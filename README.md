@@ -12,7 +12,7 @@ Prerequisites:
 
 Create a file in the root directory named `config.php` with the following content:
 
-`
+```
 <?php
 
 return [
@@ -20,5 +20,5 @@ return [
 ];
 
 ?>
-`
+```
 
