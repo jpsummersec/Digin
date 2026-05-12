@@ -3,6 +3,12 @@ const searchButton = document.getElementById('searchButton');
 const resultsDiv = document.getElementById('results');
 const numberOfResults = document.getElementById('numberOfResults');
 const returnRecipeNutrition = document.getElementById('returnRecipeNutrition');
+const searchByIngredient = document.getElementById('searchByIngredient');
+const cuisine = document.getElementById('cuisine');
+const maxTime = document.getElementById('maxTime');
+const dishType = document.getElementById('dishType');
+const allergyCheckboxes = document.querySelectorAll('.allergy');
+const sortSelect = document.getElementById('sortSelect');
 
 searchButton.addEventListener('click', searchRecipes);
 
@@ -14,7 +20,15 @@ function searchRecipes() {
 		return;
 	}
 
-	const apiUrl = `spoonacular-search.php?query=${encodeURIComponent(searchQuery)}&number=${numberOfResults.value}&addRecipeNutrition=${returnRecipeNutrition.checked}`;
+	let intolerances = [];
+
+	document.querySelectorAll('.allergy').forEach(cb => {
+		if (cb.checked) {
+			intolerances.push(cb.value);
+		}
+	});
+
+	const apiUrl = `spoonacular-search.php?query=${encodeURIComponent(searchQuery)}&number=${numberOfResults.value}&addRecipeNutrition=${returnRecipeNutrition.checked}&ingredientSearch=${searchByIngredient.checked}&cuisine=${cuisine.value}&maxTime=${maxTime.value}&type=${dishType.value}&intolerances=${intolerances.join(',')}&sort=${sortSelect.value}`;
 
 	resultsDiv.innerHTML = '<p>one moment...</p>';
 
@@ -23,17 +37,14 @@ function searchRecipes() {
 	.then(data => {
 		resultsDiv.innerHTML = '';
 
-		if (data.error) {
-			resultsDiv.innerHTML = `<div class="error">${data.error}</div>`;
+		const results = Array.isArray(data) ? data : data.results;
+
+		if (!results || results.length === 0) {
+			resultsDiv.innerHTML = '<div class="no-results">No recipes found</div>';
 			return;
 		}
 
-		if (!data.results || data.results.length === 0) {
-			resultsDiv.innerHTML = '<div class="no-results">No recipes found. Try a different search term!</div>';
-			return;
-		}
-
-		data.results.forEach(recipe => {
+		results.forEach(recipe => {
 			const title = recipe.title;
 			const image = recipe.image;
 
