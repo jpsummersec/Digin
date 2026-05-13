@@ -39,6 +39,7 @@ $maxTime = $_GET['maxTime'] ?? '';
 $type = $_GET['type'] ?? '';
 $intolerances = $_GET['intolerances'] ?? '';
 $sort = $_GET['sort'] ?? '';
+$diet = $_GET['diet'] ?? '';
 
 if (isset($_GET['number'])) {
     $number = (int) $_GET['number'];
@@ -81,6 +82,10 @@ if ($ingredientSearch) {
         $params['cuisine'] = $cuisine;
     }
 
+    if ($diet !== '') {
+        $params['diet'] = $diet;
+    }
+
     if ($maxTime !== '') {
         $params['maxReadyTime'] = $maxTime;
     }
@@ -94,7 +99,7 @@ if ($ingredientSearch) {
     }
 
     if ($sort !== '') {
-        $params['sort'] = 'popularity';
+        $params['sort'] = $sort;
     }
     $url = 'https://api.spoonacular.com/recipes/complexSearch?' . http_build_query($params);
 }

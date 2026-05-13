@@ -9,6 +9,7 @@ const maxTime = document.getElementById('maxTime');
 const dishType = document.getElementById('dishType');
 const allergyCheckboxes = document.querySelectorAll('.allergy');
 const sortSelect = document.getElementById('sortSelect');
+const diet = document.getElementById('diet');
 
 searchButton.addEventListener('click', searchRecipes);
 
@@ -28,7 +29,7 @@ function searchRecipes() {
 		}
 	});
 
-	const apiUrl = `spoonacular-search.php?query=${encodeURIComponent(searchQuery)}&number=${numberOfResults.value}&addRecipeNutrition=${returnRecipeNutrition.checked}&ingredientSearch=${searchByIngredient.checked}&cuisine=${cuisine.value}&maxTime=${maxTime.value}&type=${dishType.value}&intolerances=${intolerances.join(',')}&sort=${sortSelect.value}`;
+	const apiUrl = `spoonacular-search.php?query=${encodeURIComponent(searchQuery)}&number=${numberOfResults.value}&addRecipeNutrition=${returnRecipeNutrition.checked}&ingredientSearch=${searchByIngredient.checked}&cuisine=${cuisine.value}&diet=${diet.value}&maxReadyTime=${maxTime.value}&type=${dishType.value}&intolerances=${intolerances.join(',')}&sort=${sortSelect.value}`;
 
 	resultsDiv.innerHTML = '<p>one moment...</p>';
 
@@ -47,6 +48,8 @@ function searchRecipes() {
 		results.forEach(recipe => {
 			const title = recipe.title;
 			const image = recipe.image;
+			const id = recipe.id;
+
 
 			let calories = '', protein = '', fat = '', carbs = '';
 
@@ -66,14 +69,23 @@ function searchRecipes() {
 			const recipeDiv = document.createElement('div');
 			recipeDiv.className = 'recipe';
 
-			recipeDiv.innerHTML = `
+			if (recipe.nutrition && recipe.nutrition.nutrients) {
+				recipeDiv.innerHTML = `
+					<h3>${title}</h3>
+					<img src="${image}" alt="${title}">
+					<p><strong>Calories:</strong> ${calories}</p>
+					<p><strong>Carbs:</strong> ${carbs}</p>
+					<p><strong>Protein:</strong> ${protein}</p>
+					<p><strong>Fat:</strong> ${fat}</p>
+				`;
+			}
+			else {
+				recipeDiv.innerHTML = `
+				<a href="recipe-details.php?id=${id}">
 				<h3>${title}</h3>
 				<img src="${image}" alt="${title}">
-				<p><strong>Calories:</strong> ${calories}</p>
-				<p><strong>Carbs:</strong> ${carbs}</p>
-				<p><strong>Protein:</strong> ${protein}</p>
-				<p><strong>Fat:</strong> ${fat}</p>
-			`;
+				`;
+			}
 
 			resultsDiv.appendChild(recipeDiv);
 		});

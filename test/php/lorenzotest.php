@@ -53,10 +53,52 @@
         <label>Cuisine:</label>
         <select id="cuisine">
           <option value="">Any</option>
-          <option value="italian">Italian</option>
-          <option value="mexican">Mexican</option>
-          <option value="asian">Asian</option>
-          <option value="indian">Indian</option>
+          <option value="African">African</option>
+          <option value="Asian">Asian</option>
+          <option value="American">American</option>
+          <option value="American">British</option>
+          <option value="Cajun">Cajun</option>
+          <option value="Caribbean">Caribbean</option>
+          <option value="Chinese">Chinese</option>
+          <option value="Eastern European">Eastern European</option>
+          <option value="European">European</option>
+          <option value="French">French</option>
+          <option value="German">German</option>
+          <option value="Greek">Greek</option>
+          <option value="Indian">Indian</option>
+          <option value="Irish">Irish</option>
+          <option value="Italian">Italian</option>
+          <option value="Japanese">Japanese</option>
+          <option value="Jewish">Jewish</option>
+          <option value="Korean">Korean</option>
+          <option value="Latin American">Latin American</option>
+          <option value="German">Mediterranean</option>
+          <option value="Greek">Mexican</option>
+          <option value="Indian">Middle Eastern</option>
+          <option value="Irish">Nordic</option>
+          <option value="Italian">Southern</option>
+          <option value="Spanish">Spanish</option>
+          <option value="Thai">Thai</option>
+          <option value="Vietnamese">Vietnamese</option>
+        </select>
+      </div>
+
+       <!-- Diet type -->
+      <div class="filter-group">
+        <label>Diet type:</label>
+        <select id="diet">
+          <option value="">No diet</option>
+          <option value="gluten free">Gluten Free</option>
+          <option value="ketogenic">Ketogenic</option>
+          <option value="vegetarian">Vegetarian</option>
+          <option value="lacto-vegetarian">Lacto-Vegetarian</option>
+          <option value="ovo-vegetarian">Ovo-Vegetarian</option>
+          <option value="vegan">Vegan</option>
+          <option value="pescetarian">Pescetarian</option>
+          <option value="paleo">Paleo</option>
+          <option value="primal">Primal</option>
+          <option value="low fodmap">Low FODMAP</option>
+          <option value="whole30">Whole30</option>
         </select>
       </div>
 
@@ -68,6 +110,7 @@
           <option value="15">≤ 15 min</option>
           <option value="30">≤ 30 min</option>
           <option value="60">≤ 60 min</option>
+          <option value="360">> 60 min</option>
         </select>
       </div>
 
@@ -77,9 +120,20 @@
         <select id="dishType">
           <option value="">Any</option>
           <option value="main course">Main Course</option>
+          <option value="side dish">Side dish</option>
           <option value="dessert">Dessert</option>
+          <option value="appetizer">Appetizer</option>
+          <option value="appetizer">Appetizer</option>
+          <option value="salad">Salad</option>
+          <option value="bread">Bread</option>
           <option value="breakfast">Breakfast</option>
+          <option value="soup">Soup</option>
+          <option value="beverage">Beverage</option>
+          <option value="sauce">Sauce</option>
+          <option value="marinade">Marinade</option>
+          <option value="fingerfood">Fingerfood</option>
           <option value="snack">Snack</option>
+          <option value="drink">Drink</option>
         </select>
       </div>
 
@@ -107,6 +161,12 @@
         <select id="sortSelect">
           <option value="">Any</option>
           <option value="popularity">Popularity</option>
+          <option value="time">Time</option>
+          <option value="healthiness">Healthiness</option>
+          <option value="price">Price</option>
+          <option value="random">Random</option>
+          <option value="calories">Calories</option>
+          <option value="max-used-ingredients">Max used ingredients</option>
         </select>
       </div>
 
@@ -127,7 +187,8 @@
       </div>
     </div>
 
-    <div id="results"></div>
+    <div id="results">
+    </div>
   </div>
 </body>
 </html>
