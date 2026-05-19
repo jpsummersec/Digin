@@ -2,6 +2,7 @@
 
 session_start();
 
+// Load Spotify credentials from config.php
 $config = require __DIR__ . '/../config.php';
 $client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
 $client_secret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
@@ -10,10 +11,13 @@ if (!$client_id || !$client_secret) {
     die('Error: SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET not found in config.php');
 }
 
+// Determine the redirect URI the same way login.php does.
+// This keeps the Docker + Caddy environment working without hardcoding localhost:8000.
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost:3000';
 $redirect_uri = $config['SPOTIFY_REDIRECT_URI'] ?? "$scheme://$host/Spotify_connection/callback.php";
 
+// Validate the state token to avoid CSRF attacks.
 if (!isset($_GET['state'], $_SESSION['spotify_state']) || $_GET['state'] !== $_SESSION['spotify_state']) {
     die('State mismatch. Please restart the Spotify login process.');
 }
@@ -23,6 +27,7 @@ if (!$code) {
     die('Error: Authorization code not found in callback.');
 }
 
+// Exchange the authorization code for access and refresh tokens.
 $ch = curl_init('https://accounts.spotify.com/api/token');
 
 $data = [
@@ -59,9 +64,13 @@ if (!$result || empty($result['access_token'])) {
     die('Error: No access token received from Spotify. Check your credentials.');
 }
 
+// Save Spotify tokens in the session for the playback page.
 $_SESSION['access_token'] = $result['access_token'];
 $_SESSION['refresh_token'] = $result['refresh_token'] ?? null;
 $_SESSION['spotify_token_expires'] = time() + ($result['expires_in'] ?? 3600);
+
+// Remove the one-time state token after successful auth.
+unset($_SESSION['spotify_state']);
 
 header('Location: /Spotify_connection/play.php');
 exit();

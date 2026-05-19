@@ -2,14 +2,17 @@
 
 session_start();
 
+// We need the access token from the Spotify auth flow.
 $access_token = $_SESSION['access_token'] ?? null;
 
 if (!$access_token) {
     die('Error: No access token. Please log in first by visiting login.php');
 }
 
-$playlist_uri = "spotify:playlist:37i9dQZF1DX0r3x8OtiwEM"; // Italy example
+// Example playlist to play. Swap this with your own playlist URI if you want.
+$playlist_uri = "spotify:playlist:37i9dQZF1DX0r3x8OtiwEM";
 
+// Call Spotify's player API to start playback.
 $ch = curl_init("https://api.spotify.com/v1/me/player/play");
 
 $data = [
@@ -32,6 +35,7 @@ $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 if (curl_errno($ch)) {
     die("cURL error: " . curl_error($ch));
 }
+
 curl_close($ch);
 
 if ($http_code !== 204) {
