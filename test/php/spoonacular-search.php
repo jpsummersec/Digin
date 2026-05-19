@@ -75,7 +75,9 @@ if ($ingredientSearch) {
         'query' => $query,
         'number' => $number,
         'apiKey' => $apiKey,
-        'addRecipeNutrition' => $addRecipeNutritionValue
+        'addRecipeNutrition' => 'true',
+        'addRecipeInformation' => 'true',
+        'fillIngredients' => 'true'
     ];
 
     if ($cuisine !== '') {

@@ -74,6 +74,11 @@ if (!empty($instructions)) {
 if (!$recipe) {
     die('Invalid recipe data');
 }
+
+$showAll = isset($_GET['showAll']) && $_GET['showAll'] == 1;
+$ingredients = $recipe['extendedIngredients'];
+$previewIngredients = array_slice($ingredients, 0, 5);
+
 ?>
 
 <!DOCTYPE html>
@@ -81,7 +86,7 @@ if (!$recipe) {
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($recipe['title']) ?></title>
-    <link rel="stylesheet" href="../css/lorenzotest.css">
+    <link rel="stylesheet" href="../css/recipetest.css">
 </head>
 <body>
 
@@ -113,7 +118,11 @@ if (!$recipe) {
             <th>Portion</th>
         </tr>
 
-        <?php foreach ($recipe['extendedIngredients'] as $ingredient): ?>
+        <?php
+            $listToShow = $showAll ? $ingredients : $previewIngredients;
+        ?>
+
+        <?php foreach ($listToShow as $ingredient): ?>
             <tr>
                 <td>
                     <?= htmlspecialchars($ingredient['name']) ?>
@@ -127,17 +136,28 @@ if (!$recipe) {
         <?php endforeach; ?>
     </table>
 
+    <div style="margin-top:10px;">
+        <?php if (!$showAll): ?>
+            <a href="?id=<?= $id ?>&showAll=1">View all ingredients</a>
+        <?php else: ?>
+            <a href="?id=<?= $id ?>">Show less</a>
+        <?php endif; ?>
+    </div>
+
     <h2>Step-by-step Instructions</h2>
 
-    <?php if (!empty($steps)): ?>
+    <?php if (!empty($steps) && isset($steps[0])): ?>
         <ol>
-            <?php foreach ($steps as $step): ?>
-                <li><?= htmlspecialchars($step['step']) ?></li>
-            <?php endforeach; ?>
+            <li><?= htmlspecialchars($steps[0]['step']) ?></li>
         </ol>
     <?php else: ?>
         <p>No instructions available.</p>
     <?php endif; ?>
 
+    <div>
+        <a href="cooking-test.php?id=<?= $id ?>">
+            <button id="startCooking">Start cooking</button>
+        </a>
+    </div>
 </body>
 </html>

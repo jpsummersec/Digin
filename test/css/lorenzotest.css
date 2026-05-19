@@ -273,3 +273,40 @@ input[type="checkbox"] {
 .filter-group {
 	margin-bottom: 1.2rem;
 }
+
+.step {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    border: 2px solid #1fc66b;
+    background: #ffffff;
+}
+
+.step.done {
+    background: #1fc66b;
+    color: white;
+    opacity: 0.9;
+}
+
+.step.done p,
+.step.done h2 {
+    color: white;
+}
+
+.ingredients {
+	margin-top: 0.8rem;
+	padding-left: 1.2rem;
+	font-size: 0.9rem;
+	color: #555;
+}
+
+.ingredients li {
+	margin-bottom: 0.3rem;
+	list-style-type: disc;
+}

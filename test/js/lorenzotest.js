@@ -50,11 +50,26 @@ function searchRecipes() {
 			const image = recipe.image;
 			const id = recipe.id;
 
-
 			let calories = '', protein = '', fat = '', carbs = '';
+			let time = recipe.readyInMinutes || '';
 
+			let ingredientsList = '';
+
+			//ingredients
+			if (recipe.extendedIngredients) {
+				const ingredients = recipe.extendedIngredients
+					.map(i => i.original)
+					.slice(0, 5);
+
+				ingredientsList = ingredients
+					.map(i => `<li>${i}</li>`)
+					.join('');
+			}
+
+			//nutrition
 			if (recipe.nutrition && recipe.nutrition.nutrients) {
 				const nutrients = recipe.nutrition.nutrients;
+
 				const calInfo = nutrients.find(n => n.name === 'Calories');
 				const proteinInfo = nutrients.find(n => n.name === 'Protein');
 				const fatInfo = nutrients.find(n => n.name === 'Fat');
@@ -69,23 +84,19 @@ function searchRecipes() {
 			const recipeDiv = document.createElement('div');
 			recipeDiv.className = 'recipe';
 
-			if (recipe.nutrition && recipe.nutrition.nutrients) {
-				recipeDiv.innerHTML = `
+			recipeDiv.innerHTML = `
+				<a href="recipe-details-test.php?id=${id}">
 					<h3>${title}</h3>
 					<img src="${image}" alt="${title}">
+
+					<p><strong>Time:</strong> ${time} min</p>
 					<p><strong>Calories:</strong> ${calories}</p>
-					<p><strong>Carbs:</strong> ${carbs}</p>
-					<p><strong>Protein:</strong> ${protein}</p>
-					<p><strong>Fat:</strong> ${fat}</p>
-				`;
-			}
-			else {
-				recipeDiv.innerHTML = `
-				<a href="recipe-details.php?id=${id}">
-				<h3>${title}</h3>
-				<img src="${image}" alt="${title}">
-				`;
-			}
+
+					<ul class="ingredients">
+						${ingredientsList}
+					</ul>
+				</a>
+			`;
 
 			resultsDiv.appendChild(recipeDiv);
 		});
