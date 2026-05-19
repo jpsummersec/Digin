@@ -9,7 +9,9 @@ if (!$client_id) {
     die('Error: SPOTIFY_CLIENT_ID not found in config.php');
 }
 
-$redirect_uri = "http://127.0.0.1:8000/callback.php";
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost:3000';
+$redirect_uri = $config['SPOTIFY_REDIRECT_URI'] ?? "$scheme://$host/Spotify_connection/callback.php";
 
 $state = bin2hex(random_bytes(16));
 $_SESSION['spotify_state'] = $state;
@@ -21,7 +23,8 @@ $params = http_build_query([
     "client_id" => $client_id,
     "scope" => $scope,
     "redirect_uri" => $redirect_uri,
-    "state" => $state
+    "state" => $state,
+    "show_dialog" => "true"
 ]);
 
 header("Location: https://accounts.spotify.com/authorize?$params");
