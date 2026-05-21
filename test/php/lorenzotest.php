@@ -161,10 +161,12 @@
         <select id="sortSelect">
           <option value="">Any</option>
           <option value="popularity">Popularity</option>
+          <option value="meta-score">Score</option>
           <option value="time">Time</option>
           <option value="healthiness">Healthiness</option>
           <option value="price">Price</option>
           <option value="random">Random</option>
+          <option value="alcohol">Alcohol</option>
           <option value="calories">Calories</option>
           <option value="max-used-ingredients">Max used ingredients</option>
         </select>

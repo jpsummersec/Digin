@@ -28,7 +28,7 @@ if (!isset($_GET['id'])) {
 
 $id = (int) $_GET['id'];
 
-$url = "https://api.spoonacular.com/recipes/$id/information?apiKey=$apiKey";
+$url = "https://api.spoonacular.com/recipes/$id/information?apiKey=$apiKey&includeNutrition=true";
 
 $response = file_get_contents($url);
 
@@ -38,31 +38,21 @@ if ($response === false) {
 
 $recipe = json_decode($response, true);
 
-// NUTRITION REQUEST
-$nutritionUrl = "https://api.spoonacular.com/recipes/$id/nutritionWidget.json?apiKey=$apiKey";
+$calories = 'N/A';
 
-$nutritionResponse = file_get_contents($nutritionUrl);
-
-if ($nutritionResponse !== false) {
-    $nutrition = json_decode($nutritionResponse, true);
-} else {
-    $nutrition = null;
-}
-
-$instructionsUrl = "https://api.spoonacular.com/recipes/$id/analyzedInstructions?apiKey=$apiKey";
-
-$instructionsResponse = file_get_contents($instructionsUrl);
-
-$instructions = [];
-
-if ($instructionsResponse !== false) {
-    $instructions = json_decode($instructionsResponse, true);
+if (isset($recipe['nutrition']['nutrients'])) {
+    foreach ($recipe['nutrition']['nutrients'] as $nutrient) {
+        if ($nutrient['name'] === 'Calories') {
+            $calories = $nutrient['amount'] . ' ' . $nutrient['unit'];
+            break;
+        }
+    }
 }
 
 $steps = [];
 
-if (!empty($instructions)) {
-    foreach ($instructions as $group) {
+if (!empty($recipe['analyzedInstructions'])) {
+    foreach ($recipe['analyzedInstructions'] as $group) {
         if (!empty($group['steps'])) {
             foreach ($group['steps'] as $step) {
                 $steps[] = $step;
@@ -94,20 +84,47 @@ $previewIngredients = array_slice($ingredients, 0, 5);
 
     <img src="<?= htmlspecialchars($recipe['image']) ?>" width="300">
 
-    <h2>Calories: <?= htmlspecialchars($nutrition['calories']) ?></h2>
+    <h2>Calories: <?= htmlspecialchars($calories) ?></h2>
 
     <h2>Cooking time: <?= htmlspecialchars($recipe['readyInMinutes']) ?></h2>
 
     <p><?= $recipe['summary'] ?></p>
 
     <?php
-        $tags = array_merge($recipe['cuisines'], $recipe['diets']);
+        $tags = array_merge(
+            $recipe['cuisines'] ?? [],
+            $recipe['diets'] ?? [],
+            $recipe['dishTypes'] ?? [],
+            $recipe['occasions'] ?? []
+        );
+
+        if ($recipe['cheap'] ?? false) {
+            $tags[] = 'Budget Friendly';
+        }
+
+        if ($recipe['veryPopular'] ?? false) {
+            $tags[] = 'Popular';
+        }
+
+        if ($recipe['sustainable'] ?? false) {
+            $tags[] = 'Eco Friendly';
+        }
+
+        if (($recipe['healthScore'] ?? 0) >= 80) {
+            $tags[] = 'Healthy';
+        }
+
+        if (($recipe['readyInMinutes'] ?? 999) <= 20) {
+            $tags[] = 'Quick Meal';
+        }
         ?>
 
         <h2>Tags:</h2>
 
         <?php foreach ($tags as $tag): ?>
-        <span><?= htmlspecialchars($tag) ?>,</span>
+        <span class="tag">
+            <?= htmlspecialchars($tag) ?>
+        </span>
     <?php endforeach; ?>
 
     <h2>Ingredients</h2>

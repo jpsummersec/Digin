@@ -50,6 +50,8 @@ function searchRecipes() {
 			const image = recipe.image;
 			const id = recipe.id;
 
+			let rawScore = recipe.spoonacularScore || 0;
+			let starScore = (rawScore / 20).toFixed(1);
 			let calories = '', protein = '', fat = '', carbs = '';
 			let time = recipe.readyInMinutes || '';
 
@@ -84,6 +86,9 @@ function searchRecipes() {
 			const recipeDiv = document.createElement('div');
 			recipeDiv.className = 'recipe';
 
+			let fullStars = Math.floor(starScore);
+			let stars = '⭐'.repeat(fullStars);
+
 			recipeDiv.innerHTML = `
 				<a href="recipe-details-test.php?id=${id}">
 					<h3>${title}</h3>
@@ -91,6 +96,10 @@ function searchRecipes() {
 
 					<p><strong>Time:</strong> ${time} min</p>
 					<p><strong>Calories:</strong> ${calories}</p>
+
+					<p class="score">
+						${stars} (${starScore}/5)
+					</p>
 
 					<ul class="ingredients">
 						${ingredientsList}
