@@ -86,7 +86,7 @@ function searchRecipes() {
 			const recipeDiv = document.createElement('div');
 			recipeDiv.className = 'recipe';
 
-			let fullStars = Math.floor(starScore);
+			let fullStars = Math.round(starScore);
 			let stars = '⭐'.repeat(fullStars);
 
 			recipeDiv.innerHTML = `
