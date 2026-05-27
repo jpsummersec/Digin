@@ -52,18 +52,26 @@ body {
 }
 
 .logo {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
-.chef-img {
+.input-icon {
+    width: 29px;
+}
+
+.password-icon {
+    width: 23px;
+}
+
+.chefhat-icon {
     width: 90px;
-    margin-bottom: 20px;
 }
 
 h2 {
-    font-size: 24px;
-    margin-bottom: 12px;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
     font-weight: 700;
+    margin-top: 30px;
 }
 
 .subtitle {
@@ -74,17 +82,24 @@ h2 {
 .row {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-bottom: 20px;
 }
 
 .input-box {
     background: #efb583;
+    position: relative;
     display: flex;
     align-items: center;
     padding: 13px;
-    border-radius: 20px;
+    border-radius: 10px;
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.input-icon,
+.password-icon {
+    position: absolute;
+    left: 15px;
 }
 
 .input-box i {
@@ -98,11 +113,7 @@ h2 {
     background: transparent;
     width: 100%;
     color: #555;
-}
-
-.full {
-    width: 100%;
-    margin-bottom: 20px;
+    text-align: center;
 }
 
 .terms {
@@ -116,19 +127,19 @@ h2 {
 
 .signup-btn {
     width: 150px;
-    padding: 14px;
+    padding: 12px;
     border: none;
     border-radius: 20px;
     background: #218838;
     color: white;
-    font-size: 16px;
+    font-size: 1 rem;
     cursor: pointer;
-    margin-bottom: 25px;
+    margin-top: 18px;
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
 }
 
 .signin-text {
-    font-size: 14px;
+    font-size: 1rem;
 }
 
 .signin-text span {

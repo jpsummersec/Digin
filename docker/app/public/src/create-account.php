@@ -11,26 +11,31 @@
     <body>
         <div class="container">
             <h1 class="logo"><img src="../images/logoDigIn.svg" alt="logoDigIn" class="logoDigin"></h1>
-            <img src="../images/createaccounticon.svg" alt="chefhat" class="chefhatimg">
+            <img src="../images/createaccounticon.svg" alt="chefhat" class="chefhat-ic">
             <h2>Your next bite starts here</h2>
             <p class="subtitle">
                 Create an account and join us today
             </p>
             <div class="row">
                 <div class="input-box">
+                    <img src="../images/nameIcon.svg" alt="name-icon" class="input-icon">
                     <input type="text" placeholder="first name">
                 </div>
                 <div class="input-box">
+                    <img src="../images/nameIcon.svg" alt="name-icon" class="input-icon">
                     <input type="text" placeholder="last name">
                 </div>
             </div>
-            <div class="input-box full">
+            <div class="input-box">
+                <img src="../images/emailIcon.svg" alt="email-icon" class="input-icon">
                 <input type="email" placeholder="email@example.com">
             </div>
-            <div class="input-box full">
+            <div class="input-box">
+                <img src="../images/password.png" alt="password-icon" class="password-icon">
                 <input type="password" placeholder="password">
             </div>
-            <div class="input-box full">
+            <div class="input-box">
+                <img src="../images/password.png" alt="password-icon" class="password-icon">
                 <input type="password" placeholder="confirm password">
             </div>
             <button class="signup-btn">Create account</button>
