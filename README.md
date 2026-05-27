@@ -10,7 +10,7 @@ Team members:
 
 Prerequisites:
 
-Create a file in the root directory named `config.php` with the following content:
+Create a file in the docker/app/public/src directory named `config.php` with the following content:
 
 ```
 <?php

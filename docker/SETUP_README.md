@@ -1,9 +1,10 @@
-# Project setup — Docker development environment
+# Project setup - Docker development environment
 
 This file describes how to set up and run the project's Docker environment and common troubleshooting tips.
 
 **Files of interest**
 - [docker-compose.yaml](docker-compose.yaml)
+- [database/init.sql](database/init.sql)
 - [nginx.conf](nginx.conf)
 - [PHP.dockerfile](PHP.dockerfile)
 - [nginx.dockerfile](nginx.dockerfile)
@@ -12,9 +13,15 @@ This file describes how to set up and run the project's Docker environment and c
 - Docker Engine and Docker Compose v2 installed.
 - Clone the repository into your working folder.
 
-Quick steps
+## Quick steps
 
-1. (Optional) Create an `.env` file in project root with DB credentials, for example:
+1. Go to the Docker folder:
+
+```bash
+cd docker
+```
+
+2. Check or update `.env` with the database credentials:
 
 ```env
 DB_ROOT_PASSWORD=your_strong_password
@@ -22,59 +29,97 @@ DB_ROOT_USER=root
 DB_SERVER=mysql
 ```
 
-2. Build and start the full environment:
+3. Build and start the full environment:
 
 ```bash
-docker compose -f docker-compose.yaml -f docker-compose.spotify.yml up -d --build
+docker compose up -d --build
 ```
 
-3. Verify containers are running:
+4. Verify containers are running:
 
 ```bash
-docker compose -f docker-compose.yaml -f docker-compose.spotify.yml ps --all
+docker compose ps --all
 ```
 
-Useful commands
+5. Open the app and database tools:
 
-- View last 200 lines of combined logs:
+- App: http://localhost
+- phpMyAdmin: http://localhost:8080
+- Caddy endpoint: http://localhost:3000
+
+## Database startup import
+
+The editable starter database file is [database/init.sql](database/init.sql).
+
+MariaDB automatically imports this file only when the `mysqldata` Docker volume is created for the first time. Later `docker compose up` runs keep the existing database data and do not re-import this file.
+
+To recreate the database from `database/init.sql`, intentionally remove the Docker volume:
 
 ```bash
-docker compose -f docker-compose.yaml -f docker-compose.spotify.yml logs --tail=200
+docker compose down -v
+docker compose up -d --build
 ```
 
-- Follow logs live for `web` and `php`:
+Only use `docker compose down -v` when you want to delete the local database data.
+
+## Useful commands
+
+View last 200 lines of combined logs:
 
 ```bash
-docker compose -f docker-compose.yaml -f docker-compose.spotify.yml logs -f web php
+docker compose logs --tail=200
 ```
 
-- Stop and remove containers:
+Follow logs live for `web` and `php`:
 
 ```bash
-docker compose -f docker-compose.yaml -f docker-compose.spotify.yml down
+docker compose logs -f web php
 ```
 
-- Rebuild a single service (e.g., `php`):
+Stop and remove containers without deleting database data:
 
 ```bash
-docker compose -f docker-compose.yaml -f docker-compose.spotify.yml build php
-docker compose -f docker-compose.yaml -f docker-compose.spotify.yml up -d php
+docker compose down
 ```
 
-Common issues & fixes
+Rebuild a single service, for example `php`:
 
-- Problem: `nginx` fails to start with `host not found in upstream "php"`.
-  - Cause: `nginx` is configured to proxy to service name `php`, but `php` service either wasn't built as php-fpm or is not running.
-  - Fix:
-    - Ensure `PHP.dockerfile` uses a PHP-FPM image (it should be `FROM php:fpm`). See [PHP.dockerfile](PHP.dockerfile).
-    - Build & start services: `docker compose -f docker-compose.yaml -f docker-compose.spotify.yml up -d --build`.
-    - Check `php` container status and logs: `docker compose logs --tail=100 php`
+```bash
+docker compose build php
+docker compose up -d php
+```
 
-- Problem: `php` container immediately exits or runs an interactive CLI.
-  - Cause: Using a non-FPM image or overriding the command.
-  - Fix: Use the `php:fpm` base image and make sure the `docker-compose.yaml` uses the built image (or build from `PHP.dockerfile`).
+## Common issues and fixes
 
-Tips
+Problem: `nginx` fails to start with `host not found in upstream "php"`.
+
+Cause: `nginx` is configured to proxy to service name `php`, but the `php` service either was not built as PHP-FPM or is not running.
+
+Fix:
+
+```bash
+docker compose up -d --build
+docker compose logs --tail=100 php
+```
+
+Problem: `php` container immediately exits or runs an interactive CLI.
+
+Cause: The PHP image is not using PHP-FPM or the service command was overridden.
+
+Fix: Use the `php:fpm` base image in [PHP.dockerfile](PHP.dockerfile) and make sure [docker-compose.yaml](docker-compose.yaml) uses the built image.
+
+Problem: changes to [database/init.sql](database/init.sql) do not appear in phpMyAdmin.
+
+Cause: MariaDB only runs files from `/docker-entrypoint-initdb.d` when the database volume is first created.
+
+Fix: For a fresh local database, run:
+
+```bash
+docker compose down -v
+docker compose up -d --build
+```
+
+## Tips
 
 - Keep the local `app/` folder synced via the volume declared in [docker-compose.yaml](docker-compose.yaml).
-- If ports conflict, check `ps` output to see bound ports and free them or change the mapping in `docker-compose.yaml`.
+- If ports conflict, check `docker compose ps --all` to see bound ports and free them or change the mapping in [docker-compose.yaml](docker-compose.yaml).
