@@ -11,11 +11,7 @@ if (!$client_id || !$client_secret) {
     die('Error: SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET not found in config.php');
 }
 
-// Determine the redirect URI the same way login.php does.
-// This keeps the Docker + Caddy environment working without hardcoding localhost:8000.
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost:3000';
-$redirect_uri = $config['SPOTIFY_REDIRECT_URI'] ?? "$scheme://$host/Spotify_connection/callback.php";
+$redirect_uri = $config['SPOTIFY_REDIRECT_URI'];
 
 // Validate the state token to avoid CSRF attacks.
 if (!isset($_GET['state'], $_SESSION['spotify_state']) || $_GET['state'] !== $_SESSION['spotify_state']) {

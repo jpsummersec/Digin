@@ -10,7 +10,7 @@ if (!$access_token) {
 }
 
 // Example playlist to play. Swap this with your own playlist URI if you want.
-$playlist_uri = "spotify:playlist:37i9dQZF1DX0r3x8OtiwEM";
+$playlist_uri = "https://open.spotify.com/playlist/5llnGvn7uzQMZ0cIHFiYGG?si=SzgazOiVReahrqXueeUcCA";
 
 // Call Spotify's player API to start playback.
 $ch = curl_init("https://api.spotify.com/v1/me/player/play");

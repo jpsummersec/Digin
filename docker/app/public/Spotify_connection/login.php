@@ -10,11 +10,7 @@ if (!$client_id) {
     die('Error: SPOTIFY_CLIENT_ID not found in config.php');
 }
 
-// Build the redirect URL Spotify will send the user back to.
-// In Docker/Caddy, the browser usually sees localhost:3000.
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost:3000';
-$redirect_uri = $config['SPOTIFY_REDIRECT_URI'] ?? "$scheme://$host/Spotify_connection/callback.php";
+$redirect_uri = $config['SPOTIFY_REDIRECT_URI'];
 
 // Generate a random state token and keep it in the session.
 // Spotify will send it back so we can verify the callback.
@@ -33,8 +29,27 @@ $params = http_build_query([
     "show_dialog" => "true" // Keep the login prompt visible for fresh auth.
 ]);
 
-// Send the browser to Spotify to log in.
-header("Location: https://accounts.spotify.com/authorize?$params");
-exit();
+$authorize_url = "https://accounts.spotify.com/authorize?$params";
+
+if (isset($_GET['action']) && $_GET['action'] === 'login') {
+    header("Location: $authorize_url");
+    exit();
+}
 
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Login</title>
+</head>
+<body>
+    <div>
+        <h1>Login with Spotify</h1>
+        <p>Click the button below to authenticate and continue.</p>
+        <a class="button" href="?action=login">Login with Spotify</a>
+    </div>
+</body>
+</html>
