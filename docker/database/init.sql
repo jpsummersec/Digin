@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `user_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `first_name` VARCHAR(100) NOT NULL,
   `last_name` VARCHAR(100) NOT NULL,
+  `path_to_icon` VARCHAR(512) NOT NULL DEFAULT 'profile-pictures/default.png',
   `email_address` VARCHAR(255) NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   `level` INT UNSIGNED NOT NULL DEFAULT 1,
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 CREATE TABLE IF NOT EXISTS `achievement` (
   `achievement_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `achievement_name` VARCHAR(100) NOT NULL,
+  `path_to_icon` VARCHAR(512) NOT NULL,
 
   PRIMARY KEY (`achievement_id`),
   UNIQUE (`achievement_name`)
@@ -113,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `spoonacular_api_key` (
   PRIMARY KEY (`api_key_value`)
 );
 
-CREATE TABLE IF NOT EXISTS `ramsay_clip` (
+CREATE TABLE IF NOT EXISTS `motivational_audio_clips` (
   `clip_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `path_to_audio` VARCHAR(512) NOT NULL,
 
