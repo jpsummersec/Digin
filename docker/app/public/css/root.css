@@ -1,0 +1,35 @@
+*
+{
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+body
+{
+    font-family: var(--font);
+    color: var(--primary-text);
+}
+
+:root
+{
+    --primary: #248232;
+    --primary-dark: #040F0F;
+    --accent: #F4A261;
+    --background: #FCFFFC;
+    --surface: #E0FBFC;
+    --surface-dark: #2D3A3A;
+    --primary-text: #040F0F;
+    --secondary-text: #5C6B73;
+    --success: #2BA84A;
+    --warning: #F4A261;
+    --error: #E74C3C;
+    --font: "Inter", Arial, sans-serif;
+    --main-border-radius: 20px;
+}
+
+@font-face
+{
+    font-family: "Inter";
+    src: url(../fonts/Inter_18pt-Regular.ttf);
+}
