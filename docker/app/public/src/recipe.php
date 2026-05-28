@@ -1,44 +1,78 @@
 <?php
-    //after authorisation, the check to make sure recipe ID is valid etc.
-
-    $recipe = [
-        'title' => 'Crack Burger',
-        'kcal' => 720,
-        'time' => '20 minutes',
-        'description' => 'A rich, indulgent smash-style burger loaded with crispy bacon, melted cheddar, tangy sour cream and a bold ranch kick. Perfect for a weekend treat.',
-        'tags' => ['American', 'Burger'],
-        'image' => '../images/recipes/crack_burger.jpg',
-        'ingredients' => [
-            ['name' => 'Ground beef', 'amount' => '680 g'],
-            ['name' => 'Cooked and crumbled bacon slices', 'amount' => '35 g'],
-            ['name' => 'Shredded sharp cheddar cheese', 'amount' => '56 g'],
-            ['name' => 'Sour cream', 'amount' => '45 g'],
-            ['name' => 'Ranch seasoning mix', 'amount' => '14 g'],
-            ['name' => 'Worcestershire sauce', 'amount' => '5 g'],
-            ['name' => 'Salt & pepper', 'amount' => ''],
-        ],
-        'steps' => [
-            [
-                'number' => 1,
-                'text' => 'In a large bowl, combine all patty ingredients. Gently knead with your hands until just combined; don\'t overwork the meat. Divide into 8 loose 3-ounce balls (weigh if possible) and keep chilled.',
-            ],
-            [
-                'number' => 2,
-                'text' => 'Heat a cast-iron skillet or griddle over high heat until smoking. Place a ball of meat onto the surface and smash flat with a spatula. Season with salt and pepper. Cook for 2 minutes.',
-            ],
-            [
-                'number' => 3,
-                'text' => 'Flip each patty, immediately add cheese on top, and cook for another 1-2 minutes until the cheese melts. Stack two patties per burger.',
-            ],
-            [
-                'number' => 4,
-                'text' => 'Toast the buns cut-side down on the skillet. Spread sour cream on the bottom bun, add the stacked patties, top with bacon and your preferred toppings. Serve immediately.',
-            ],
-        ],
-    ];
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
 
 
+    $config = [];
+    $configPath = __DIR__ . '/../test/php/config.php';
+
+
+    if (is_file($configPath)) {
+        $config = require $configPath;
+    }
+
+    if (isset($config['api_key'])) {
+        $apiKey = $config['api_key'];
+    } else {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Missing API key'
+        ]);
+        exit;
+    }
+
+    /*
+    if (!isset($_GET['id'])) {
+        die('Missing recipe ID');
+    }
+
+    $id = (int) $_GET['id'];
+    */
+    
+    $id = 657933;
+
+    $url = "https://api.spoonacular.com/recipes/$id/information?apiKey=$apiKey&includeNutrition=true";
+
+    $response = file_get_contents($url);
+
+    if ($response === false) {
+        die('Failed to fetch recipe');
+    }
+
+    $recipe = json_decode($response, true);
+
+    $calories = 'N/A';
+
+    if (isset($recipe['nutrition']['nutrients'])) {
+        foreach ($recipe['nutrition']['nutrients'] as $nutrient) {
+            if ($nutrient['name'] === 'Calories') {
+                $calories = $nutrient['amount'] . ' ' . $nutrient['unit'];
+                break;
+            }
+        }
+    }
+
+    $steps = [];
+
+    if (!empty($recipe['analyzedInstructions'])) {
+        foreach ($recipe['analyzedInstructions'] as $group) {
+            if (!empty($group['steps'])) {
+                foreach ($group['steps'] as $step) {
+                    $steps[] = $step;
+                }
+            }
+        }
+    }
+
+    if (!$recipe) {
+        die('Invalid recipe data');
+    }
+
+    $showAll = isset($_GET['showAll']) && $_GET['showAll'] == 1;
+    $ingredients = $recipe['extendedIngredients'];
+    $previewIngredients = array_slice($ingredients, 0, 5);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,9 +83,23 @@
 </head>
 <body>
     <div id="page-wrapper">
-        <div class="page-section">HEADER</div>
-        <div class="page-section">PIC</div>
-        <div class="page-section">YAP</div>
+        <nav id="nav-bar">
+            <a id="back-button" href="recipe.php">&#8592;</a>
+            <span id="page-title">Recipe</span>
+        </nav>
+
+        <?php if (!empty($recipe['image'])): ?>
+            <div class="page-section">
+                <img class="hero-image" src="<?php echo htmlspecialchars($recipe['image']); ?>" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
+            </div>
+        <?php else: ?>
+            <div class="page-section">
+                <img class="hero-image" src="../images/hero-image-fallback.png" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
+            </div>
+        <?php endif; ?>
+        
+        <div id="content">
+        </div>
     </div>
 </body>
 </html>
