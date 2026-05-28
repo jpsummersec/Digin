@@ -49,8 +49,6 @@ if (curl_errno($ch)) {
     die('cURL error: ' . curl_error($ch));
 }
 
-curl_close($ch);
-
 if ($http_code !== 200) {
     die('Spotify API error (HTTP ' . $http_code . '): ' . $response);
 }
