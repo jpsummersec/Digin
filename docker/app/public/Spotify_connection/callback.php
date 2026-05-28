@@ -2,7 +2,10 @@
 
 session_start();
 
-// Load Spotify credentials from config.php
+// Load helper functions for saving Spotify tokens to the current user record
+require __DIR__ . '/spotify_helper.php';
+
+// Load Spotify app credentials from the shared config
 $config = require __DIR__ . '/../config.php';
 $client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
 $client_secret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
@@ -13,17 +16,18 @@ if (!$client_id || !$client_secret) {
 
 $redirect_uri = $config['SPOTIFY_REDIRECT_URI'];
 
-// Validate the state token to avoid CSRF attacks.
+// Validate the state token to avoid CSRF attacks
 if (!isset($_GET['state'], $_SESSION['spotify_state']) || $_GET['state'] !== $_SESSION['spotify_state']) {
     die('State mismatch. Please restart the Spotify login process.');
 }
 
+// Get the authorization code from Spotify's callback request
 $code = $_GET['code'] ?? null;
 if (!$code) {
     die('Error: Authorization code not found in callback.');
 }
 
-// Exchange the authorization code for access and refresh tokens.
+// Exchange the authorization code for access and refresh tokens
 $ch = curl_init('https://accounts.spotify.com/api/token');
 
 $data = [
@@ -58,12 +62,20 @@ if (!$result || empty($result['access_token'])) {
     die('Error: No access token received from Spotify. Check your credentials.');
 }
 
-// Save Spotify tokens in the session for the playback page.
+// Persist the token payload to the current logged-in user's record
+$userId = getCurrentUserId();
+if ($userId !== null) {
+    $db = getDbConnection();
+    $expiresAt = time() + ($result['expires_in'] ?? 3600);
+    saveSpotifyTokenToUser($db, $userId, $result['access_token'], $result['refresh_token'] ?? '', $expiresAt);
+}
+
+// Keep the token in the session while the request flow continues
 $_SESSION['access_token'] = $result['access_token'];
 $_SESSION['refresh_token'] = $result['refresh_token'] ?? null;
 $_SESSION['spotify_token_expires'] = time() + ($result['expires_in'] ?? 3600);
 
-// Remove the one-time state token after successful auth.
+// Remove the one-time state token after successful auth
 unset($_SESSION['spotify_state']);
 
 header('Location: /Spotify_connection/play.php');
