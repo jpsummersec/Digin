@@ -116,15 +116,6 @@ h2 {
     text-align: center;
 }
 
-.terms {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    margin: 20px 0 30px;
-    text-align: left;
-}
-
 .signup-btn {
     width: 150px;
     padding: 12px;
