@@ -46,7 +46,7 @@
     if (isset($recipe['nutrition']['nutrients'])) {
         foreach ($recipe['nutrition']['nutrients'] as $nutrient) {
             if ($nutrient['name'] === 'Calories') {
-                $calories = $nutrient['amount'] . ' ' . $nutrient['unit'];
+                $calories = round($nutrient['amount']) . ' ' . $nutrient['unit'];
                 break;
             }
         }
@@ -71,6 +71,12 @@
     $showAll = isset($_GET['showAll']) && $_GET['showAll'] == 1;
     $ingredients = $recipe['extendedIngredients'];
     $previewIngredients = array_slice($ingredients, 0, 5);
+
+    /*
+    var_dump($recipe);
+    exit;
+    */
+    
 ?>
 
 <!DOCTYPE html>
@@ -86,7 +92,7 @@
     <div id="page-wrapper">
         <nav id="nav-bar">
             <a id="back-button" href="recipe.php">&#8592;</a>
-            <span id="page-title">Recipe</span>
+            <span class="title">Recipe</span>
         </nav>
 
         <?php if (!empty($recipe['image'])): ?>
@@ -100,8 +106,25 @@
         <?php endif; ?>
         
         <div id="content">
-            <div id="recipe-description">
-                <div id="">
+            <div id="recipe">
+                <div id="recipe-title">
+                    <span class="title"><?php echo htmlspecialchars($recipe['title']); ?></span>
+                </div>
+                <div id="recipe-data">
+                    <img src="../images/recipe/bolt.png" alt=""><?php echo htmlspecialchars($calories)?> ADD GREY COLUMN HERE <?php echo htmlspecialchars($recipe['time']) ?>
+                </div>
+                <div id="recipe-description">
+desc
+                </div>
+                <div id="recipe-tags">
+east europe ahh
+                </div>
+            </div>
+            <div id="ingredients">
+ts ingreds
+            </div>
+            <div id="steps">
+step
             </div>
         </div>
     </div>

@@ -26,7 +26,7 @@
     font-size: 1.2rem;
 }
 
-#page-title {
+.title {
     font-size: 1.5rem;
     font-weight: bold;
 }
@@ -54,7 +54,11 @@
     flex-direction: column;
 }
 
-#recipe-description {
+#recipe-title {
+    margin-bottom: 10px;
+}
+
+#recipe {
     display: flex;
     flex-direction: column;
 }
