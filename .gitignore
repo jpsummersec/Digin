@@ -104,3 +104,9 @@ $RECYCLE.BIN/
 # Config file to avoid API Key leaks
 config.php
 
+# Codex
+.codex/
+codex.log
+codex-cache/
+codex.md
+
