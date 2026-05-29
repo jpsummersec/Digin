@@ -54,11 +54,28 @@
     flex-direction: column;
 }
 
+#recipe {
+    display: flex;
+    flex-direction: column;
+}
+
 #recipe-title {
     margin-bottom: 10px;
 }
 
-#recipe {
+#recipe-data {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+}
+
+#calories-border {
+    padding-right: 5px;
+    margin-right: 5px;
+    border-right: 2px solid var(--hr);
+}
+
+#recipe-data img {
+    height: 1rem;
+    width: auto;
+    vertical-align: middle;
 }

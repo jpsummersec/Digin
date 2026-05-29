@@ -111,7 +111,14 @@
                     <span class="title"><?php echo htmlspecialchars($recipe['title']); ?></span>
                 </div>
                 <div id="recipe-data">
-                    <img src="../images/recipe/bolt.png" alt=""><?php echo htmlspecialchars($calories)?> ADD GREY COLUMN HERE <?php echo htmlspecialchars($recipe['time']) ?>
+                    <div id ="calories-border">
+                        <img src="../images/bolt.png" alt="">
+                        <?php echo htmlspecialchars($calories)?>
+                    </div>
+                    <div>
+                        <img src="../images/clock.png" alt="">
+                        <?php echo htmlspecialchars($recipe['readyInMinutes']) ?> minutes
+                    </div>
                 </div>
                 <div id="recipe-description">
 desc
