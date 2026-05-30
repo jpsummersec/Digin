@@ -118,13 +118,20 @@
                     <div>
                         <img src="../images/clock.png" alt="">
                         <?php echo htmlspecialchars($recipe['readyInMinutes']) ?> minutes
-                    </div>
+                    </div> 
                 </div>
                 <div id="recipe-description">
-desc
+                    uuhh... description? <?php // echo htmlspecialchars($recipe['summary']); ?>
                 </div>
                 <div id="recipe-tags">
-east europe ahh
+                    Tags: 
+                    <?php
+                        $tags = array_merge($recipe['cuisines'], $recipe['dishTypes']);
+
+                        foreach ($tags as $tag) {
+                            echo "<span class='tag'>" . htmlspecialchars($tag) . "</span>";
+                        }
+                    ?>
                 </div>
             </div>
             <div id="ingredients">
