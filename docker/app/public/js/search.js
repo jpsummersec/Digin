@@ -1,165 +1,268 @@
 const searchInput = document.getElementById('searchInput');
 const searchButton = document.getElementById('searchButton');
 const resultsDiv = document.getElementById('results');
-const numberOfResults = 10;
+const numberOfResults = document.getElementById('numberOfResults');
+const numberOfResultsValue = document.getElementById('numberOfResultsValue');
 const searchByIngredient = document.getElementById('searchByIngredient');
-const cuisineVal = cuisine?.value ?? "";
-const dietVal = diet?.value ?? "";
-const maxTimeVal = maxTime?.value ?? "";
-const dishTypeVal = dishType?.value ?? "";
-const allergyCheckboxes = document.querySelectorAll('.allergy');
-const sortVal = sortSelect?.value ?? "";
-
-searchButton.addEventListener('click', searchRecipes);
-
-const filterBtn     = document.getElementById('filterBtn');
-const filterPanel   = document.getElementById('filterPanel');
+const filterBtn = document.getElementById('filterBtn');
+const filterPanel = document.getElementById('filterPanel');
 const filterOverlay = document.getElementById('filterOverlay');
-const closeFilter   = document.getElementById('closeFilter');
-const applyFilters  = document.getElementById('applyFilters');
-const clearFilters  = document.getElementById('clearFilters');
- 
+const closeFilter = document.getElementById('closeFilter');
+const applyFilters = document.getElementById('applyFilters');
+const clearFilters = document.getElementById('clearFilters');
+
+const recipeDetailsUrl = '../src/recipe.php';
+
 function openFilter() {
-  filterPanel.classList.add('open');
-  filterOverlay.classList.add('active');
-  filterPanel.setAttribute('aria-hidden', 'false');
+	filterPanel.classList.add('open');
+	filterOverlay.classList.add('active');
+	filterPanel.setAttribute('aria-hidden', 'false');
 }
- 
+
 function closeFilterPanel() {
-  filterPanel.classList.remove('open');
-  filterOverlay.classList.remove('active');
-  filterPanel.setAttribute('aria-hidden', 'true');
+	filterPanel.classList.remove('open');
+	filterOverlay.classList.remove('active');
+	filterPanel.setAttribute('aria-hidden', 'true');
 }
- 
-filterBtn.addEventListener('click', openFilter);
-closeFilter.addEventListener('click', closeFilterPanel);
-filterOverlay.addEventListener('click', closeFilterPanel);
- 
-/* Chip toggle (active state) */
-document.querySelectorAll('.chip-group button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const group = btn.closest('.chip-group');
-    // maxTime allows only one selection; others can multi-select
-    if (group.id === 'maxTime') {
-      group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-    }
-    btn.classList.toggle('active');
-  });
-});
- 
-applyFilters.addEventListener('click', () => {
-  closeFilterPanel();
-  searchRecipes();
-});
- 
-clearFilters.addEventListener('click', () => {
-  document.querySelectorAll('.chip-group button').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.allergy').forEach(cb => cb.checked = false);
-  document.getElementById('sortSelect').value = '';
-});
+
+function escapeHtml(value) {
+	return String(value ?? '')
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#039;');
+}
+
+function getSelectedButton(groupId) {
+	return document.querySelector(`#${groupId} button.active`);
+}
+
+function getSelectedValue(groupId) {
+	const button = getSelectedButton(groupId);
+	return button ? button.dataset.value || button.value || button.textContent.trim() : '';
+}
+
+function getSelectedQuery(groupId) {
+	const button = getSelectedButton(groupId);
+	return button ? button.dataset.query || '' : '';
+}
+
+function getSelectedIntolerances() {
+	return Array.from(document.querySelectorAll('.allergy.active'))
+		.map(button => button.dataset.value || button.textContent.trim());
+}
+
+function hasSelectedFilters() {
+	return Boolean(
+		getSelectedValue('diet') ||
+		getSelectedValue('cuisine') ||
+		getSelectedValue('dishType') ||
+		getSelectedValue('maxTime') ||
+		getSelectedValue('sortSelect') ||
+		getSelectedIntolerances().length
+	);
+}
+
+function getCalories(recipe) {
+	const nutrients = recipe.nutrition?.nutrients || [];
+	const calories = nutrients.find(nutrient => nutrient.name === 'Calories');
+
+	if (!calories) {
+		return '- kcal';
+	}
+
+	return `${Math.round(calories.amount)} ${calories.unit}`;
+}
+
+function getIngredients(recipe) {
+	const ingredients =
+		recipe.extendedIngredients ||
+		recipe.usedIngredients ||
+		recipe.missedIngredients ||
+		[];
+
+	return ingredients
+		.map(ingredient => ingredient.original || ingredient.originalString || ingredient.name)
+		.filter(Boolean);
+}
+
+function renderRecipe(recipe) {
+	const id = encodeURIComponent(recipe.id);
+	const title = escapeHtml(recipe.title || 'Untitled recipe');
+	const image = escapeHtml(recipe.image || '../images/');
+	const time = recipe.readyInMinutes ? `${recipe.readyInMinutes} minutes` : '- minutes';
+	const calories = escapeHtml(getCalories(recipe));
+	const ingredients = getIngredients(recipe);
+	const previewIngredients = ingredients.slice(0, 6);
+	const hasMoreIngredients = ingredients.length > previewIngredients.length;
+	const ingredientItems = previewIngredients
+		.map(ingredient => `<li>${escapeHtml(ingredient)}</li>`)
+		.join('');
+
+	const recipeDiv = document.createElement('article');
+	recipeDiv.className = 'recipe';
+
+	recipeDiv.innerHTML = `
+		<a class="recipe-link" href="${recipeDetailsUrl}?id=${id}">
+			<img class="recipe-image" src="${image}" alt="${title}" loading="lazy">
+			<div class="recipe-content">
+				<h2>${title}</h2>
+				<div class="recipe-meta">
+					<span><span class="meta-bolt" aria-hidden="true"><img src = "../images/search-page/calories.png"></span>${calories}</span>
+					<span><span class="meta-clock" aria-hidden="true"><img src = "../images/search-page/time.png"></span>${time}</span>
+				</div>
+				<div class="ingredients-block">
+					<h3>Ingredients</h3>
+					<ul class="ingredients">
+						${ingredientItems}
+						${hasMoreIngredients ? '<li>...</li>' : ''}
+					</ul>
+				</div>
+				<span class="recipe-cta">To Recipe</span>
+			</div>
+		</a>
+	`;
+
+	resultsDiv.appendChild(recipeDiv);
+}
+
+function setLoadingState() {
+	resultsDiv.innerHTML = '<div class="status-message">One moment...</div>';
+}
+
+function setMessage(message, className = 'status-message') {
+	resultsDiv.innerHTML = `<div class="${className}">${escapeHtml(message)}</div>`;
+}
+
+function buildSearchParams() {
+	const typedQuery = searchInput.value.trim();
+	const ingredientMode = searchByIngredient.checked;
+	const dishQuery = getSelectedQuery('dishType');
+	const fallbackQuery = hasSelectedFilters() ? (dishQuery || 'recipe') : '';
+	const query = typedQuery || fallbackQuery;
+
+	if (!query) {
+		return null;
+	}
+
+	const params = new URLSearchParams({
+		query,
+		number: numberOfResults.value,
+		addRecipeNutrition: 'true',
+		ingredientSearch: ingredientMode ? 'true' : 'false'
+	});
+
+	if (!ingredientMode) {
+		params.set('cuisine', getSelectedValue('cuisine'));
+		params.set('diet', getSelectedValue('diet'));
+		params.set('maxTime', getSelectedValue('maxTime'));
+		params.set('type', getSelectedValue('dishType'));
+		params.set('intolerances', getSelectedIntolerances().join(','));
+		params.set('sort', getSelectedValue('sortSelect'));
+	}
+
+	return params;
+}
 
 function searchRecipes() {
-	const searchQuery = searchInput.value.trim();
+	const params = buildSearchParams();
 
-	if (!searchQuery) {
-		alert('Please enter a search term');
+	if (!params) {
+		alert('Please enter a search term or choose a filter');
 		return;
 	}
 
-	let intolerances = [];
+	setLoadingState();
 
-	document.querySelectorAll('.allergy').forEach(cb => {
-		if (cb.checked) {
-			intolerances.push(cb.value);
-		}
-	});
-
-	const apiUrl =
-		`../php/spoonacular-search.php?query=${encodeURIComponent(searchQuery)}`
-		+ `&number=${numberOfResults}`
-		+ `&addRecipeNutrition=true`
-		+ `&ingredientSearch=${searchByIngredient?.checked || false}`
-		+ `&cuisine=${cuisine?.value || ""}`
-		+ `&diet=${diet?.value || ""}`
-		+ `&maxReadyTime=${maxTime?.value || ""}`
-		+ `&type=${dishType?.value || ""}`
-		+ `&intolerances=${intolerances.join(',')}`
-		+ `&sort=${sortSelect?.value || ""}`;
-
-	resultsDiv.innerHTML = '<p>one moment...</p>';
-
-	fetch(apiUrl)
-	.then(response => response.json())
-	.then(data => {
-		resultsDiv.innerHTML = '';
-
-		const results = Array.isArray(data) ? data : data.results;
-
-		if (!results || results.length === 0) {
-			resultsDiv.innerHTML = '<div class="no-results">No recipes found</div>';
-			return;
-		}
-
-		results.forEach(recipe => {
-			const title = recipe.title;
-			const image = recipe.image;
-			const id = recipe.id;
-
-			let rawScore = recipe.spoonacularScore || 0;
-			let starScore = (rawScore / 20).toFixed(1);
-			let calories = '', protein = '', fat = '', carbs = '';
-			let time = recipe.readyInMinutes || '';
-
-			let ingredientsList = '';
-
-			//ingredients
-			if (recipe.extendedIngredients) {
-				const ingredients = recipe.extendedIngredients
-					.map(i => i.original)
-					.slice(0, 5);
-
-				ingredientsList = ingredients
-					.map(i => `<li>${i}</li>`)
-					.join('');
+	fetch(`../php/spoonacular-search.php?${params.toString()}`)
+		.then(response => {
+			if (!response.ok) {
+				throw new Error(`Request failed with status ${response.status}`);
 			}
 
-			//nutrition
-			if (recipe.nutrition && recipe.nutrition.nutrients) {
-				const nutrients = recipe.nutrition.nutrients;
-
-				const calInfo = nutrients.find(n => n.name === 'Calories');
-				const proteinInfo = nutrients.find(n => n.name === 'Protein');
-				const fatInfo = nutrients.find(n => n.name === 'Fat');
-				const carbsInfo = nutrients.find(n => n.name === 'Carbohydrates');
-
-				if (calInfo) calories = Math.round(calInfo.amount) + ' ' + calInfo.unit;
-				if (proteinInfo) protein = Math.round(proteinInfo.amount) + ' ' + proteinInfo.unit;
-				if (fatInfo) fat = Math.round(fatInfo.amount) + ' ' + fatInfo.unit;
-				if (carbsInfo) carbs = Math.round(carbsInfo.amount) + ' ' + carbsInfo.unit;
+			return response.json();
+		})
+		.then(data => {
+			if (data.error) {
+				throw new Error(data.error);
 			}
 
-			const recipeDiv = document.createElement('div');
-			recipeDiv.className = 'recipe';
+			const results = Array.isArray(data) ? data : data.results;
+			resultsDiv.innerHTML = '';
 
-			recipeDiv.innerHTML = `
-				<a href="recipe-details-test.php?id=${id}">
-					<h3>${title}</h3>
-					<img src="${image}" alt="${title}">
+			if (!results || results.length === 0) {
+				setMessage('No recipes found', 'no-results');
+				return;
+			}
 
-					<p><strong>Time:</strong> ${time} min</p>
-					<p><strong>Calories:</strong> ${calories}</p>
-
-					<ul class="ingredients">
-						${ingredientsList}
-					</ul>
-				</a>
-			`;
-
-			resultsDiv.appendChild(recipeDiv);
+			results.forEach(renderRecipe);
+		})
+		.catch(error => {
+			console.error('Error fetching recipes:', error);
+			setMessage('An error occurred while fetching recipes. Please try again.', 'error');
 		});
-	})
-	.catch(error => {
-		console.error('Error fetching recipes:', error);
-		resultsDiv.innerHTML = '<div class="error">An error occurred while fetching recipes. Please try again.</div>';
-	});
 }
+
+document.querySelectorAll('.chip-group button').forEach(button => {
+	button.addEventListener('click', () => {
+		const group = button.closest('.chip-group');
+
+		if (group.dataset.singleSelect === 'true') {
+			group.querySelectorAll('button').forEach(groupButton => {
+				if (groupButton !== button) {
+					groupButton.classList.remove('active');
+				}
+			});
+		}
+
+		button.classList.toggle('active');
+	});
+});
+
+document.querySelectorAll('.see-all-btn').forEach(button => {
+	button.addEventListener('click', () => {
+		const group = document.getElementById(button.dataset.target);
+		const expanded = group.classList.toggle('is-expanded');
+		button.textContent = expanded ? 'Show less' : 'See all';
+	});
+});
+
+searchButton.addEventListener('click', searchRecipes);
+
+searchInput.addEventListener('keydown', event => {
+	if (event.key === 'Enter') {
+		searchRecipes();
+	}
+});
+
+filterBtn.addEventListener('click', openFilter);
+closeFilter.addEventListener('click', closeFilterPanel);
+filterOverlay.addEventListener('click', closeFilterPanel);
+
+applyFilters.addEventListener('click', () => {
+	closeFilterPanel();
+	searchRecipes();
+});
+
+clearFilters.addEventListener('click', () => {
+	document.querySelectorAll('.chip-group button').forEach(button => button.classList.remove('active'));
+	document.querySelectorAll('.chip-group.is-expanded').forEach(group => group.classList.remove('is-expanded'));
+	document.querySelectorAll('.see-all-btn').forEach(button => button.textContent = 'See all');
+	numberOfResults.value = '10';
+	numberOfResultsValue.value = '10';
+	numberOfResultsValue.textContent = '10';
+	returnRecipeNutrition.checked = true;
+	searchByIngredient.checked = false;
+});
+
+numberOfResults.addEventListener('input', () => {
+	numberOfResultsValue.value = numberOfResults.value;
+	numberOfResultsValue.textContent = numberOfResults.value;
+});
+
+document.addEventListener('keydown', event => {
+	if (event.key === 'Escape') {
+		closeFilterPanel();
+	}
+});

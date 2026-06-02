@@ -35,7 +35,7 @@ if (isset($_GET['query'])) {
 }
 
 $cuisine = $_GET['cuisine'] ?? '';
-$maxTime = $_GET['maxTime'] ?? '';
+$maxTime = $_GET['maxTime'] ?? ($_GET['maxReadyTime'] ?? '');
 $type = $_GET['type'] ?? '';
 $intolerances = $_GET['intolerances'] ?? '';
 $sort = $_GET['sort'] ?? '';
@@ -75,7 +75,7 @@ if ($ingredientSearch) {
         'query' => $query,
         'number' => $number,
         'apiKey' => $apiKey,
-        'addRecipeNutrition' => 'true',
+        'addRecipeNutrition' => $addRecipeNutritionValue,
         'addRecipeInformation' => 'true',
         'fillIngredients' => 'true'
     ];
