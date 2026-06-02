@@ -1,7 +1,7 @@
 <?php
+session_start();
 
 include __DIR__ . '/include.php';
-// include 'dbconnection.php';
 
 $errors = [];
 
@@ -97,6 +97,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $hashedPassword
             ]);
 
+            
+            $newUserId = (int) $dbHandler->lastInsertId();
+
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $newUserId;
+
             header("Location: login.php");
             exit;
         }
@@ -118,7 +124,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
     <form class="container" action="create-account.php" method="POST">
         <h1 class="logo"><img src="../images/logoDigIn.svg" alt="logoDigIn" class="logoDigin"></h1>
-        <img src="../images/createaccounticon.svg" alt="chefhat" class="chefhat-ic">
+        <img src="../images/Chef.svg" alt="chefhat" class="chefhat-ic">
         <h2>Your next bite starts here</h2>
         <p class="subtitle">
             Create an account and join us today
