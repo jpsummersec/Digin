@@ -67,6 +67,14 @@ body {
     width: 90px;
 }
 
+h1 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    font-weight: 700;
+    margin-top: 30px;
+
+}
+
 h2 {
     font-size: 1.5rem;
     margin-bottom: 15px;
@@ -77,6 +85,13 @@ h2 {
 .subtitle {
     color: #555;
     margin-bottom: 35px;
+}
+
+.error-message {
+    color: #b00020;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: -18px 0 18px;
 }
 
 .row {
@@ -130,7 +145,8 @@ h2 {
 }
 
 .signin-text {
-    font-size: 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
 }
 
 .signin-text span {

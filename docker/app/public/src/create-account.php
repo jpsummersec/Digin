@@ -1,45 +1,82 @@
 <?php
 
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    exit("Invalid request");
-}
-
-if (isset($_POST["first_name"])) {
-    $firstName = trim($_POST["first_name"]);
-} else {
-    $firstName = "";
-}
-
-if (isset($_POST["last_name"])) {
-    $lastName = trim($_POST["last_name"]);
-} else {
-    $lastName = "";
-}
-
-if (isset($_POST["email"])) {
-    $email = trim($_POST["email"]);
-} else {
-    $email = "";
-}
-
-if (isset($_POST["password"])) {
-    $password = $_POST["password"];
-} else {
-    $password = "";
-}
-
-if (isset($_POST["confirm_password"])) {
-    $confirmPassword = $_POST["confirm_password"];
-} else {
-    $confirmPassword = "";
-}
-
 $errors = [];
 
+$firstName = "";
+$lastName = "";
+$email = "";
+$password = "";
+$confirmPassword = "";
 
-$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-echo "Account input is valid.";
+    if (isset($_POST["first_name"])) {
+        $firstName = trim($_POST["first_name"]);
+    } else {
+        $firstName = "";
+    }
+
+    if (isset($_POST["last_name"])) {
+        $lastName = trim($_POST["last_name"]);
+    } else {
+        $lastName = "";
+    }
+
+    if (isset($_POST["email"])) {
+        $email = trim($_POST["email"]);
+    } else {
+        $email = "";
+    }
+
+    if (isset($_POST["password"])) {
+        $password = $_POST["password"];
+    } else {
+        $password = "";
+    }
+
+    if (isset($_POST["confirm_password"])) {
+        $confirmPassword = $_POST["confirm_password"];
+    } else {
+        $confirmPassword = "";
+    }
+
+    $errors = [];
+    //first name//
+    if ($firstName === "") {
+        $errors[] = "First name is required.";
+    }
+
+    //last name//
+    if ($lastName === "") {
+        $errors[] = "Last name is required.";
+    }
+
+    //email//
+    if ($email === "") {
+        $errors[] = "Email is required.";
+    } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+        $errors[] = "Invalid email address.";
+    }
+
+    //password//
+    if ($password === "") {
+        $errors[] = "Password is required.";
+    } elseif (strlen($password) < 8) {
+        $errors[] = "Password must be at least 8 characters.";
+    }
+}
+
+//confirmpassword//
+if ($confirmPassword === "") {
+    $errors[] = "Confirm password is required.";
+} elseif ($password !== $confirmPassword) {
+    $errors[] = "Passwords do not match.";
+}
+
+if (empty($errors)) {
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -60,19 +97,32 @@ echo "Account input is valid.";
         <p class="subtitle">
             Create an account and join us today
         </p>
+
+        <?php
+        if (!empty($errors)) {
+            echo '<div class="error-message">';
+
+            foreach ($errors as $error) {
+                echo htmlspecialchars($error) . '<br>';
+            }
+
+            echo '</div>';
+        }
+        ?>
+
         <div class="row">
             <div class="input-box">
                 <img src="../images/nameIcon.svg" alt="name-icon" class="input-icon">
-                <input type="text" name="first_name" placeholder="first name">
+                <input type="text" name="first_name" placeholder="first name" value="<?php echo htmlspecialchars($firstName); ?>">
             </div>
             <div class="input-box">
                 <img src="../images/nameIcon.svg" alt="name-icon" class="input-icon">
-                <input type="text" name="last_name" placeholder="last name">
+                <input type="text" name="last_name" placeholder="last name" value="<?php echo htmlspecialchars($lastName); ?>">
             </div>
         </div>
         <div class="input-box">
             <img src="../images/emailIcon.svg" alt="email-icon" class="input-icon">
-            <input type="email" name="email" placeholder="email@example.com">
+            <input type="email" name="email" placeholder="email@example.com" value="<?php echo htmlspecialchars($email); ?>">
         </div>
         <div class="input-box">
             <img src="../images/password.png" alt="password-icon" class="password-icon">
@@ -88,13 +138,14 @@ echo "Account input is valid.";
                 <img src="../images/eyeclosed.svg" alt="eyeclosed-icon" class="eye-icon">
             </button>
         </div>
-        <button class="signup-btn">Create account</button>
+        <button type="submit" class="signup-btn">Create account</button>
         <hr>
         <p class="signin-text">
             Already have an account?
         </p>
-        <button class="signup-btn">Sign in</button>
+        <button type="button" class="signup-btn">Sign in</button>
     </form>
+
     <script>
         function togglePassword(inputId, button) {
             const input = document.getElementById(inputId);
