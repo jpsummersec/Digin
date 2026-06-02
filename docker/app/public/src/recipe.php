@@ -121,7 +121,7 @@
                     </div> 
                 </div>
                 <div id="recipe-description">
-                    uuhh... description? <?php // echo htmlspecialchars($recipe['summary']); ?>
+                    <?php echo htmlspecialchars(strip_tags($recipe['summary'])); ?>
                 </div>
                 <div id="recipe-tags">
                     Tags: 
@@ -129,16 +129,40 @@
                         $tags = array_merge($recipe['cuisines'], $recipe['dishTypes']);
 
                         foreach ($tags as $tag) {
-                            echo "<span class='tag'>" . htmlspecialchars($tag) . "</span>";
+                            echo "<span class='tag'>" . htmlspecialchars(ucfirst($tag)) . "</span>";
                         }
                     ?>
                 </div>
             </div>
             <div id="ingredients">
-ts ingreds
+                <h2><ul>Ingredients</ul></h2>
+                <div id="ingredients-container">
+                    <div id="ingredient-details">
+                        <?php foreach ($ingredients as $ingredient) {
+                                echo "<li class='ingredient'>" . htmlspecialchars(ucfirst($ingredient['name'])) . "</li>";
+                            };
+                        ?>
+                    </div>
+                    <div id="ingredient-details">
+                        <?php foreach ($ingredients as $ingredient) {
+                                echo "<li class='amount'>" . htmlspecialchars(ucfirst($ingredient['amount'])) . " " . htmlspecialchars(ucfirst($ingredient['unit'])) . "</li>";
+                            };
+                        ?>
+                    </div>
+                </div>
             </div>
             <div id="steps">
-step
+                <h2>Steps</h2>
+                <?php foreach ($steps as $step) {
+                        echo "<div class='step'>";
+                            echo "<h3> Step" . $step['number'] . "</h3>";
+                            echo "<div class='step-description'>";
+                                echo htmlspecialchars(strip_tags($step['description']));
+                            echo "</div>";
+                        echo "</div>";
+                    }
+                ?>
+                
             </div>
         </div>
     </div>
