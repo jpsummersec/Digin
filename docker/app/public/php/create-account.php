@@ -1,6 +1,7 @@
 <?php
 
-include 'dbconnection.php';
+include __DIR__ . '/include.php';
+// include 'dbconnection.php';
 
 $errors = [];
 
@@ -75,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     if (empty($errors)) {
-        $checkEmail = $pdo->prepare("SELECT user_id FROM user WHERE email_address = ?");
+        $checkEmail = $dbHandler->prepare("SELECT user_id FROM user WHERE email_address = ?");
         $checkEmail->execute([$email]);
 
         if ($checkEmail->fetch()) {
@@ -83,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            $stmt = $pdo->prepare("
+            $stmt = $dbHandler->prepare("
                 INSERT INTO user
                 (first_name, last_name, email_address, password_hash, level, xp, spotify_token)
                 VALUES (?, ?, ?, ?, 1, 0, NULL)

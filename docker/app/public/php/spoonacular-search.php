@@ -6,7 +6,7 @@ ini_set('display_errors', 1);
 header('Content-Type: application/json');
 
 $config = [];
-$configPath = __DIR__ . '/../php/config.php';
+$configPath = __DIR__ . '/config.php';
 $MIN_SEARCH_RESULTS = 0;
 $MAX_SEARCH_RESULTS = 10;
 
