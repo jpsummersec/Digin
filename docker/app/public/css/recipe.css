@@ -26,7 +26,7 @@
     font-size: 1.2rem;
 }
 
-#page-title {
+.title {
     font-size: 1.5rem;
     font-weight: bold;
 }
@@ -54,7 +54,45 @@
     flex-direction: column;
 }
 
-#recipe-description {
+#recipe {
     display: flex;
     flex-direction: column;
+    row-gap: 8px;
+    padding-bottom: 8px;
+}
+
+#recipe-title {
+    margin-bottom: 10px;
+}
+
+#recipe-data {
+    display: flex;
+    flex-direction: row;
+}
+
+#calories-border {
+    padding-right: 5px;
+    margin-right: 5px;
+    border-right: 2px solid var(--hr);
+}
+
+#recipe-data img {
+    height: 1rem;
+    width: auto;
+    vertical-align: middle;
+}
+
+#recipe-tags {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.tag {
+    color: var(--primary);
+    padding: 5px;
+    border-radius: 5px;
+    background-color: var(--light-green);
 }

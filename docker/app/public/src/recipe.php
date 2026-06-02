@@ -46,7 +46,7 @@
     if (isset($recipe['nutrition']['nutrients'])) {
         foreach ($recipe['nutrition']['nutrients'] as $nutrient) {
             if ($nutrient['name'] === 'Calories') {
-                $calories = $nutrient['amount'] . ' ' . $nutrient['unit'];
+                $calories = round($nutrient['amount']) . ' ' . $nutrient['unit'];
                 break;
             }
         }
@@ -71,6 +71,12 @@
     $showAll = isset($_GET['showAll']) && $_GET['showAll'] == 1;
     $ingredients = $recipe['extendedIngredients'];
     $previewIngredients = array_slice($ingredients, 0, 5);
+
+    /*
+    var_dump($recipe);
+    exit;
+    */
+    
 ?>
 
 <!DOCTYPE html>
@@ -86,7 +92,7 @@
     <div id="page-wrapper">
         <nav id="nav-bar">
             <a id="back-button" href="recipe.php">&#8592;</a>
-            <span id="page-title">Recipe</span>
+            <span class="title">Recipe</span>
         </nav>
 
         <?php if (!empty($recipe['image'])): ?>
@@ -100,8 +106,39 @@
         <?php endif; ?>
         
         <div id="content">
-            <div id="recipe-description">
-                <div id="">
+            <div id="recipe">
+                <div id="recipe-title">
+                    <span class="title"><?php echo htmlspecialchars($recipe['title']); ?></span>
+                </div>
+                <div id="recipe-data">
+                    <div id ="calories-border">
+                        <img src="../images/bolt.png" alt="">
+                        <?php echo htmlspecialchars($calories)?>
+                    </div>
+                    <div>
+                        <img src="../images/clock.png" alt="">
+                        <?php echo htmlspecialchars($recipe['readyInMinutes']) ?> minutes
+                    </div> 
+                </div>
+                <div id="recipe-description">
+                    uuhh... description? <?php // echo htmlspecialchars($recipe['summary']); ?>
+                </div>
+                <div id="recipe-tags">
+                    Tags: 
+                    <?php
+                        $tags = array_merge($recipe['cuisines'], $recipe['dishTypes']);
+
+                        foreach ($tags as $tag) {
+                            echo "<span class='tag'>" . htmlspecialchars($tag) . "</span>";
+                        }
+                    ?>
+                </div>
+            </div>
+            <div id="ingredients">
+ts ingreds
+            </div>
+            <div id="steps">
+step
             </div>
         </div>
     </div>
