@@ -1,5 +1,7 @@
 <?php
 
+include 'dbconnection.php';
+
 $errors = [];
 
 $firstName = "";
@@ -64,17 +66,40 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif (strlen($password) < 8) {
         $errors[] = "Password must be at least 8 characters.";
     }
-}
 
-//confirmpassword//
-if ($confirmPassword === "") {
-    $errors[] = "Confirm password is required.";
-} elseif ($password !== $confirmPassword) {
-    $errors[] = "Passwords do not match.";
-}
+    //confirmpassword//
+    if ($confirmPassword === "") {
+        $errors[] = "Confirm password is required.";
+    } elseif ($password !== $confirmPassword) {
+        $errors[] = "Passwords do not match.";
+    }
 
-if (empty($errors)) {
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    if (empty($errors)) {
+        $checkEmail = $pdo->prepare("SELECT user_id FROM user WHERE email_address = ?");
+        $checkEmail->execute([$email]);
+
+        if ($checkEmail->fetch()) {
+            $errors[] = "Email address already exists.";
+        } else {
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+            $stmt = $pdo->prepare("
+                INSERT INTO user
+                (first_name, last_name, email_address, password_hash, level, xp, spotify_token)
+                VALUES (?, ?, ?, ?, 1, 0, NULL)
+            ");
+
+            $stmt->execute([
+                $firstName,
+                $lastName,
+                $email,
+                $hashedPassword
+            ]);
+
+            header("Location: login.php");
+            exit;
+        }
+    }
 }
 
 ?>
