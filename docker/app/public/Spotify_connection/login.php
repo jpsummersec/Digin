@@ -2,58 +2,34 @@
 
 session_start();
 
-// Load helper functions that read/write Spotify tokens for the current user
-require __DIR__ . '/spotify_helper.php';
-
-// Load Spotify app credentials and redirect URI from the shared config
+// Load the Spotify client ID from config.php.
 $config = require __DIR__ . '/../config.php';
 $client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
-$client_secret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
 
-if (!$client_id || !$client_secret) {
-    die('Error: SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET not found in config.php');
+if (!$client_id) {
+    die('Error: SPOTIFY_CLIENT_ID not found in config.php');
 }
 
 $redirect_uri = $config['SPOTIFY_REDIRECT_URI'];
 
-// If the user is already logged in try to reuse their stored Spotify token
-$userId = getCurrentUserId();
-if ($userId !== null) {
-    $db = getDbConnection();
-    $stored = loadSpotifyTokenFromUser($db, $userId);
-
-    if ($stored) {
-        // If the stored access token is still valid continue directly to playback
-        if ($stored['expires_at'] > time()) {
-            setSpotifySessionTokens([
-                'access_token' => $stored['access_token'],
-                'refresh_token' => $stored['refresh_token'],
-                'expires_in' => $stored['expires_at'] - time(),
-            ]);
-            header('Location: /Spotify_connection/play.php');
-            exit();
-        }
-
-        // If the access token expired refresh it using the saved refresh token
-        if (!empty($stored['refresh_token'])) {
-            $refresh = refreshSpotifyAccessToken($stored['refresh_token'], $client_id, $client_secret);
-            if (empty($refresh['error'])) {
-                $expiresAt = time() + $refresh['expires_in'];
-                saveSpotifyTokenToUser($db, $userId, $refresh['access_token'], $refresh['refresh_token'], $expiresAt);
-                setSpotifySessionTokens($refresh);
-                header('Location: /Spotify_connection/play.php');
-                exit();
-            }
-        }
-    }
+// Ensure the page is loaded from the same host as the Spotify redirect URI.
+$expected_host = parse_url($redirect_uri, PHP_URL_HOST);
+$expected_port = parse_url($redirect_uri, PHP_URL_PORT);
+$expected_host_with_port = $expected_host . ($expected_port ? ':' . $expected_port : '');
+$current_host = $_SERVER['HTTP_HOST'] ?? '';
+if ($current_host !== $expected_host_with_port) {
+    $scheme = parse_url($redirect_uri, PHP_URL_SCHEME) ?: 'http';
+    $redirect_url = $scheme . '://' . $expected_host_with_port . $_SERVER['REQUEST_URI'];
+    header('Location: ' . $redirect_url);
+    exit();
 }
 
-// Generate a random state token and keep it in the session
-// Spotify will send it back so we can verify the callback
+// Generate a random state token and keep it in the session.
+// Spotify will send it back so we can verify the callback.
 $state = bin2hex(random_bytes(16));
 $_SESSION['spotify_state'] = $state;
 
-// These scopes let us read playback state and start playback
+// These scopes let us read playback state and start playback.
 $scope = "user-read-playback-state user-modify-playback-state";
 
 $params = http_build_query([
@@ -62,7 +38,7 @@ $params = http_build_query([
     "scope" => $scope,
     "redirect_uri" => $redirect_uri,
     "state" => $state,
-    "show_dialog" => "true" // Keep the login prompt visible for fresh auth
+    "show_dialog" => "true" // Keep the login prompt visible for fresh auth.
 ]);
 
 $authorize_url = "https://accounts.spotify.com/authorize?$params";
