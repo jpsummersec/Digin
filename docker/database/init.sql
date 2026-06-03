@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `user_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `first_name` VARCHAR(100) NOT NULL,
   `last_name` VARCHAR(100) NOT NULL,
-  `path_to_icon` VARCHAR(512) NOT NULL DEFAULT 'profile-pictures/default.png',
+  `path_to_icon` VARCHAR(512) NOT NULL DEFAULT '../database/profile-pictures/default.png',
   `email_address` VARCHAR(255) NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   `level` INT UNSIGNED NOT NULL DEFAULT 1,
@@ -27,6 +27,14 @@ CREATE TABLE IF NOT EXISTS `achievement` (
   PRIMARY KEY (`achievement_id`),
   UNIQUE (`achievement_name`)
 );
+
+INSERT INTO `achievement` (`achievement_name`, `path_to_icon`) VALUES
+  ('bronze-light', '../database/achievement-icons/bronze-light.png'),
+  ('silver-light', '../database/achievement-icons/silver-light.png'),
+  ('gold-light', '../database/achievement-icons/gold-light.png'),
+  ('diamond-light', '../database/achievement-icons/diamond-light.png')
+ON DUPLICATE KEY UPDATE
+  `path_to_icon` = VALUES(`path_to_icon`);
 
 CREATE TABLE IF NOT EXISTS `user_achievement` (
   `user_id` INT UNSIGNED NOT NULL,

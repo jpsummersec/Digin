@@ -3,8 +3,10 @@ include __DIR__ . '/include.php';
 
 $userId = 1;
 $user = null;
+$achievements = [];
 
 if (isset($dbHandler)) {
+	// get user info based on user ID
 	try { 
 		$statement = $dbHandler->prepare('SELECT * FROM `user` WHERE `user_id` = :userId');
 		$statement->bindValue(':userId', $userId, PDO::PARAM_INT); 
@@ -15,22 +17,25 @@ if (isset($dbHandler)) {
 	catch(PDOException $exception) {
 		die('Select error: ' . $exception->getMessage());
 	}
-	
-	var_dump($user);
 
-	// echo '<div class="content">';
-	// foreach ($results as $result) {
-	// 	echo '<div class="racer">';
-	// 	echo '<div class="racerImg">
-	// 		<img src="img/racerImg/' . $result['racerImage'] . '">
-	// 		</div>';
-	// 	echo '<div class="racerDetails">
-	// 			<p><strong>Racer: </strong>' . $result['racerName'] . '</p>
-	// 			<p><strong>Car: </strong>' . $result['carName'] . '</p>
-	// 			</div>';
-	// 	echo '</div>';
-	// }
-	// echo '</div>';
+	// get user achievements based on user ID
+	try { 
+		$statement = $dbHandler->prepare('
+			SELECT a.`achievement_id`, a.`achievement_name`, a.`path_to_icon`
+			FROM `user_achievement` ua
+			INNER JOIN `achievement` a
+				ON a.`achievement_id` = ua.`achievement_id`
+			WHERE ua.`user_id` = :userId
+			ORDER BY a.`achievement_id`
+		');
+		$statement->bindValue(':userId', $userId, PDO::PARAM_INT); 
+		$statement->execute();
+		$achievements = $statement->fetchAll(PDO::FETCH_ASSOC);  
+		$statement->closeCursor(); 
+	}
+	catch(PDOException $exception) {
+		die('Select error: ' . $exception->getMessage());
+	}
 }
 ?>
 
@@ -46,20 +51,16 @@ if (isset($dbHandler)) {
 	<body>
 		<h1 class="page-title">Your Profile</h1>
 		<div class="profile-banner">
-			<img class="profile-picture" src="<?= htmlspecialchars($user['path_to_icon']) ?>" alt="Profile Picture">
-			<h1>Name</h1>
-			<h2>@username</h2>
+			<div class="profile-picture">
+				<img src="<?= '../' . htmlspecialchars($user['path_to_icon']) ?>" alt="Profile Picture">
+			</div>
+			<h1><?= htmlspecialchars($user['first_name']) . ' ' . htmlspecialchars($user['last_name']) ?></h1>
+			<h2><?= htmlspecialchars($user['email_address']) ?></h2>
 
 			<?php
-			// THESE VALUES NEED TO BE PULLED FROM THE DATABASE LATER
-			$currentXp = 75;
-			$currentLevel = 0;
-			if ($currentLevel !== 0) {
-				$xpToNextLevel = 100 * $currentLevel * 2;
-			} else {
-				$xpToNextLevel = 100;
-			}
-			
+			$currentXp = $user['xp'];
+			$currentLevel = $user['level'];
+			$xpToNextLevel = 100 * $currentLevel * 2;
 
 			$progressPercent = ($currentXp / $xpToNextLevel) * 100;
 			$progressPercent = max(0, min(100, $progressPercent));
@@ -76,12 +77,32 @@ if (isset($dbHandler)) {
 			<h3 class="level-counter">Level <?= $currentLevel ?></h3>
 		</div>
 
-		<h2>Achievements</h2>
+		<div class="achievements">
+			<h2>Achievements</h2>
 
-		<hr>
-		<hr>
+			<?php if (empty($achievements)): ?>
+				<p class="empty-achievements">No achievements yet.</p>
+			<?php else: ?>
+				<div class="achievement-list">
+					<?php foreach ($achievements as $achievement): ?>
+						<div class="achievement-item">
+							<img src="<?= htmlspecialchars($achievement['path_to_icon']) ?>" alt="<?= htmlspecialchars($achievement['achievement_name']) ?>">
+						</div>
+					<?php endforeach; ?>
+				</div>
+			<?php endif; ?>
+			<hr>
+		</div>
 
-		<h2>Favorite Dishes</h2>
+		
+
+		<div class="favourite-dishes">
+			<h2>Favorite Dishes</h2>
+			<hr>
+		</div>
+
+		
+
 
 	</body>
 

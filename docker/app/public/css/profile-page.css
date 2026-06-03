@@ -1,9 +1,9 @@
 body {
   display: grid;
-  /* justify-content: center; */
   padding-inline: 10%;
   padding-block: 0;
 }
+
 
 .profile-banner {
   display: grid;
@@ -11,6 +11,7 @@ body {
   grid-template-rows: 2fr 1fr 2fr;
   width: 100%;
   padding: 10%;
+  padding-left: 2%;
   background-color: var(--accent-50-opaque);
   justify-self: center;
   border-radius: var(--main-border-radius);
@@ -19,14 +20,16 @@ body {
 .profile-banner h1 {
   grid-column: 2/3;
   grid-row: 1/2;
-  font-size: 1rem;
+  font-size: 0.75rem;
+  align-self: self-end;
 }
 
 .profile-banner h2 {
   grid-column: 2/3;
   grid-row: 2/3;
-  font-size: 0.8rem;
+  font-size: 0.65rem;
   font-family: 'Inter-regular';
+  align-self: self-end;
 }
 
 .profile-banner h3 {
@@ -36,23 +39,40 @@ body {
 }
 
 .profile-banner .profile-picture {
-  border-radius: 100px;
+  grid-column: 1 / 2;
+  grid-row: 1 / 4;
+  width: 100px;
+  clip-path: circle(35%);
+  margin-right: 7.5px;
+}
+
+.profile-banner .profile-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  justify-self: start;
 }
 
 .profile-banner .level-counter {
-  justify-self: left;
-  align-self:self-end;
+  justify-self: start;
+  align-self: end;
+}
+
+.profile-banner .xp-bar, .xp-bar-fill, .xp-progress {
+  grid-column: 2/3;
 }
 
 .profile-banner .xp-progress {
-  justify-self: right;
-  align-self:self-end;
+  justify-self: end;
+  align-self: end;
 }
 
 .profile-banner .xp-bar {
   width: 100%;
   height: 5px;
-  background-color: #5E6A71;
+  background-color: rgba(94, 106, 113, 0.25);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -65,16 +85,49 @@ body {
 
 hr {
   border: 0.1px solid var(--hr);
+  margin-block: 10px;
 }
 
-h2 {
-  font-family: 0.1rem;
+/* Achievements */
+
+.achievements h2 {
+  font-size: 0.80rem;
+  margin-top: 50px;
+}
+
+.achievement-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.achievement-item {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.achievement-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.achievement-item p,
+.empty-achievements {
+  font-size: 0.65rem;
   font-family: 'Inter-regular';
 }
 
+.empty-achievements {
+  margin-top: 16px;
+}
 
 
-
-
-
-
+/* Favourite Dishes */
+.favourite-dishes h2 {
+  font-size: 0.8rem;
+  margin-top: 25px;
+}
