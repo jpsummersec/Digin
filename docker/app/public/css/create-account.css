@@ -38,7 +38,7 @@ h1 {
 
 .subtitle {
     margin-bottom: 35px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 600;
 }
 
@@ -82,20 +82,26 @@ h1 {
 .signup-btn {
     width: 165px;
     height: 35px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
     padding: 0;
     border-radius: 20px;
     background: #218838;
     color: white;
+    text-decoration: none;
+
     font-size: 0.9rem;
-    cursor: pointer;
-    margin-top: 22px;
-    margin-bottom: 22px;
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
     font-weight: 500;
+    cursor: pointer;
+
+    margin-top: 22px;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
 }
 
 .signin-text {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     margin-top: 25px;
     margin-bottom: 10px;
@@ -115,11 +121,18 @@ hr {
 }
 
 .eye-icon {
-    width: 22px;
-    height: 22px;
+    width: 23px;
+    height: auto;
     object-fit: contain;
 }
 
 .signin-container {
     margin-top: 120px;
+}
+
+.error-message {
+    color: red;
+    font-weight: 500;
+    font-size: 1rem;
+    margin-bottom: 20px;
 }

@@ -31,7 +31,7 @@
         <p class="signin-text">
             Don't have an account?
         </p>
-        <button type="button" class="signup-btn">Sign up</button>
+        <a href="create-account.php" class="signup-btn">Sign in</a>
     </form>
 
     <script>

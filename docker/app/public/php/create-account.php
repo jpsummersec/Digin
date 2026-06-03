@@ -176,7 +176,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <p class="signin-text">
             Already have an account?
         </p>
-        <button type="button" class="signup-btn">Sign in</button>
+        <a href="signin.php" class="signup-btn">Sign in</a>
     </form>
 
     <script>
