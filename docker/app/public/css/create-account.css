@@ -1,54 +1,10 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-}
-
-@font-face {
-    font-family: 'Inter';
-    src: url(../fonts/Inter_18pt-Regular.ttf);
-    font-weight: 400;
-}
-
-@font-face {
-    font-family: 'Inter';
-    src: url(../fonts/Inter_18pt-Regular.ttf);
-    font-weight: 400;
-}
-
-@font-face {
-    font-family: 'Inter';
-    src: url(../fonts/Inter_18pt-Medium.ttf);
-    font-weight: 500;
-}
-
-@font-face {
-    font-family: 'Inter';
-    src: url(../fonts/Inter_18pt-SemiBold.ttf);
-    font-weight: 600;
-}
-
-@font-face {
-    font-family: 'Inter';
-    src: url(../fonts/Inter_18pt-Bold.ttf);
-    font-weight: 700;
-}
-
-body {
-    background: #eeeeee;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 900px;
-}
-
 .container {
     width: 420px;
     background: #f7f7f7;
     padding: 40px 35px;
     text-align: center;
     border-radius: 20px;
+    margin: 0 auto;
 }
 
 .logo {
@@ -138,7 +94,7 @@ h2 {
     border-radius: 20px;
     background: #218838;
     color: white;
-    font-size: 1 rem;
+    font-size: 0.8rem;
     cursor: pointer;
     margin-top: 18px;
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
@@ -173,4 +129,8 @@ hr {
     width: 22px;
     height: 32px;
     object-fit: contain;
+}
+
+.signin-container {
+    margin-top: 80px;
 }

@@ -97,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $hashedPassword
             ]);
 
-            
+
             $newUserId = (int) $dbHandler->lastInsertId();
 
             session_regenerate_id(true);
@@ -119,12 +119,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign Up</title>
     <link rel="stylesheet" href="../css/create-account.css">
+    <link rel="stylesheet" href="../css/root.css">
 </head>
 
 <body>
     <form class="container" action="create-account.php" method="POST">
         <h1 class="logo"><img src="../images/logoDigIn.svg" alt="logoDigIn" class="logoDigin"></h1>
-        <img src="../images/Chef.svg" alt="chefhat" class="chefhat-ic">
+        <img src="../images/cheficon-createacc.svg" alt="chefIcon" class="chefhat-icon">
         <h2>Your next bite starts here</h2>
         <p class="subtitle">
             Create an account and join us today
