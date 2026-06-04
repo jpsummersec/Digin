@@ -1,0 +1,51 @@
+body
+{
+    max-width: 420px;
+    margin: 0 auto;
+    background-color: var(--accent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#redirect-container
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+    color: var(--background);
+    padding: 20px;
+}
+
+#thank-you
+{
+    font-size: 1rem;
+}
+
+#brand
+{
+    width: 200px;
+    height: auto;
+}
+
+#redirect-message
+{
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+#stuck
+{
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+#stuck a
+{
+    color: var(--background);
+    text-decoration: underline;
+}
