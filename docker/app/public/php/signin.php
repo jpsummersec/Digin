@@ -78,7 +78,7 @@ if (empty($errors)) {
 
 <body>
     <form class="container signin-container" action="signin.php" method="POST">
-        <h1 class="logo"><img src="../images/logoDigIn.svg" alt="logoDigIn" class="logoDigin"></h1>
+        <h1 class="logo"><img src="../images/digin_logo.svg" alt="logoDigIn" class="logoDigin"></h1>
         <img src="../images/burger.svg" alt="burger-icon" class="burger-icon">
         <h1>Sign in to continue to your account</h1>
 
@@ -87,7 +87,7 @@ if (empty($errors)) {
             <input type="email" name="email" placeholder="email@example.com">
         </div>
         <div class="input-box">
-            <img src="../images/password.png" alt="password-icon" class="password-icon">
+            <img src="../images/password.svg" alt="password-icon" class="password-icon">
             <input type="password" name="password" placeholder="password" id="password">
             <button type="button" class="eye-btn" onclick="togglePassword('password', this)">
                 <img src="../images/eyeopen.svg" alt="eyeopen-icon" class="eye-icon">

@@ -117,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <body>
     <form class="container" action="create-account.php" method="POST">
-        <h1 class="logo"><img src="../images/logoDigIn.svg" alt="logoDigIn" class="logoDigin"></h1>
+        <h1 class="logo"><img src="../images/digin_logo.svg" alt="logoDigIn" class="logoDigin"></h1>
         <img src="../images/cheficon-createacc.svg" alt="chefIcon" class="chefhat-icon">
         <h2>Your next bite starts here</h2>
         <p class="subtitle">
@@ -138,11 +138,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <div class="row">
             <div class="input-box">
-                <img src="../images/nameIcon.svg" alt="name-icon" class="input-icon">
+                <img src="../images/name_icon.svg" alt="name-icon" class="input-icon">
                 <input type="text" name="first_name" placeholder="first name" value="<?php echo htmlspecialchars($firstName); ?>">
             </div>
             <div class="input-box">
-                <img src="../images/nameIcon.svg" alt="name-icon" class="input-icon">
+                <img src="../images/name_icon.svg" alt="name-icon" class="input-icon">
                 <input type="text" name="last_name" placeholder="last name" value="<?php echo htmlspecialchars($lastName); ?>">
             </div>
         </div>
@@ -151,14 +151,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <input type="email" name="email" placeholder="email@example.com" value="<?php echo htmlspecialchars($email); ?>">
         </div>
         <div class="input-box">
-            <img src="../images/password.png" alt="password-icon" class="password-icon">
+            <img src="../images/password.svg" alt="password-icon" class="password-icon">
             <input type="password" name="password" placeholder="password" id="password">
             <button type="button" class="eye-btn" onclick="togglePassword('password', this)">
                 <img src="../images/eyeopen.svg" alt="eyeopen-icon" class="eye-icon">
             </button>
         </div>
         <div class="input-box">
-            <img src="../images/password.png" alt="password-icon" class="password-icon">
+            <img src="../images/password.svg" alt="password-icon" class="password-icon">
             <input type="password" name="confirm_password" placeholder="confirm password" id="confirmPassword">
             <button type="button" class="eye-btn" onclick="togglePassword('confirmPassword', this)">
                 <img src="../images/eyeclosed.svg" alt="eyeclosed-icon" class="eye-icon">
