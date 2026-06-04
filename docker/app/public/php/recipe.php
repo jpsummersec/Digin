@@ -91,7 +91,7 @@
 </head>
 <body>
     <nav id="nav-bar">
-        <a id="back-button" href="recipe.php">&#8592;</a>
+        <a id="back-button" href="recipe.php"><img src="../images/recipe-page/arrow.svg" alt="Back"></a>
         <span class="title">Recipe</span>
     </nav>
 
