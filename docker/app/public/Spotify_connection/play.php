@@ -2,14 +2,49 @@
 
 session_start();
 
-// We need the access token from the Spotify auth flow.
+// Load helper functions and Spotify app credentials
+require __DIR__ . '/spotify_helper.php';
+$config = require __DIR__ . '/../config.php';
+$client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
+$client_secret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
+
+// First try to use the access token from the session
 $access_token = $_SESSION['access_token'] ?? null;
+$expires_at = $_SESSION['spotify_token_expires'] ?? 0;
+$userId = getCurrentUserId();
+
+if (!$access_token || $expires_at <= time()) {
+    // If the session token is missing or has expired, try the DB copy
+    if ($userId !== null) {
+        $db = getDbConnection();
+        $stored = loadSpotifyTokenFromUser($db, $userId);
+
+        if ($stored && $stored['expires_at'] > time()) {
+            // Use a still-valid saved token from the database
+            setSpotifySessionTokens([
+                'access_token' => $stored['access_token'],
+                'refresh_token' => $stored['refresh_token'],
+                'expires_in' => $stored['expires_at'] - time(),
+            ]);
+            $access_token = $stored['access_token'];
+        } elseif ($stored && !empty($stored['refresh_token'])) {
+            // Refresh the token if it expired and a refresh token is available
+            $refresh = refreshSpotifyAccessToken($stored['refresh_token'], $client_id, $client_secret);
+            if (empty($refresh['error'])) {
+                $expiresAt = time() + $refresh['expires_in'];
+                saveSpotifyTokenToUser($db, $userId, $refresh['access_token'], $refresh['refresh_token'], $expiresAt);
+                setSpotifySessionTokens($refresh);
+                $access_token = $refresh['access_token'];
+            }
+        }
+    }
+}
 
 if (!$access_token) {
     die('Error: No access token. Please log in first by visiting login.php');
 }
 
-// Search query based on cuisine or fallback text.
+// Build the Spotify search query from the requested cuisine
 $cuisine = trim($_GET['cuisine'] ?? 'indian');
 $search_query = $cuisine ?: 'indian';
 
@@ -18,7 +53,7 @@ $headers = [
     "Content-Type: application/json"
 ];
 
-// Find the first playlist matching the cuisine query.
+// Search Spotify for the first playlist that matches the cuisine
 $search_url = 'https://api.spotify.com/v1/search?' . http_build_query([
     'q' => $search_query,
     'type' => 'playlist',
@@ -50,7 +85,7 @@ if (!$playlist_uri) {
     die('Failed to resolve playlist URI from Spotify search result.');
 }
 
-// Look for an available Spotify Connect device.
+// Look for an available Spotify Connect device to send playback to
 $devices_url = 'https://api.spotify.com/v1/me/player/devices';
 $ch = curl_init($devices_url);
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -88,6 +123,7 @@ if (!$device_id) {
     die('No playable Spotify device ID found.');
 }
 
+// Request Spotify to start playback on the selected device with the playlist context
 $play_url = 'https://api.spotify.com/v1/me/player/play?' . http_build_query(['device_id' => $device_id]);
 $body = json_encode(['context_uri' => $playlist_uri]);
 
@@ -108,6 +144,6 @@ if ($http_code !== 204) {
     die("Spotify API error (HTTP $http_code): " . $response . ". Open Spotify on a device and make sure it is available for playback.");
 }
 
-echo 'Playing playlist for cuisine: ' . htmlspecialchars($search_query) . ' on device ' . htmlspecialchars($device_id) . '.';
+echo 'Playing playlist for cuisine: ' . htmlspecialchars($search_query) . '.';
 
 ?>
