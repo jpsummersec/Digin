@@ -109,8 +109,8 @@ function renderRecipe(recipe) {
 			<div class="recipe-content">
 				<h2>${title}</h2>
 				<div class="recipe-meta">
-					<span><span class="meta-bolt" aria-hidden="true"><img src = "../images/search-page/calories.png"></span>${calories}</span>
-					<span><span class="meta-clock" aria-hidden="true"><img src = "../images/search-page/time.png"></span>${time}</span>
+					<span><span class="meta-bolt" aria-hidden="true"><img src = "../images/search-page/calories.svg"></span>${calories}</span>
+					<span><span class="meta-clock" aria-hidden="true"><img src = "../images/search-page/time.svg"></span>${time}</span>
 				</div>
 				<div class="ingredients-block">
 					<h3>Ingredients</h3>

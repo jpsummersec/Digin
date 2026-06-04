@@ -13,19 +13,19 @@
     <main class="search-page">
         <div class="topbar">
             <button type="button" class="back-btn" aria-label="Back">
-                <img src="../images/search-page/arrow.png" alt="back">
+               <img src="../images/search-page/arrow.svg" alt="back-arrow">
             </button>
 
             <div class="search-wrap">
                 <button type="button" class="search-icon" id="searchButton" aria-label="Search recipes">
-                    <img src="../images/search-page/search.png" alt="">
+                    <img src="../images/search-page/search.svg" alt="search-button">
                 </button>
 
                 <input type="text" id="searchInput" placeholder="Search for recipes, cuisines..." />
             </div>
 
             <button type="button" class="filter-btn" id="filterBtn" aria-label="Open filters">
-                <img src="../images/search-page/filter.png" alt="">
+                <img src="../images/search-page/filter.svg" alt="filter-button">
             </button>
         </div>
 
@@ -48,48 +48,48 @@
 
                     <div class="chip-group preference-grid" id="diet" data-single-select="true">
                         <button type="button" class="preference-chip" data-value="vegan">
-                            <span class="preference-icon">V</span>
                             Vegan
+                            <img src="../images/search-page/vegan.svg" alt="vegan icon">
                         </button>
                         <button type="button" class="preference-chip" data-value="vegetarian">
-                            <span class="preference-icon">VG</span>
                             Vegetarian
+                            <img src="../images/search-page/vegeterian.svg" alt="vegeterian icon">
                         </button>
                         <button type="button" class="preference-chip" data-value="paleo">
-                            <span class="preference-icon">P</span>
                             Paleo
+                            <img src="../images/search-page/paleo.svg" alt="paleo icon">
                         </button>
                         <button type="button" class="preference-chip" data-value="ketogenic">
-                            <span class="preference-icon">K</span>
                             Keto
+                            <img src="../images/search-page/keto.svg" alt="keto icon">
                         </button>
                         <button type="button" class="preference-chip is-extra" data-value="gluten free">
-                            <span class="preference-icon">GF</span>
                             Gluten Free
+                            <img src="../images/search-page/gluten-free.svg" alt="gluten-free icon">
                         </button>
                         <button type="button" class="preference-chip is-extra" data-value="lacto-vegetarian">
-                            <span class="preference-icon">LV</span>
                             Lacto-Veg
+                            <img src="../images/search-page/lacto-veg.svg" alt="ovo-veg icon">
                         </button>
                         <button type="button" class="preference-chip is-extra" data-value="ovo-vegetarian">
-                            <span class="preference-icon">OV</span>
                             Ovo-Veg
+                            <img src="../images/search-page/ovo-veg.svg" alt="ovo-veg icon">
                         </button>
                         <button type="button" class="preference-chip is-extra" data-value="pescetarian">
-                            <span class="preference-icon">PS</span>
                             Pescetarian
+                            <img src="../images/search-page/pescetarian.svg" alt="pescetarian icon">
                         </button>
                         <button type="button" class="preference-chip is-extra" data-value="primal">
-                            <span class="preference-icon">PR</span>
                             Primal
+                            <img src="../images/search-page/primal.svg" alt="primal icon">
                         </button>
                         <button type="button" class="preference-chip is-extra" data-value="low fodmap">
-                            <span class="preference-icon">LF</span>
                             Low FODMAP
+                            <img src="../images/search-page/lowfodmap.svg" alt="Low FODMAP icon">
                         </button>
                         <button type="button" class="preference-chip is-extra" data-value="whole30">
-                            <span class="preference-icon">W30</span>
                             Whole30
+                            <img src="../images/search-page/whole30.svg" alt="Whole30 icon">
                         </button>
                     </div>
                 </section>
