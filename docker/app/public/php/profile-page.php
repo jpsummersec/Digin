@@ -2,6 +2,14 @@
 include __DIR__ . '/include-loginrequired.php';
 include __DIR__ . '/include-dbhandler.php';
 
+if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+	session_unset();
+	session_destroy();
+
+	header('Location: signin.php');
+	exit();
+}
+
 // Load the Spotify client ID from config.php.
 $config = require __DIR__ . '/config.php';
 $client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
@@ -155,6 +163,11 @@ if (isset($dbHandler)) {
 			<p>Cook with Spotify. Taste the vibe.</p>
 		</div>
 
+		<div class="logout">
+			<form action="profile-page.php?action=logout" method="post">
+				<button type="submit">Logout</button>
+			</form>
+		</div>
 
 	</body>
 

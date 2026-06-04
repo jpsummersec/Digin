@@ -167,3 +167,29 @@ hr {
   border-radius: var(--main-border-radius);
   margin-bottom: 1rem;
 }
+
+/* Logout */
+.logout {
+  display: flex;
+  justify-content: center;
+  margin-block: 1.5rem 3rem;
+}
+
+.logout form {
+  width: 100%;
+}
+
+.logout button {
+  width: 100%;
+  font-family: 'Inter-700-weight', var(--font);
+  font-size: 0.5rem;
+  cursor: pointer;
+  background-color: rgba(231, 77, 60, 0.75);
+  padding: 10px 10px;
+  color: var(--background);
+  border-radius: var(--main-border-radius);
+}
+
+.logout button:hover {
+  background-color: rgba(231, 77, 60, 1);;
+}
