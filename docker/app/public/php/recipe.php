@@ -1,4 +1,6 @@
 <?php
+    include("include.php");
+
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
 
@@ -29,7 +31,7 @@
     $id = (int) $_GET['id'];
     */
     
-    $id = 657933;
+    $id = 642540;
 
     $url = "https://api.spoonacular.com/recipes/$id/information?apiKey=$apiKey&includeNutrition=true";
 
@@ -76,7 +78,6 @@
     var_dump($recipe);
     exit;
     */
-    
 ?>
 
 <!DOCTYPE html>
@@ -170,6 +171,6 @@
         </div>
     </div>
 
-    <?php include("include2.php"); ?>
+    <?php include("footer.php"); ?>
 </body>
 </html>

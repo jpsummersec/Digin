@@ -18,9 +18,3 @@ try {
     die("Connection Error (PDOException): " . $ex->getMessage()); 
 }
 ?>
-
-<!DOCTYPE html>
-<footer>
-    &copy; 2026 NHL Stenden
-</footer>
-</html>

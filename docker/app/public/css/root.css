@@ -58,6 +58,9 @@ body {
     color: var(--primary-text);
     font-size: 1rem;
     background-color: var(--background);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .page-title {
@@ -73,4 +76,5 @@ footer {
     align-items: center;
     color: #C1C1C1;
     font-size: 0.7rem;
+    margin-top: auto;
 }
