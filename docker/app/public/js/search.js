@@ -11,7 +11,7 @@ const closeFilter = document.getElementById('closeFilter');
 const applyFilters = document.getElementById('applyFilters');
 const clearFilters = document.getElementById('clearFilters');
 
-const recipeDetailsUrl = '../src/recipe.php';
+const recipeDetailsUrl = '../php/recipe.php';
 
 function openFilter() {
 	filterPanel.classList.add('open');
