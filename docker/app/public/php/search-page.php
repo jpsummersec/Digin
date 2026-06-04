@@ -2,8 +2,7 @@
 include("include-loginrequired.php");
 
 
-echo "User ID: " . $_SESSION["user_id"] . "<br>";
-echo "Name: " . $_SESSION["first_name"] . "<br>";
+// echo "User ID: " . $_SESSION["user_id"] . "<br>";
 ?>
 
 <!DOCTYPE html>
