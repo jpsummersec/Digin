@@ -47,8 +47,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'login') {
     exit();
 }
 
-include __DIR__ . '/include.php';
-
+include __DIR__ . '/include-loginrequired.php';
+include __DIR__ . '/include-dbhandler.php';
 
 $userId = (int) $_SESSION['user_id'];
 $user = null;

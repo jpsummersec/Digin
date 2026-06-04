@@ -1,28 +1,12 @@
 <?php
+include __DIR__ . '/include-loginrequired.php';
+include __DIR__ . '/include-dbhandler.php';
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // tells header that JSON content is being returned
 header('Content-Type: application/json');
-
-$config = [];
-$configPath = __DIR__ . '/config.php';
-$MIN_SEARCH_RESULTS = 0;
-$MAX_SEARCH_RESULTS = 10;
-
-if (is_file($configPath)) {
-    $config = require $configPath;
-}
-
-if (isset($config['api_key'])) {
-    $apiKey = $config['api_key'];
-} else {
-    http_response_code(500);
-    echo json_encode([
-        'error' => 'Missing API key'
-    ]);
-    exit;
-}
 
 if (isset($_GET['query'])) {
     $query = trim($_GET['query']);
@@ -30,6 +14,19 @@ if (isset($_GET['query'])) {
 	http_response_code(400);
     echo json_encode([
         'error' => 'Missing search query'
+    ]);
+    exit;
+}
+
+include_once __DIR__ . '/include-spoonacular-api.php';
+
+$MIN_SEARCH_RESULTS = 0;
+$MAX_SEARCH_RESULTS = 10;
+
+if (empty($apiKeys)) {
+    http_response_code(500);
+    echo json_encode([
+        'error' => 'Missing API keys'
     ]);
     exit;
 }
@@ -63,18 +60,17 @@ if (isset($_GET['ingredientSearch']) && $_GET['ingredientSearch'] === 'true') {
 
 if ($ingredientSearch) {
 
-    $url = 'https://api.spoonacular.com/recipes/findByIngredients?' . http_build_query([
+    $baseUrl = 'https://api.spoonacular.com/recipes/findByIngredients';
+    $params = [
         'ingredients' => implode(',', preg_split('/[\s,]+/', trim($query))),
         'number' => $number,
-        'apiKey' => $apiKey,
-    ]);
+    ];
 
 } else {
 
     $params = [
         'query' => $query,
         'number' => $number,
-        'apiKey' => $apiKey,
         'addRecipeNutrition' => $addRecipeNutritionValue,
         'addRecipeInformation' => 'true',
         'fillIngredients' => 'true'
@@ -103,17 +99,15 @@ if ($ingredientSearch) {
     if ($sort !== '') {
         $params['sort'] = $sort;
     }
-    $url = 'https://api.spoonacular.com/recipes/complexSearch?' . http_build_query($params);
+    $baseUrl = 'https://api.spoonacular.com/recipes/complexSearch';
 }
 
-$response = file_get_contents($url);
+$response = spoonacularRequestWithKeyRotation($baseUrl, $params);
 
-if ($response === false) {
-    http_response_code(502);
-    echo json_encode([
-        'error' => 'Failed to fetch from Spoonacular'
-    ]);
+if (!$response['success']) {
+    http_response_code($response['status']);
+    echo $response['body'];
     exit;
 }
 
-echo $response;
+echo $response['body'];
