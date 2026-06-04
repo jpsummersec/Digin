@@ -1,7 +1,6 @@
 <?php
-session_start();
 
-include __DIR__ . '/include.php';
+include __DIR__ . '/include-dbhandler.php';
 
 $errors = [];
 
@@ -103,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             session_regenerate_id(true);
             $_SESSION['user_id'] = $newUserId;
 
-            header("Location: login.php");
+            header("Location: signin.php");
             exit;
         }
     }

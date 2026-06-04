@@ -1,3 +1,34 @@
+<?php
+include __DIR__ . '/include-dbhandler.php';
+
+$errors = [];
+
+$email = "";
+$password = "";
+
+if (isset($_POST["email"])) {
+    $email = trim($_POST["email"]);
+} else {
+    $email = "";
+}
+
+if (isset($_POST["password"])) {
+    $password = $_POST["password"];
+} else {
+    $password = "";
+}
+
+if ($email === "") {
+    $errors[] = "Email is required.";
+}
+
+if ($password === "") {
+    $errors[] = "Password is required.";
+}
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +41,7 @@
 </head>
 
 <body>
-    <form class="container signin-container" action="create-account.php" method="POST">
+    <form class="container signin-container" action="signin.php" method="POST">
         <h1 class="logo"><img src="../images/logoDigIn.svg" alt="logoDigIn" class="logoDigin"></h1>
         <img src="../images/burger.svg" alt="burger-icon" class="burger-icon">
         <h1>Sign in to continue to your account</h1>
@@ -31,7 +62,7 @@
         <p class="signin-text">
             Don't have an account?
         </p>
-        <a href="create-account.php" class="signup-btn">Sign in</a>
+        <a href="create-account.php" class="signup-btn">Sign up</a>
     </form>
 
     <script>
