@@ -3,7 +3,7 @@
 session_start();
 
 // Load Spotify credentials from config.php
-$config = require __DIR__ . '/../config.php';
+$config = require __DIR__ . '/config.php';
 $client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
 $client_secret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
 

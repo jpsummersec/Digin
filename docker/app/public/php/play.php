@@ -3,8 +3,7 @@
 session_start();
 
 // Load helper functions and Spotify app credentials
-require __DIR__ . '/spotify_helper.php';
-$config = require __DIR__ . '/../config.php';
+$config = require __DIR__ . '/config.php';
 $client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
 $client_secret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
 
