@@ -1,5 +1,6 @@
 <?php 
-session_start();
+include __DIR__ . '/include-loginrequired.php';
+include __DIR__ . '/include-dbhandler.php';
 
 // Load the Spotify client ID from config.php.
 $config = require __DIR__ . '/config.php';
@@ -46,9 +47,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'login') {
     header("Location: $authorize_url");
     exit();
 }
-
-include __DIR__ . '/include-loginrequired.php';
-include __DIR__ . '/include-dbhandler.php';
 
 $userId = (int) $_SESSION['user_id'];
 $user = null;
@@ -152,7 +150,7 @@ if (isset($dbHandler)) {
 
 		<div class="spotify">
 			<hr>
-			<img src="../images/profile-page/spotify-logo.png" alt="spotify-logo">
+			<img src="../images/profile-page/spotify-logo.svg" alt="spotify-logo">
 			<a href="?action=login" class="button">Connect to Spotify</a>
 			<p>Cook with Spotify. Taste the vibe.</p>
 		</div>
