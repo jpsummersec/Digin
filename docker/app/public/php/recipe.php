@@ -1,5 +1,6 @@
 <?php
-    include("include.php");
+    include("include-dbhandler.php");
+    include("include-loginrequired.php");
 
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
@@ -101,7 +102,7 @@
         </div>
     <?php else: ?>
         <div class="hero">
-            <img class="hero-image" src="../images/hero-image-fallback.png" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
+            <img class="hero-image" src="../images/hero-image-fallback.svg" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
         </div>
     <?php endif; ?>
     
@@ -112,11 +113,11 @@
             </div>
             <div id="recipe-data">
                 <div id ="calories-border">
-                    <img src="../images/recipe-page/bolt.png" alt="">
+                    <img src="../images/recipe-page/bolt.svg" alt="">
                     <?php echo htmlspecialchars($calories)?>
                 </div>
                 <div>
-                    <img src="../images/recipe-page/clock.png" alt="">
+                    <img src="../images/recipe-page/clock.svg" alt="">
                     <?php echo htmlspecialchars($recipe['readyInMinutes']) ?> minutes
                 </div> 
             </div>
