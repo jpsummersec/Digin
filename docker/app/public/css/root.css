@@ -67,7 +67,8 @@ body {
     font-size: 1.125rem;
     justify-self: center;
     font-family: 'Inter-600-weight';
-    margin-block: 5vh;
+    margin-block: 50px;
+    text-align: center;
 }
 
 footer {

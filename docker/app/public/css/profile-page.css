@@ -1,5 +1,5 @@
 body {
-  display: grid;
+  display: flex;
   padding-inline: 10%;
   padding-block: 0;
 }
@@ -42,8 +42,10 @@ body {
   grid-column: 1 / 2;
   grid-row: 1 / 4;
   width: 100px;
+  height: 100px;
   clip-path: circle(35%);
   margin-right: 7.5px;
+  align-self: center;
 }
 
 .profile-banner .profile-picture img {
