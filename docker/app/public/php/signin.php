@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 include __DIR__ . '/include-dbhandler.php';
 
 $errors = [];
@@ -46,6 +48,7 @@ if (empty($errors)) {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($password, $user["password_hash"])) {
+
         $_SESSION["user_id"] = $user["user_id"];
         $_SESSION["first_name"] = $user["first_name"];
         $_SESSION["last_name"] = $user["last_name"];
@@ -53,7 +56,7 @@ if (empty($errors)) {
         $_SESSION["level"] = $user["level"];
         $_SESSION["xp"] = $user["xp"];
 
-        header("Location: index.php");
+        header("Location: search-page.php");
         exit;
     } else {
         $errors[] = "Invalid email or password.";

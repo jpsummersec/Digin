@@ -1,3 +1,11 @@
+<?php
+include("include-loginrequired.php");
+
+
+echo "User ID: " . $_SESSION["user_id"] . "<br>";
+echo "Name: " . $_SESSION["first_name"] . "<br>";
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,7 +21,7 @@
     <main class="search-page">
         <div class="topbar">
             <button type="button" class="back-btn" aria-label="Back">
-               <img src="../images/search-page/arrow.svg" alt="back-arrow">
+                <img src="../images/search-page/arrow.svg" alt="back-arrow">
             </button>
 
             <div class="search-wrap">
