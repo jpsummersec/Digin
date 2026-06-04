@@ -133,3 +133,37 @@ hr {
   font-size: 0.8rem;
   margin-top: 25px;
 }
+
+/* Spotify */
+.spotify {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(217 217 217 / 30%);
+  border-radius: var(--main-border-radius);
+}
+
+.spotify p {
+  font-size: 0.65rem;
+  margin-bottom: 1rem;
+  font-family: 'Inter-regular';
+  color: var(--primary-dark);
+}
+
+.spotify img {
+  width: 9rem;
+  height: 4rem;
+  object-fit: contain;
+}
+
+.spotify a {
+  font-size: 1rem;
+  font-weight: bold;
+  text-decoration: none;
+  background-color: var(--success);
+  padding: 0.5rem;
+  color: var(--background);
+  border-radius: var(--main-border-radius);
+  margin-bottom: 1rem;
+}
