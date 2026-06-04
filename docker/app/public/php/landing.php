@@ -4,15 +4,15 @@
 $page_title = "DigIn – Cook Smarter. Eat Better. Every Day.";
 
 $nav_links = [
-  "Recipes"    => "#",
-  "Meal Plans" => "#",
+  "Recipes"    => "recipe.php",
+  "Search"     => "search-page.php",
   "Community"  => "#",
-  "Sign In"    => "#",
+  "Sign In"    => "signin.php",
 ];
 
 $hero_buttons = [
-  ["label" => "Get Started",    "class" => "btn-primary", "href" => "#"],
-  ["label" => "Browse Recipes", "class" => "btn-outline", "href" => "#"],
+  ["label" => "Get Started",    "class" => "btn-primary", "href" => "signin.php"],
+  ["label" => "Browse Recipes", "class" => "btn-outline", "href" => "recipe.php"],
 ];
 ?>
 <!DOCTYPE html>
