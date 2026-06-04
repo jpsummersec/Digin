@@ -13,6 +13,9 @@
   --muted: #9cac9f;
   --light: #f9faf8;
   --white: #ffffff;
+  --new-col: #f6f7f1;
+
+ 
 
   --radius-lg: 1.5rem;
   --radius-pill: 99px;
@@ -191,11 +194,9 @@ nav {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: .6rem;
-  background: var(--green-faint);
-  border: 1px solid var(--green-border);
-  border-radius: var(--radius-pill);
-  padding: .4rem 1rem;
+  background: var(--white);
+  border: 0;
+  padding: 0;
   margin-bottom: 1.5rem;
 }
 
