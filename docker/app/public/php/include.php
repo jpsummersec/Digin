@@ -1,15 +1,9 @@
 <?php
-// // Start PHP session if not already set
-// if (session_status() === PHP_SESSION_NONE) {
-//     session_start();
-// }
-
-// // If user not logged, in, give 401 error
-// if (!isset($_SESSION['user_id'])) {
-//     http_response_code(401);
-//     echo "<h1>You must log in first<h1>";
-//     exit;
-// }
+session_start();
+if (!isset($_SESSION['user_id'])) {
+	header('Location: signin.php');
+	exit;
+}
 
 // Create dbHandler
 $host = 'mysql';

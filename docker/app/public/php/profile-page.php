@@ -1,7 +1,8 @@
-<?php 
+<?php
 include __DIR__ . '/include.php';
 
-$userId = 1;
+
+$userId = (int) $_SESSION['user_id'];
 $user = null;
 $achievements = [];
 
