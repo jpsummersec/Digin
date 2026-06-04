@@ -1,4 +1,3 @@
-
 <?php
 $host = 'mysql';
 $username = 'root';
@@ -11,4 +10,3 @@ try {
 } catch (PDOException $ex) {
     die("Connection Error (PDOException): " . $ex->getMessage());
 }
-?>

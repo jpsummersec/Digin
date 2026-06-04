@@ -26,6 +26,39 @@ if ($password === "") {
     $errors[] = "Password is required.";
 }
 
+if (empty($errors)) {
+
+    $stmt = $dbHandler->prepare("
+            SELECT user_id,
+                   first_name,
+                   last_name,
+                   email_address,
+                   password_hash,
+                   level,
+                   xp
+            FROM user
+            WHERE email_address = ?
+        ");
+
+
+    $stmt->execute([$email]);
+
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && password_verify($password, $user["password_hash"])) {
+        $_SESSION["user_id"] = $user["user_id"];
+        $_SESSION["first_name"] = $user["first_name"];
+        $_SESSION["last_name"] = $user["last_name"];
+        $_SESSION["email"] = $user["email_address"];
+        $_SESSION["level"] = $user["level"];
+        $_SESSION["xp"] = $user["xp"];
+
+        header("Location: index.php");
+        exit;
+    } else {
+        $errors[] = "Invalid email or password.";
+    }
+}
 
 ?>
 

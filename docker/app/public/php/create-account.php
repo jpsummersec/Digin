@@ -96,13 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $hashedPassword
             ]);
 
-
-            $newUserId = (int) $dbHandler->lastInsertId();
-
-            session_regenerate_id(true);
-            $_SESSION['user_id'] = $newUserId;
-
-            header("Location: signin.php");
+            header("Location: redirect.php");
             exit;
         }
     }

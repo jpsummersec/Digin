@@ -1,9 +1,10 @@
 <?php
-    include("include.php");
+include("include-dbhandler.php");
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="../css/root.css">
     <link rel="stylesheet" href="../css/redirect.css">
 </head>
+
 <body>
     <div id="redirect-container">
         <p id="thank-you">Thank you for</p>
@@ -25,17 +27,16 @@
 
         const countdown = document.getElementById('countdown');
 
-        const interval = setInterval(function()
-        {
+        const interval = setInterval(function() {
             seconds--;
             countdown.textContent = seconds;
 
-            if (seconds <= 0)
-            {
+            if (seconds <= 0) {
                 clearInterval(interval);
                 window.location.href = 'search-page.php';
             }
         }, 1000);
     </script>
 </body>
+
 </html>
