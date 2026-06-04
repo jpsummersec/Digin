@@ -1,25 +1,15 @@
 <?php
     include("include-dbhandler.php");
     include("include-loginrequired.php");
+    include_once __DIR__ . '/include-spoonacular-api.php';
 
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
 
-
-    $config = [];
-    $configPath = __DIR__ . '/../test/php/config.php';
-
-
-    if (is_file($configPath)) {
-        $config = require $configPath;
-    }
-
-    if (isset($config['api_key'])) {
-        $apiKey = $config['api_key'];
-    } else {
+    if (empty($apiKeys)) {
         http_response_code(500);
         echo json_encode([
-            'error' => 'Missing API key'
+            'error' => 'Missing API keys'
         ]);
         exit;
     }
@@ -34,15 +24,15 @@
     
     $id = 642540;
 
-    $url = "https://api.spoonacular.com/recipes/$id/information?apiKey=$apiKey&includeNutrition=true";
+    $responseData = spoonacularRequestWithKeyRotation("https://api.spoonacular.com/recipes/$id/information", [
+        'includeNutrition' => 'true',
+    ]);
 
-    $response = file_get_contents($url);
-
-    if ($response === false) {
+    if (!$responseData['success']) {
         die('Failed to fetch recipe');
     }
 
-    $recipe = json_decode($response, true);
+    $recipe = json_decode($responseData['body'], true);
 
     $calories = 'N/A';
 
