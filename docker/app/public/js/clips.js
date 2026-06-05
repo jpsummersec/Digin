@@ -1,9 +1,7 @@
 
 const ramsayInsults = [
-  { text: "IT'S RAWWWW!", file: "/assets/audio/raw.mp3" },
-  { text: "You absolute idiot sandwich!", file: "/assets/audio/idiot-sandwich.mp3" },
-  { text: "This is a total disaster! Shut it down!", file: "/assets/audio/disaster.mp3" },
-  { text: "Wake up! You're moving like a snail!", file: "/assets/audio/wake-up.mp3" }
+  { text: "I don`t know what kind of herb from jemaica you`ve been smorking", file:"../audio/herbs.mp3" }
+  
 ];
 
 let cookingTimerInstance = null;
