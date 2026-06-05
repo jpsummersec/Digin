@@ -8,29 +8,31 @@ $errors = [];
 $email = "";
 $password = "";
 
-if (isset($_POST["email"])) {
-    $email = trim($_POST["email"]);
-} else {
-    $email = "";
-}
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-if (isset($_POST["password"])) {
-    $password = $_POST["password"];
-} else {
-    $password = "";
-}
+    if (isset($_POST["email"])) {
+        $email = trim($_POST["email"]);
+    } else {
+        $email = "";
+    }
 
-if ($email === "") {
-    $errors[] = "Email is required.";
-}
+    if (isset($_POST["password"])) {
+        $password = $_POST["password"];
+    } else {
+        $password = "";
+    }
 
-if ($password === "") {
-    $errors[] = "Password is required.";
-}
+    if ($email === "") {
+        $errors[] = "Email is required.";
+    }
 
-if (empty($errors)) {
+    if ($password === "") {
+        $errors[] = "Password is required.";
+    }
 
-    $stmt = $dbHandler->prepare("
+    if (empty($errors)) {
+
+        $stmt = $dbHandler->prepare("
             SELECT user_id,
                    first_name,
                    last_name,
@@ -43,23 +45,24 @@ if (empty($errors)) {
         ");
 
 
-    $stmt->execute([$email]);
+        $stmt->execute([$email]);
 
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && password_verify($password, $user["password_hash"])) {
+        if ($user && password_verify($password, $user["password_hash"])) {
 
-        $_SESSION["user_id"] = $user["user_id"];
-        $_SESSION["first_name"] = $user["first_name"];
-        $_SESSION["last_name"] = $user["last_name"];
-        $_SESSION["email"] = $user["email_address"];
-        $_SESSION["level"] = $user["level"];
-        $_SESSION["xp"] = $user["xp"];
+            $_SESSION["user_id"] = $user["user_id"];
+            $_SESSION["first_name"] = $user["first_name"];
+            $_SESSION["last_name"] = $user["last_name"];
+            $_SESSION["email"] = $user["email_address"];
+            $_SESSION["level"] = $user["level"];
+            $_SESSION["xp"] = $user["xp"];
 
-        header("Location: search-page.php");
-        exit;
-    } else {
-        $errors[] = "Invalid email or password.";
+            header("Location: search-page.php");
+            exit;
+        } else {
+            $errors[] = "Invalid email or password.";
+        }
     }
 }
 
@@ -81,6 +84,18 @@ if (empty($errors)) {
         <h1 class="logo"><img src="../images/digin_logo.svg" alt="logoDigIn" class="logoDigin"></h1>
         <img src="../images/burger.svg" alt="burger-icon" class="burger-icon">
         <h1>Sign in to continue to your account</h1>
+
+        <?php
+        if (!empty($errors)) {
+            echo '<div class="error-message">';
+
+            foreach ($errors as $error) {
+                echo htmlspecialchars($error) . '<br>';
+            }
+
+            echo '</div>';
+        }
+        ?>
 
         <div class="input-box">
             <img src="../images/emailIcon.svg" alt="email-icon" class="input-icon">
