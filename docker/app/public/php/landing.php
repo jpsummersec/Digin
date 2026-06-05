@@ -1,14 +1,18 @@
 <?php
+include __DIR__ . '/include-dbhandler.php';
+
 //  DigIn  –  index.php
 
 $page_title = "DigIn – Cook Smarter. Eat Better. Every Day.";
 
 $nav_links = [
-  "Recipes"    => "recipe.php",
+
   "Search"     => "search-page.php",
-  "Community"  => "#",
+  "Recipes"    => "recipe.php",
+  "Profile"  => "profile-page.php",
   "Sign In"    => "signin.php",
 ];
+
 
 $hero_buttons = [
   ["label" => "Get Started",    "class" => "btn-primary", "href" => "signin.php"],
@@ -33,7 +37,7 @@ $hero_buttons = [
       <div class="nav-inner">
 
         <a href="#" class="logo">
-          <img src="../images/logoDigIn.svg" alt="DigIn" />
+          <img src="../images/digin_logo.svg" alt="DigIn" />
         </a>
 
         <ul class="nav-links">
@@ -71,7 +75,7 @@ $hero_buttons = [
           <div class="hero-content">
 
             <div class="badge">
-              <img src="../images/badge.png" alt="Cook. Share. Enjoy" />
+              <img src="../images/badge.svg" alt="Cook. Share. Enjoy" />
             </div>
 
             <h1 class="headline">
@@ -120,11 +124,11 @@ $hero_buttons = [
             <div class="blob blob-peach" aria-hidden="true"></div>
 
             <div class="hero-photo">
-              <img src="../images/hero-food.png" alt="Various delicious meals prepared with DigIn" />
+              <img src="../images/hero-food.svg" alt="Various delicious meals prepared with DigIn" />
             </div>
 
             <div class="photo-label">
-              <img src="../images/logoDigIn.svg" alt="DigIn" />
+              <img src="../images/digin_logo.svg" alt="DigIn" />
             </div>
           </div>
 
@@ -138,7 +142,7 @@ $hero_buttons = [
         <div class="features-strip">
 
           <div class="feat">
-            <img src="../images/image 18.svg" alt="Easy Recipes" />
+            <img src="../images/cooking_book.svg" alt="Easy Recipes" />
             <div class="feat-text">
               <strong>Easy Recipes</strong>
               <span>Simple steps, delicious result</span>
@@ -146,7 +150,7 @@ $hero_buttons = [
           </div>
 
           <div class="feat">
-            <img src="../images/image 22.svg" alt="Meal Plans" />
+            <img src="../images/menu_card.svg" alt="Menu card" />
             <div class="feat-text">
               <strong>Meal Plans</strong>
               <span>Personalized plans for your lifestyle</span>
@@ -162,7 +166,7 @@ $hero_buttons = [
           </div>
 
           <div class="feat">
-            <img src="../images/chif.svg" alt="Eat Better" />
+            <img src="../images/chef2.svg" alt="Eat Better" />
             <div class="feat-text">
               <strong>Eat Better</strong>
               <span>Healthier choices for a better you</span>
