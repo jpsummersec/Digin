@@ -87,6 +87,17 @@ function getIngredients(recipe) {
 		.filter(Boolean);
 }
 
+function getStarRating(recipe) {
+	const maxStars = 5;
+	const rawScore = Number(recipe.spoonacularScore) || 0;
+	const starScore = Math.min(Math.max(rawScore / 20, 0), maxStars);
+	const fullStars = Math.round(starScore);
+	return Array.from({ length: maxStars }, (_, index) => {
+		const className = index < fullStars ? 'rating-star is-filled' : 'rating-star is-empty';
+		return `<span class="${className}" aria-hidden="true">⭐</span>`;
+	}).join('');
+}
+
 function renderRecipe(recipe) {
 	const id = encodeURIComponent(recipe.id);
 	const title = escapeHtml(recipe.title || 'Untitled recipe');
@@ -94,6 +105,7 @@ function renderRecipe(recipe) {
 	const time = recipe.readyInMinutes ? `${recipe.readyInMinutes} minutes` : '- minutes';
 	const calories = escapeHtml(getCalories(recipe));
 	const ingredients = getIngredients(recipe);
+	const rating = getStarRating(recipe);
 	const previewIngredients = ingredients.slice(0, 6);
 	const hasMoreIngredients = ingredients.length > previewIngredients.length;
 	const ingredientItems = previewIngredients
@@ -107,7 +119,7 @@ function renderRecipe(recipe) {
 		<a class="recipe-link" href="${recipeDetailsUrl}?id=${id}">
 			<img class="recipe-image" src="${image}" alt="${title}" loading="lazy">
 			<div class="recipe-content">
-				<h2>${title}</h2>
+				<h2>${title}<span class="meta-rating" aria-hidden="true">${rating}</span></h2>
 				<div class="recipe-meta">
 					<span><span class="meta-bolt" aria-hidden="true"><img src = "../images/search-page/calories.svg"></span>${calories}</span>
 					<span><span class="meta-clock" aria-hidden="true"><img src = "../images/search-page/time.svg"></span>${time}</span>

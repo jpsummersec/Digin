@@ -19,6 +19,7 @@ function spoonacularParseStatusCode(array $headers): int
         return 0;
     }
 
+    // Gets status code that starts with "HTTP"
     if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $headers[0], $matches)) {
         return (int) $matches[1];
     }
@@ -50,41 +51,66 @@ function spoonacularRequestWithKeyRotation(string $baseUrl, array $params): arra
 
         $url = $baseUrl . '?' . http_build_query($requestParams);
 
-        $context = stream_context_create([
-            'http' => [
-                'ignore_errors' => true,
-                'timeout' => 10,
-            ],
-        ]);
+        $httpOptions = [];
+        $httpOptions['ignore_errors'] = true;
+        $httpOptions['timeout'] = 10;
+
+        $contextOptions = [];
+        $contextOptions['http'] = $httpOptions;
+
+        $context = stream_context_create($contextOptions);
 
         $response = @file_get_contents($url, false, $context);
-        $statusCode = spoonacularParseStatusCode($http_response_header ?? []);
+        $lastResponseHeaders = http_get_last_response_headers();
+        if (is_array($lastResponseHeaders)) {
+            $responseHeaders = $lastResponseHeaders;
+        } else {
+            $responseHeaders = [];
+        }
+
+        $statusCode = spoonacularParseStatusCode($responseHeaders);
         $networkFailure = $response === false;
 
         if (!$networkFailure && $statusCode >= 200 && $statusCode < 300) {
-            return [
-                'success' => true,
-                'status' => $statusCode,
-                'body' => $response,
-            ];
+            $successResult = [];
+            $successResult['success'] = true;
+            $successResult['status'] = $statusCode;
+            $successResult['body'] = $response;
+
+            return $successResult;
         }
 
         if (!spoonacularShouldTryNextKey($statusCode, $networkFailure)) {
-            return [
-                'success' => false,
-                'status' => $statusCode > 0 ? $statusCode : 502,
-                'body' => $response !== false ? $response : json_encode([
-                    'error' => 'Failed to fetch from Spoonacular',
-                ]),
-            ];
+            if ($statusCode > 0) {
+                $failedStatusCode = $statusCode;
+            } else {
+                $failedStatusCode = 502;
+            }
+
+            if ($response !== false) {
+                $failedBody = $response;
+            } else {
+                $errorBody = [];
+                $errorBody['error'] = 'Failed to fetch from Spoonacular';
+                $failedBody = json_encode($errorBody);
+            }
+
+            $failedResult = [];
+            $failedResult['success'] = false;
+            $failedResult['status'] = $failedStatusCode;
+            $failedResult['body'] = $failedBody;
+
+            return $failedResult;
         }
     }
 
-    return [
-        'success' => false,
-        'status' => 502,
-        'body' => json_encode([
-            'error' => 'Failed to fetch from Spoonacular',
-        ]),
-    ];
+    $errorBody = [];
+    $errorBody['error'] = 'Failed to fetch from Spoonacular';
+
+    $failedResult = [];
+    $failedResult['success'] = false;
+    $failedResult['status'] = 502;
+    $failedResult['body'] = json_encode($errorBody);
+
+    return $failedResult;
 }

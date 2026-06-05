@@ -149,6 +149,9 @@ button {
 }
 
 .recipe-content h2 {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
   margin-bottom: 0.28rem;
   color: var(--primary-text);
   font-family: 'Inter-700-weight', var(--font);
@@ -171,6 +174,24 @@ button {
   align-items: center;
   gap: 0.25rem;
   min-width: 0;
+}
+
+.meta-rating {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: fit-content;
+  gap: 0.06rem;
+}
+
+.rating-star {
+  display: inline-block;
+  min-width: auto;
+  line-height: 1;
+}
+
+.rating-star.is-empty {
+  filter: grayscale(1);
+  opacity: 0.28;
 }
 
 .meta-bolt {

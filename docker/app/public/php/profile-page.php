@@ -12,7 +12,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 
 // Load the Spotify client ID from config.php.
 $config = require __DIR__ . '/config.php';
-$client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
+if (isset($config['SPOTIFY_CLIENT_ID'])) {
+    $client_id = $config['SPOTIFY_CLIENT_ID'];
+} else {
+    $client_id = null;
+}
 
 if (!$client_id) {
     die('Error: SPOTIFY_CLIENT_ID not found in config.php');
@@ -23,10 +27,25 @@ $redirect_uri = $config['SPOTIFY_REDIRECT_URI'];
 // Ensure the page is loaded from the same host as the Spotify redirect URI.
 $expected_host = parse_url($redirect_uri, PHP_URL_HOST);
 $expected_port = parse_url($redirect_uri, PHP_URL_PORT);
-$expected_host_with_port = $expected_host . ($expected_port ? ':' . $expected_port : '');
-$current_host = $_SERVER['HTTP_HOST'] ?? '';
+if ($expected_port) {
+    $expected_port_text = ':' . $expected_port;
+} else {
+    $expected_port_text = '';
+}
+
+$expected_host_with_port = $expected_host . $expected_port_text;
+if (isset($_SERVER['HTTP_HOST'])) {
+    $current_host = $_SERVER['HTTP_HOST'];
+} else {
+    $current_host = '';
+}
+
 if ($current_host !== $expected_host_with_port) {
-    $scheme = parse_url($redirect_uri, PHP_URL_SCHEME) ?: 'http';
+    $scheme = parse_url($redirect_uri, PHP_URL_SCHEME);
+    if (!$scheme) {
+        $scheme = 'http';
+    }
+
     $redirect_url = $scheme . '://' . $expected_host_with_port . $_SERVER['REQUEST_URI'];
     header('Location: ' . $redirect_url);
     exit();
@@ -40,14 +59,15 @@ $_SESSION['spotify_state'] = $state;
 // These scopes let us read playback state and start playback.
 $scope = "user-read-playback-state user-modify-playback-state";
 
-$params = http_build_query([
-    "response_type" => "code",
-    "client_id" => $client_id,
-    "scope" => $scope,
-    "redirect_uri" => $redirect_uri,
-    "state" => $state,
-    "show_dialog" => "true" // Keep the login prompt visible for fresh auth.
-]);
+$spotifyParams = [];
+$spotifyParams["response_type"] = "code";
+$spotifyParams["client_id"] = $client_id;
+$spotifyParams["scope"] = $scope;
+$spotifyParams["redirect_uri"] = $redirect_uri;
+$spotifyParams["state"] = $state;
+$spotifyParams["show_dialog"] = "true"; // Keep the login prompt visible for fresh auth.
+
+$params = http_build_query($spotifyParams);
 
 $authorize_url = "https://accounts.spotify.com/authorize?$params";
 
@@ -107,10 +127,10 @@ if (isset($dbHandler)) {
 		<h1 class="page-title">Your Profile</h1>
 		<div class="profile-banner">
 			<div class="profile-picture">
-				<img src="<?= '../' . htmlspecialchars($user['path_to_icon']) ?>" alt="Profile Picture">
+				<img src="<?php echo '../' . htmlspecialchars($user['path_to_icon']); ?>" alt="Profile Picture">
 			</div>
-			<h1><?= htmlspecialchars($user['first_name']) . ' ' . htmlspecialchars($user['last_name']) ?></h1>
-			<h2><?= htmlspecialchars($user['email_address']) ?></h2>
+			<h1><?php echo htmlspecialchars($user['first_name']) . ' ' . htmlspecialchars($user['last_name']); ?></h1>
+			<h2><?php echo htmlspecialchars($user['email_address']); ?></h2>
 
 			<?php
 			$currentXp = $user['xp'];
@@ -122,30 +142,30 @@ if (isset($dbHandler)) {
 			?>
 
 			<div class="xp-bar">
-				<div class="xp-bar-fill" style="width: <?= $progressPercent ?>%;"></div>
+				<div class="xp-bar-fill" style="width: <?php echo $progressPercent; ?>%;"></div>
 			</div>
 
 			<h3 class="xp-progress">
-				<?= $currentXp ?> / <?= $xpToNextLevel ?> XP
+				<?php echo $currentXp; ?> / <?php echo $xpToNextLevel; ?> XP
 			</h3>
 
-			<h3 class="level-counter">Level <?= $currentLevel ?></h3>
+			<h3 class="level-counter">Level <?php echo $currentLevel; ?></h3>
 		</div>
 
 		<div class="achievements">
 			<h2>Achievements</h2>
 
-			<?php if (empty($achievements)): ?>
+			<?php if (empty($achievements)) { ?>
 				<p class="empty-achievements">No achievements yet.</p>
-			<?php else: ?>
+			<?php } else { ?>
 				<div class="achievement-list">
-					<?php foreach ($achievements as $achievement): ?>
+					<?php foreach ($achievements as $achievement) { ?>
 						<div class="achievement-item">
-							<img src="<?= htmlspecialchars($achievement['path_to_icon']) ?>" alt="<?= htmlspecialchars($achievement['achievement_name']) ?>">
+							<img src="<?php echo htmlspecialchars($achievement['path_to_icon']); ?>" alt="<?php echo htmlspecialchars($achievement['achievement_name']); ?>">
 						</div>
-					<?php endforeach; ?>
+					<?php } ?>
 				</div>
-			<?php endif; ?>
+			<?php } ?>
 			<hr>
 		</div>
 
