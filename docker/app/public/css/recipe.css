@@ -153,6 +153,11 @@ body {
     padding: 20px 0px;
 }
 
+#button a {
+    display: inline-block;
+    text-decoration: none;
+}
+
 #cooking-button {
     background-color: var(--success);
     color: var(--background);
@@ -161,7 +166,6 @@ body {
     border-radius: var(--main-border-radius);
     font-size: 1rem;
     cursor: pointer;
-    width: 50%;
     transition: background-color 0.3s ease-in-out;
 }
 

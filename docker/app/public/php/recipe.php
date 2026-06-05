@@ -173,6 +173,7 @@
                 <button class="toggle-btn" onclick="toggleIngredients()">View All</button>
             <?php endif; ?>
         </div>
+        
         <div id="steps">
             <h2>Steps</h2>
             <?php
@@ -200,7 +201,11 @@
             <?php endif; ?>            
         </div>
         <div id="button">
-            <button id="cooking-button">Start Cooking</button>
+            <a href="steps.php?id=<?php echo htmlspecialchars($id); ?>">
+                <button id="cooking-button">
+                    Start Cooking
+                </button>
+            </a>
         </div>
     </div>
 
