@@ -1,5 +1,5 @@
 <?php
-include("include-loginrequired.php");
+require_once __DIR__ . '/include-loginrequired.php';
 
 
 // echo "User ID: " . $_SESSION["user_id"] . "<br>";

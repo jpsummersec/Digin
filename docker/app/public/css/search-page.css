@@ -149,9 +149,6 @@ button {
 }
 
 .recipe-content h2 {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
   margin-bottom: 0.28rem;
   color: var(--primary-text);
   font-family: 'Inter-700-weight', var(--font);
@@ -177,8 +174,10 @@ button {
 }
 
 .meta-rating {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.55rem;
   display: inline-flex;
-  flex-shrink: 0;
   width: fit-content;
   gap: 0.06rem;
 }
@@ -222,25 +221,6 @@ button {
 .ingredients li {
   margin-bottom: 0.08rem;
   overflow-wrap: anywhere;
-}
-
-.recipe-cta {
-  position: absolute;
-  right: 0.7rem;
-  bottom: 0.55rem;
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.3rem;
-  max-width: calc(100% - 1.4rem);
-  padding: 0.22rem 0.48rem;
-  border-radius: 0.25rem;
-  background: #b9e5c1;
-  color: var(--primary);
-  font-family: 'Inter-500-weight', var(--font);
-  font-size: clamp(0.64rem, 2.2vw, 0.76rem);
-  font-style: italic;
-  line-height: 1;
-  white-space: nowrap;
 }
 
 .status-message,

@@ -119,7 +119,7 @@ function renderRecipe(recipe) {
 		<a class="recipe-link" href="${recipeDetailsUrl}?id=${id}">
 			<img class="recipe-image" src="${image}" alt="${title}" loading="lazy">
 			<div class="recipe-content">
-				<h2>${title}<span class="meta-rating" aria-hidden="true">${rating}</span></h2>
+				<h2>${title}</h2>
 				<div class="recipe-meta">
 					<span><span class="meta-bolt" aria-hidden="true"><img src = "../images/search-page/calories.svg"></span>${calories}</span>
 					<span><span class="meta-clock" aria-hidden="true"><img src = "../images/search-page/time.svg"></span>${time}</span>
@@ -131,7 +131,7 @@ function renderRecipe(recipe) {
 						${hasMoreIngredients ? '<li>...</li>' : ''}
 					</ul>
 				</div>
-				<span class="recipe-cta">To Recipe</span>
+				<span class="meta-rating" aria-hidden="true">${rating}</span>
 			</div>
 		</a>
 	`;

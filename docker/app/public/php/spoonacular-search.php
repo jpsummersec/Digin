@@ -1,6 +1,6 @@
 <?php
-include __DIR__ . '/include-loginrequired.php';
-include __DIR__ . '/include-dbhandler.php';
+require_once __DIR__ . '/include-loginrequired.php';
+require_once __DIR__ . '/include-dbhandler.php';
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -20,7 +20,7 @@ if (isset($_GET['query'])) {
     exit;
 }
 
-include_once __DIR__ . '/include-spoonacular-api.php';
+require_once __DIR__ . '/include-spoonacular-api.php';
 
 $MIN_SEARCH_RESULTS = 0;
 $MAX_SEARCH_RESULTS = 10;

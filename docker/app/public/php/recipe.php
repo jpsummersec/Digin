@@ -1,7 +1,7 @@
 <?php
-    include("include-dbhandler.php");
-    include("include-loginrequired.php");
-    include_once __DIR__ . '/include-spoonacular-api.php';
+    require_once __DIR__ . '/include-loginrequired.php';
+    require_once __DIR__ . '/include-dbhandler.php';
+    require_once __DIR__ . '/include-spoonacular-api.php';
 
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
@@ -204,7 +204,7 @@
         </div>
     </div>
 
-    <?php include("footer.php"); ?>
+    <?php require_once __DIR__ . '/footer.php'; ?>
 
     <script>
     function toggleDesc()
