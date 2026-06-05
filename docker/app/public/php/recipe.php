@@ -61,10 +61,13 @@
     $ingredients = $recipe['extendedIngredients'];
     $previewIngredients = array_slice($ingredients, 0, 5);
 
-    /*
-    var_dump($recipe);
-    exit;
-    */
+    $descriptionWords = explode(' ', strip_tags($recipe['summary'])); //store description as an array of words
+    $shortDescription = implode(' ', array_slice($descriptionWords, 0, 27)); //short version -> the first 27 words
+    $longDescription = strip_tags($recipe['summary']);
+    $descriptionTruncated = count($descriptionWords) > 27; //how many words are there after the initial 27
+
+    $previewSteps = array_slice($steps, 0, 3); //preview steps -> the first 3 steps
+    $stepsTruncated = count($steps) > 3; //how many steps are there after the initial 3
 ?>
 
 <!DOCTYPE html>
@@ -108,7 +111,16 @@
                 </div> 
             </div>
             <div id="recipe-description">
-                <?php echo htmlspecialchars(strip_tags($recipe['summary'])); ?>
+                <span id="desc-short">
+                    <?php
+                        echo htmlspecialchars($shortDescription);
+                        echo $descriptionTruncated ? '...' : '';
+                    ?>
+                </span>
+                <?php if ($descriptionTruncated): ?>
+                    <span id="desc-full" style="display:none;"><?php echo htmlspecialchars($longDescription); ?></span>
+                    <br><button class="toggle-btn" onclick="toggleDesc()">View all</button>
+                <?php endif; ?>
             </div>
             <div id="recipe-tags">
                 Tags: 
@@ -117,47 +129,132 @@
 
                     foreach ($tags as $tag) {
                         echo "<span class='tag'>" . htmlspecialchars(ucfirst($tag)) . "</span>";
-                    }
+                    };
                 ?>
             </div>
         </div>
         <div id="ingredients">
             <h2><ul>Ingredients</ul></h2>
             <div id="ingredients-container">
-                <div id="ingredient-details">
-                    <?php foreach ($ingredients as $ingredient) {
+                <div class="ingredient-details">
+                    <?php
+                        foreach ($previewIngredients as $ingredient) {
                             echo "<li class='ingredient'>" . htmlspecialchars(ucfirst($ingredient['name'])) . "</li>";
                         };
-                    ?>
+                        
+                        if (count($ingredients) > 5): ?>
+                        <div id="ingredient-names-extra" style="display:none;">
+                            <?php
+                                foreach (array_slice($ingredients, 5) as $ingredient) {
+                                    echo "<li class='ingredient'>" . htmlspecialchars(ucfirst($ingredient['name'])) . "</li>";
+                                };
+                            ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
-                <div id="ingredient-details">
-                    <?php foreach ($ingredients as $ingredient) {
-                            echo "<li class='amount'>" . htmlspecialchars(ucfirst($ingredient['amount'])) . " " . htmlspecialchars(ucfirst($ingredient['unit'])) . "</li>";
+                <div class="ingredient-details">
+                    <?php
+                        foreach ($previewIngredients as $ingredient) {
+                            echo "<li class='amount'>" . htmlspecialchars(ucfirst($ingredient['amount'])) . " " . htmlspecialchars($ingredient['unit']) . "</li>";
                         };
-                    ?>
+
+                        if (count($ingredients) > 5) : ?>
+                        <div id="ingredient-amounts-extra" style="display:none;">
+                            <?php
+                                foreach (array_slice($ingredients, 5) as $ingredient) {
+                                    echo "<li class='amount'>" . htmlspecialchars($ingredient['amount']) . " " . htmlspecialchars($ingredient['unit']) . "</li>";
+                                };
+                            ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
+            <?php if (count($ingredients) > 5): ?>
+                <button class="toggle-btn" onclick="toggleIngredients()">View All</button>
+            <?php endif; ?>
         </div>
         <div id="steps">
             <h2>Steps</h2>
-            <?php foreach ($steps as $step) {
+            <?php
+                foreach ($previewSteps as $step) {
                     echo "<div class='step'>";
-                        echo "<h3 class='step-title'> Step " . $step['number'] . "</h3>";
+                        echo "<h3 class='step-title'>Step " . $step['number'] . "</h3>";
                         echo "<div class='step-description'>";
                             echo htmlspecialchars(strip_tags($step['step']));
                         echo "</div>";
                     echo "</div>";
-                }
-            ?>
-            
+                };
+                
+                if ($stepsTruncated): ?>
+                <div id="steps-extra" style="display:none;">
+                    <?php
+                        foreach (array_slice($steps, 3) as $step) {
+                            echo "<div class='step'>";
+                                echo "<h3 class='step-title'>Step ". $step['number'] . "</h3>";
+                                echo "<div class='step-description'>" . htmlspecialchars(strip_tags($step['step'])) . "</div>";
+                            echo "</div>";
+                        };
+                    ?>
+                </div>
+                <button class="toggle-btn" id="steps-btn" onclick="toggleSteps()">View All</button>
+            <?php endif; ?>            
         </div>
         <div id="button">
-            <button id="cooking-button">
-                Start Cooking
-            </button>
+            <button id="cooking-button">Start Cooking</button>
         </div>
     </div>
 
     <?php include("footer.php"); ?>
+
+    <script>
+    function toggleDesc()
+    {
+        const short = document.getElementById('desc-short');
+        const full = document.getElementById('desc-full');
+        const btn = event.target;
+
+        if (full.style.display === 'none')
+        {
+            short.style.display = 'none';
+            full.style.display = 'inline';
+            btn.textContent = 'View less';
+        }
+        else
+        {
+            short.style.display = 'inline';
+            full.style.display = 'none';
+            btn.textContent = 'View all';
+        }
+    }
+
+    function toggleIngredients()
+    {
+        const namesExtra = document.getElementById('ingredient-names-extra');
+        const amountsExtra = document.getElementById('ingredient-amounts-extra');
+        const btn = event.target;
+
+        const isHidden = namesExtra.style.display === 'none';
+        namesExtra.style.display = isHidden ? 'contents' : 'none';
+        amountsExtra.style.display = isHidden ? 'contents' : 'none';
+        btn.textContent = isHidden ? 'View less' : 'View all';
+    }
+
+    function toggleSteps()
+    {
+        const extra = document.getElementById('steps-extra');
+        const btn = document.getElementById('steps-btn');
+
+        if (extra.style.display === 'none')
+        {
+            extra.style.display = 'block';
+            btn.textContent = 'View less';
+        }
+        else
+        {
+            extra.style.display = 'none';
+            btn.textContent = 'View all';
+        }
+    }
+</script>
 </body>
 </html>

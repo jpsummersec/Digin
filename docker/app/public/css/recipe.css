@@ -112,7 +112,7 @@ body {
     grid-template-columns: 50% 50%;
 }
 
-#ingredient-details {
+.ingredient-details {
     display: flex;
     flex-direction: column;
     row-gap: 10px;
@@ -174,4 +174,22 @@ body {
 #cooking-button:active
 {
     transform: scale(0.98);
+}
+
+.toggle-btn
+{
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 8px 0px;
+    font-weight: 600;
+    display: block;
+    margin: 0 auto;
+}
+
+.toggle-btn:hover
+{
+    text-decoration: underline;
 }
