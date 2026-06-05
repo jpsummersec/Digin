@@ -8,6 +8,8 @@ ini_set('display_errors', 1);
 // tells header that JSON content is being returned
 header('Content-Type: application/json');
 
+$db = $dbHandler;
+
 if (isset($_GET['query'])) {
     $query = trim($_GET['query']);
 } else {
@@ -38,6 +40,7 @@ $intolerances = $_GET['intolerances'] ?? '';
 $sort = $_GET['sort'] ?? '';
 $diet = $_GET['diet'] ?? '';
 
+
 if (isset($_GET['number'])) {
     $number = (int) $_GET['number'];
 } else {
@@ -56,6 +59,86 @@ if (isset($_GET['ingredientSearch']) && $_GET['ingredientSearch'] === 'true') {
     $ingredientSearch = true;
 } else {
     $ingredientSearch = false;
+}
+
+$cacheKey = [
+    'query' => strtolower(trim($query)),
+    'number' => $number,
+    'ingredientSearch' => $ingredientSearch,
+    'cuisine' => $cuisine,
+    'diet' => $diet,
+    'maxTime' => $maxTime,
+    'type' => $type,
+    'intolerances' => $intolerances,
+    'sort' => $sort,
+    'addRecipeNutrition' => $addRecipeNutritionValue
+];
+
+$keyString = json_encode($cacheKey, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$hash = md5($keyString);
+
+$stmt = $db->prepare("
+    SELECT search_id, search_parameter_string
+    FROM cached_search
+");
+
+$stmt->execute();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$searchId = null;
+
+foreach ($rows as $row) {
+
+    $stored = json_decode($row['search_parameter_string'], true);
+    if (!$stored) continue;
+
+    $storedHash = md5(json_encode($stored, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+    if ($storedHash === $hash) {
+        $searchId = $row['search_id'];
+        break;
+    }
+}
+
+if ($searchId) {
+
+    $stmt = $db->prepare("
+        SELECT recipe_id
+        FROM cached_search_results
+        WHERE search_id = ?
+    ");
+
+    $stmt->execute([$searchId]);
+
+    $recipeIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    if (!empty($recipeIds)) {
+
+        $placeholders = implode(
+            ',',
+            array_fill(0, count($recipeIds), '?')
+        );
+
+        $stmt = $db->prepare("
+            SELECT recipe_json
+            FROM recipe
+            WHERE recipe_id IN ($placeholders)
+        ");
+
+        $stmt->execute($recipeIds);
+
+        $recipes = array_map(
+            fn($row) => json_decode($row, true),
+            $stmt->fetchAll(PDO::FETCH_COLUMN)
+        );
+
+        echo json_encode([
+            'source' => 'cache',
+            'results' => array_values($recipes)
+        ]);
+
+        exit;
+    }
 }
 
 if ($ingredientSearch) {
@@ -109,5 +192,85 @@ if (!$response['success']) {
     echo $response['body'];
     exit;
 }
+
+$data = json_decode($response['body'], true);
+
+$results = $ingredientSearch
+    ? $data
+    : ($data['results'] ?? []);
+
+if (!empty($results)) {
+
+    try {
+
+        $stmt = $db->prepare("
+            INSERT INTO cached_search
+            (
+                search_parameter_string
+            )
+            VALUES (?)
+        ");
+
+        $stmt->execute([
+            $keyString
+        ]);
+
+        $searchId = $db->lastInsertId();
+
+    } catch (PDOException $e) {
+
+        $stmt = $db->prepare("
+            SELECT search_id
+            FROM cached_search
+            WHERE search_parameter_string = ?
+            LIMIT 1
+        ");
+
+        $stmt->execute([$keyString]);
+
+        $searchId = $stmt->fetchColumn();
+    }
+
+    if ($searchId) {
+
+        foreach ($results as $recipe) {
+
+            if (!isset($recipe['id'])) {
+                continue;
+            }
+
+            $stmt = $db->prepare("
+                INSERT INTO recipe
+                (
+                    recipe_id,
+                    recipe_json
+                )
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE
+                recipe_json = VALUES(recipe_json)
+            ");
+
+            $stmt->execute([
+                $recipe['id'],
+                json_encode($recipe)
+            ]);
+
+            $stmt = $db->prepare("
+                INSERT INTO cached_search_results
+                (
+                    search_id,
+                    recipe_id
+                )
+                VALUES (?, ?)
+            ");
+
+            $stmt->execute([
+                $searchId,
+                $recipe['id']
+            ]);
+        }
+    }
+}
+
 
 echo $response['body'];
