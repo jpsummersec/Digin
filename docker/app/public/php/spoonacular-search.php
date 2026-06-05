@@ -155,6 +155,7 @@ if ($ingredientSearch) {
         'query' => $query,
         'number' => $number,
         'addRecipeNutrition' => $addRecipeNutritionValue,
+        'addRecipeInstructions' => 'true',
         'addRecipeInformation' => 'true',
         'fillIngredients' => 'true'
     ];
