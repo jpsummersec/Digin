@@ -14,16 +14,12 @@
         exit;
     }
 
-    /*
     if (!isset($_GET['id'])) {
         die('Missing recipe ID');
     }
 
     $id = (int) $_GET['id'];
-    */
     
-    $id = 642540;
-
     $responseData = spoonacularRequestWithKeyRotation("https://api.spoonacular.com/recipes/$id/information", [
         'includeNutrition' => 'true',
     ]);
