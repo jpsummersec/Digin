@@ -6,6 +6,8 @@
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
 
+    $db = $dbHandler;
+
     if (empty($apiKeys)) {
         http_response_code(500);
         echo json_encode([
@@ -19,16 +21,53 @@
     }
 
     $id = (int) $_GET['id'];
-    
-    $responseData = spoonacularRequestWithKeyRotation("https://api.spoonacular.com/recipes/$id/information", [
-        'includeNutrition' => 'true',
-    ]);
 
-    if (!$responseData['success']) {
-        die('Failed to fetch recipe');
+    $stmt = $db->prepare("
+        SELECT recipe_json
+        FROM recipe
+        WHERE recipe_id = ?
+        LIMIT 1
+    ");
+
+    $stmt->execute([$id]);
+
+    $cachedRecipe = $stmt->fetchColumn();
+
+    if ($cachedRecipe) {
+
+        $recipe = json_decode($cachedRecipe, true);
+
+    } else {
+
+        $responseData = spoonacularRequestWithKeyRotation(
+            "https://api.spoonacular.com/recipes/$id/information",
+            [
+                'includeNutrition' => 'true',
+            ]
+        );
+
+        if (!$responseData['success']) {
+            die('Failed to fetch recipe');
+        }
+
+        $recipe = json_decode($responseData['body'], true);
+
+        $stmt = $db->prepare("
+            INSERT INTO recipe
+            (
+                recipe_id,
+                recipe_json
+            )
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE
+            recipe_json = VALUES(recipe_json)
+        ");
+
+        $stmt->execute([
+            $id,
+            json_encode($recipe)
+        ]);
     }
-
-    $recipe = json_decode($responseData['body'], true);
 
     $calories = 'N/A';
 
