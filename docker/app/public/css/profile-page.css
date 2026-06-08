@@ -48,6 +48,17 @@ body {
   align-self: center;
 }
 
+.profile-banner .profile-picture label {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.profile-banner .profile-picture input {
+  display: none;
+}
+
 .profile-banner .profile-picture img {
   width: 100%;
   height: 100%;
@@ -55,6 +66,16 @@ body {
   object-position: center;
   display: block;
   justify-self: start;
+}
+
+.profile-banner .profile-picture img:hover {
+  opacity: 0.8;
+}
+
+.upload-error {
+  color: var(--error);
+  margin-bottom: 10px;
+  text-align: center;
 }
 
 .profile-banner .level-counter {

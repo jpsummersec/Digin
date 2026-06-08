@@ -110,3 +110,6 @@ codex.log
 codex-cache/
 codex.md
 
+# User-uploaded profile pictures
+docker/app/public/database/profile-pictures/*
+!docker/app/public/database/profile-pictures/default.png

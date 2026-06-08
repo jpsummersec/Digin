@@ -10,6 +10,73 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 	exit();
 }
 
+$userId = (int) $_SESSION['user_id'];
+$uploadError = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture'])) {
+	$profilePicture = $_FILES['profile_picture'];
+	$maximumFileSize = 10 * 1024 * 1024;
+
+	if ($profilePicture['error'] !== UPLOAD_ERR_OK) {
+		$uploadError = 'The image could not be uploaded.';
+	} elseif ($profilePicture['size'] > $maximumFileSize) {
+		$uploadError = 'The image must be smaller than 10 MiB.';
+	} else {
+		$imageInfo = getimagesize($profilePicture['tmp_name']);
+		$allowedImageTypes = array(
+			IMAGETYPE_JPEG => 'jpg',
+			IMAGETYPE_PNG => 'png',
+			IMAGETYPE_WEBP => 'webp',
+			IMAGETYPE_GIF => 'gif'
+		);
+
+		if ($imageInfo === false || !isset($allowedImageTypes[$imageInfo[2]])) {
+			$uploadError = 'Please upload a JPEG, PNG, WebP, or GIF image.';
+		} else {
+			$fileName = 'user-' . $userId . '-' . uniqid() . '.' . $allowedImageTypes[$imageInfo[2]];
+			$uploadDirectory = __DIR__ . '/../database/profile-pictures/';
+			$newFileLocation = $uploadDirectory . $fileName;
+			$newDatabasePath = '../database/profile-pictures/' . $fileName;
+
+			try {
+				$statement = $dbHandler->prepare('SELECT `path_to_icon` FROM `user` WHERE `user_id` = :userId');
+				$statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+				$statement->execute();
+				$oldDatabasePath = $statement->fetchColumn();
+				$statement->closeCursor();
+
+				if (move_uploaded_file($profilePicture['tmp_name'], $newFileLocation)) {
+					$statement = $dbHandler->prepare('UPDATE `user` SET `path_to_icon` = :pathToIcon WHERE `user_id` = :userId');
+					$statement->bindValue(':pathToIcon', $newDatabasePath);
+					$statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+					$statement->execute();
+					$statement->closeCursor();
+
+					if ($oldDatabasePath !== '../database/profile-pictures/default.png') {
+						$oldFileLocation = $uploadDirectory . basename($oldDatabasePath);
+
+						if (is_file($oldFileLocation)) {
+							unlink($oldFileLocation);
+						}
+					}
+
+					header('Location: profile-page.php');
+					exit();
+				} else {
+					$uploadError = 'The image could not be saved.';
+				}
+			}
+			catch(PDOException $exception) {
+				if (is_file($newFileLocation)) {
+					unlink($newFileLocation);
+				}
+
+				$uploadError = 'The profile picture could not be updated.';
+			}
+		}
+	}
+}
+
 // Load the Spotify client ID from config.php.
 $config = require __DIR__ . '/config.php';
 if (isset($config['SPOTIFY_CLIENT_ID'])) {
@@ -49,7 +116,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'login') {
     exit();
 }
 
-$userId = (int) $_SESSION['user_id'];
 $user = null;
 $achievements = [];
 
@@ -98,10 +164,16 @@ if (isset($dbHandler)) {
 	</head>
 	<body>
 		<h1 class="page-title">Your Profile</h1>
+		<?php if ($uploadError !== '') { ?>
+			<p class="upload-error"><?php echo htmlspecialchars($uploadError); ?></p>
+		<?php } ?>
 		<div class="profile-banner">
-			<div class="profile-picture">
-				<img src="<?php echo '../' . htmlspecialchars($user['path_to_icon']); ?>" alt="Profile Picture">
-			</div>
+			<form class="profile-picture" action="profile-page.php" method="post" enctype="multipart/form-data">
+				<label for="profile-picture-input">
+					<img src="<?php echo '../' . htmlspecialchars($user['path_to_icon']); ?>" alt="Profile Picture">
+				</label>
+				<input id="profile-picture-input" type="file" name="profile_picture" accept="image/jpeg,image/png,image/webp,image/gif" onchange="this.form.submit()">
+			</form>
 			<h1><?php echo htmlspecialchars($user['first_name']) . ' ' . htmlspecialchars($user['last_name']); ?></h1>
 			<h2><?php echo htmlspecialchars($user['email_address']); ?></h2>
 
