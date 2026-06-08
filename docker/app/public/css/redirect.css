@@ -23,12 +23,39 @@ body
 #thank-you
 {
     font-size: 1rem;
+    padding-bottom: 20px;
 }
 
 #brand
 {
     width: 200px;
     height: auto;
+
+    animation: squat-bounce 0.75s ease-in-out infinite;
+    transform-origin: bottom center;
+}
+
+@keyframes squat-bounce
+{
+    0%, 100%
+    {
+        transform: translateY(0);
+    }
+
+    35%
+    {
+        transform: translateY(-25px);
+    }
+
+    65%
+    {
+        transform: translateY(-25px);
+    }
+
+    85%
+    {
+        transform: translateY(18px);
+    }
 }
 
 #redirect-message
