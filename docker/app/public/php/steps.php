@@ -58,6 +58,7 @@ if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -69,65 +70,71 @@ if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
 
 <body>
 
-<nav id="nav-bar">
-    <a id="back-button" href="recipe.php?id=<?php echo htmlspecialchars($id); ?>"><img src="../images/recipe-page/arrow.svg" alt="Back"></a>
-    <span class="title">Cooking Mode</span>
-</nav>
+    <nav id="nav-bar">
+        <a id="back-button" href="recipe.php?id=<?php echo htmlspecialchars($id); ?>"><img src="../images/recipe-page/arrow.svg" alt="Back"></a>
+        <span class="title">Cooking Mode</span>
+    </nav>
 
-<?php if (!empty($recipe['image'])): ?>
-    <div class="hero">
-        <img class="hero-image" src="<?php echo htmlspecialchars($recipe['image']); ?>" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
-    </div>
-<?php else: ?>
-    <div class="hero">
-        <img class="hero-image" src="../images/hero-image-fallback.svg" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
-    </div>
-<?php endif; ?>
-
-<div id="content">
-    <div id="recipe">
-        <div id="recipe-title">
-            <span class="title"><?php echo htmlspecialchars($recipe['title']); ?></span>
+    <?php if (!empty($recipe['image'])): ?>
+        <div class="hero">
+            <img class="hero-image" src="<?php echo htmlspecialchars($recipe['image']); ?>" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
         </div>
-    </div>
+    <?php else: ?>
+        <div class="hero">
+            <img class="hero-image" src="../images/hero-image-fallback.svg" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
+        </div>
+    <?php endif; ?>
 
-    <div id="steps">
-        <h2>Cooking Steps</h2>
-        <div id="steps-container">
-            <?php foreach ($steps as $index => $step) {
+    <div id="content">
+        <div id="recipe">
+            <div id="recipe-title">
+                <span class="title"><?php echo htmlspecialchars($recipe['title']); ?></span>
+            </div>
+        </div>
+
+        <div id="steps">
+            <h2>Cooking Steps</h2>
+            <div id="steps-container">
+                <?php foreach ($steps as $index => $step) {
                     echo "<div class='step " . ($index === 0 ? 'active' : '') . "' data-step='" . $index . "'>";
-                        echo "<h3 class='step-title'> Step " . $step['number'] . "</h3>";
-                        echo "<div class='step-description'>";
-                            echo htmlspecialchars(strip_tags($step['step']));
-                        echo "</div>";
+                    echo "<h3 class='step-title'> Step " . $step['number'] . "</h3>";
+                    echo "<div class='step-description'>";
+                    echo htmlspecialchars(strip_tags($step['step']));
+                    echo "</div>";
                     echo "</div>";
                 }
-            ?>
-        </div>
-        <div id="step-navigation">
-            <p id="step-counter">Step <span id="current-step">1</span> of <span id="total-steps"><?php echo count($steps); ?></span></p>
-            <div id="step-buttons">
-                <button id="prev-step-btn">Previous</button>
-                <button id="next-step-btn">Next</button>
+                ?>
             </div>
-            <button id="reset-to-step-one">Go back to Step 1</button>
+            <div id="step-navigation">
+                <p id="step-counter">Step <span id="current-step">1</span> of <span id="total-steps"><?php echo count($steps); ?></span></p>
+                <div id="step-buttons">
+                    <button id="prev-step-btn">Previous</button>
+                    <button id="next-step-btn">Next</button>
+                </div>
+                <button id="reset-to-step-one">Go back to Step 1</button>
+            </div>
         </div>
     </div>
-</div>
 
-<?php include("footer.php"); ?>
-<script src="../js/steps.js"></script>
-<script>
-    // Start playing Spotify music based on recipe cuisine when page loads
-    window.addEventListener('load', () => {
-        const cuisine = '<?php echo htmlspecialchars($cuisine); ?>';
-        
-        // Call play.php to start Spotify playback
-        fetch(`../play.php?cuisine=${encodeURIComponent(cuisine)}`)
-            .then(response => response.text())
-            .then(data => console.log('Spotify:', data))
-            .catch(error => console.log('Spotify playback note:', error));
-    });
-</script>
+    <?php include("footer.php"); ?>
+
+    <audio id="gordon-audio" src="../audio/gordontest.mp3"></audio>
+
+    <script src="../js/steps.js"></script>
+
+    <script>
+        // Start playing Spotify music based on recipe cuisine when page loads
+        window.addEventListener('load', () => {
+            const cuisine = '<?php echo htmlspecialchars($cuisine); ?>';
+
+            // Call play.php to start Spotify playback
+            fetch(`../play.php?cuisine=${encodeURIComponent(cuisine)}`)
+                .then(response => response.text())
+                .then(data => console.log('Spotify:', data))
+                .catch(error => console.log('Spotify playback note:', error));
+        });
+    </script>
+
 </body>
+
 </html>
