@@ -17,7 +17,8 @@ if (empty($apiKeys)) {
 }
 
 if (!isset($_GET['id'])) {
-    die('Missing recipe ID');
+    header('Location: search-page.php');
+    exit;
 }
 
 $id = (int) $_GET['id'];
