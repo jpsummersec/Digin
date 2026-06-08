@@ -5,6 +5,7 @@ const totalStepsDisplay = document.getElementById('total-steps');
 let currentStepIndex = 0;
 
 const gordonAudio = document.getElementById('gordon-audio');
+const backgroundAudio = document.getElementById('background-audio');
 
 const stepAudios = [
   '../audio/idkwheretostart.mp3',
@@ -12,15 +13,67 @@ const stepAudios = [
   '../audio/idkwheretostart.mp3',
 ];
 
+const randomPressureAudios = [
+  '../audio/idtyoucancook.mp3',
+  '../audio/waitingfortalent.mp3',
+  '../audio/burntpan.mp3',
+];
+
+let pressureTimer = null;
+
+function startRandomPressureTimer() {
+  clearTimeout(pressureTimer);
+
+  const minTime = 5000; // 5 sec
+  const maxTime = 10000; // 10 sec
+
+  const randomTime =
+    Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
+
+  pressureTimer = setTimeout(() => {
+    playRandomPressureAudio();
+    startRandomPressureTimer();
+  }, randomTime);
+}
+
+function playRandomPressureAudio() {
+  const randomIndex = Math.floor(Math.random() * randomPressureAudios.length);
+
+  backgroundAudio.pause();
+
+  gordonAudio.pause();
+  gordonAudio.currentTime = 0;
+  gordonAudio.src = randomPressureAudios[randomIndex];
+
+  gordonAudio.play().catch((error) => {
+    console.log('Pressure audio error:', error);
+  });
+
+  gordonAudio.onended = function () {
+    backgroundAudio.play();
+  };
+}
+
 function playStepAudio() {
   const audioIndex = currentStepIndex % stepAudios.length;
+
+  backgroundAudio.pause();
+  backgroundAudio.currentTime = 0;
 
   gordonAudio.pause();
   gordonAudio.currentTime = 0;
   gordonAudio.src = stepAudios[audioIndex];
+
   gordonAudio.play().catch((error) => {
     console.log('Audio error:', error);
   });
+
+  gordonAudio.onended = function () {
+    backgroundAudio.volume = 0.25;
+    backgroundAudio.play();
+  };
+
+  startRandomPressureTimer();
 }
 
 // Function to update the display
