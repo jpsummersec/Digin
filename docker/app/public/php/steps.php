@@ -119,6 +119,7 @@ if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
     <?php include("footer.php"); ?>
 
     <audio id="gordon-audio" src="../audio/gordontest.mp3"></audio>
+    <audio id="background-audio" src="../audio/kitchendramaticsound.mp3" loop></audio>
 
     <script src="../js/steps.js"></script>
 
