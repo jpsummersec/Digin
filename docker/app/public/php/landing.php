@@ -16,8 +16,8 @@ $nav_links = [
 
 
 $hero_buttons = [
-  ["label" => "Get Started",    "class" => "btn-primary", "href" => "signin.php"],
-  ["label" => "Browse Recipes", "class" => "btn-outline", "href" => "recipe.php"],
+  ["label" => "Sign Up", "class" => "btn-primary", "href" => "create-account.php"],
+  ["label" => "Sign In", "class" => "btn-outline", "href" => "signin.php"],
 ];
 ?>
 <!DOCTYPE html>
