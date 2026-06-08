@@ -39,7 +39,7 @@ $type = $_GET['type'] ?? '';
 $intolerances = $_GET['intolerances'] ?? '';
 $sort = $_GET['sort'] ?? '';
 $diet = $_GET['diet'] ?? '';
-
+$sortDirection = $_GET['sortDirection'] ?? 'asc';
 
 if (isset($_GET['number'])) {
     $number = (int) $_GET['number'];
@@ -71,6 +71,7 @@ $cacheKey = [
     'type' => $type,
     'intolerances' => $intolerances,
     'sort' => $sort,
+    'sortDirection' => $sortDirection, 
     'addRecipeNutrition' => $addRecipeNutritionValue
 ];
 
@@ -182,6 +183,7 @@ if ($ingredientSearch) {
 
     if ($sort !== '') {
         $params['sort'] = $sort;
+        $params['sortDirection'] = $sortDirection;
     }
     $baseUrl = 'https://api.spoonacular.com/recipes/complexSearch';
 }

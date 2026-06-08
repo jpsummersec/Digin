@@ -527,3 +527,26 @@ button {
     min-height: 14rem;
   }
 }
+
+.sort-direction {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.sort-btn {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.3rem;
+  border: none;
+  background: #f2f3f2;
+  color: var(--primary-text);
+  font-size: 0.85rem;
+  font-family: 'Inter-700-weight', var(--font);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sort-btn.active {
+  background: var(--primary);
+  color: #fff;
+}

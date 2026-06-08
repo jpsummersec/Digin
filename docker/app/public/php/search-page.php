@@ -217,6 +217,11 @@ require_once __DIR__ . '/include-loginrequired.php';
                         <button type="button" data-value="calories">Calories</button>
                         <button type="button" data-value="max-used-ingredients">Max used ingredients</button>
                     </div>
+
+                    <div class="sort-direction">
+                        <button type="button" id="sortAsc" class="sort-btn active">Ascending</button>
+                        <button type="button" id="sortDesc" class="sort-btn">Descending</button>
+                    </div>
                 </section>
 
                 <section class="filter-section">

@@ -10,6 +10,9 @@ const filterOverlay = document.getElementById('filterOverlay');
 const closeFilter = document.getElementById('closeFilter');
 const applyFilters = document.getElementById('applyFilters');
 const clearFilters = document.getElementById('clearFilters');
+const sortAscBtn = document.getElementById('sortAsc');
+const sortDescBtn = document.getElementById('sortDesc');
+let sortDirection = 'asc';
 
 const recipeDetailsUrl = '../php/recipe.php';
 
@@ -162,7 +165,8 @@ function buildSearchParams() {
 		query,
 		number: numberOfResults.value,
 		addRecipeNutrition: 'true',
-		ingredientSearch: ingredientMode ? 'true' : 'false'
+		ingredientSearch: ingredientMode ? 'true' : 'false',
+		sortDirection 
 	});
 
 	if (!ingredientMode) {
@@ -256,6 +260,16 @@ applyFilters.addEventListener('click', () => {
 	closeFilterPanel();
 	searchRecipes();
 });
+
+function setSortDirection(direction) {
+	sortDirection = direction;
+
+	sortAscBtn.classList.toggle('active', direction === 'asc');
+	sortDescBtn.classList.toggle('active', direction === 'desc');
+}
+
+sortAscBtn?.addEventListener('click', () => setSortDirection('asc'));
+sortDescBtn?.addEventListener('click', () => setSortDirection('desc'));
 
 clearFilters.addEventListener('click', () => {
 	document.querySelectorAll('.chip-group button').forEach(button => button.classList.remove('active'));
