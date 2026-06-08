@@ -1,4 +1,7 @@
 <?php
+
+require_once __DIR__ . '/include-url-config.php';
+
 $host = 'mysql';
 $username = 'root';
 $password = 'qwerty';

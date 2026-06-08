@@ -6,7 +6,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 	session_unset();
 	session_destroy();
 
-	header('Location: signin.php');
+	header('Location: landing.php');
 	exit();
 }
 
@@ -23,33 +23,6 @@ if (!$client_id) {
 }
 
 $redirect_uri = $config['SPOTIFY_REDIRECT_URI'];
-
-// Ensure the page is loaded from the same host as the Spotify redirect URI.
-$expected_host = parse_url($redirect_uri, PHP_URL_HOST);
-$expected_port = parse_url($redirect_uri, PHP_URL_PORT);
-if ($expected_port) {
-    $expected_port_text = ':' . $expected_port;
-} else {
-    $expected_port_text = '';
-}
-
-$expected_host_with_port = $expected_host . $expected_port_text;
-if (isset($_SERVER['HTTP_HOST'])) {
-    $current_host = $_SERVER['HTTP_HOST'];
-} else {
-    $current_host = '';
-}
-
-if ($current_host !== $expected_host_with_port) {
-    $scheme = parse_url($redirect_uri, PHP_URL_SCHEME);
-    if (!$scheme) {
-        $scheme = 'http';
-    }
-
-    $redirect_url = $scheme . '://' . $expected_host_with_port . $_SERVER['REQUEST_URI'];
-    header('Location: ' . $redirect_url);
-    exit();
-}
 
 // Generate a random state token and keep it in the session.
 // Spotify will send it back so we can verify the callback.

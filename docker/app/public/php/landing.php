@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/include-cannot-access-when-loggedin.php';
 include __DIR__ . '/include-dbhandler.php';
 
 //  DigIn  –  index.php

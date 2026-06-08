@@ -1,4 +1,7 @@
 <?php
+
+require_once __DIR__ . '/php/include-url-config.php';
+
 session_start();
 
 // If user is logged in, redirect to search-page.php

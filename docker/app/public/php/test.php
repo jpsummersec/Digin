@@ -1,3 +1,5 @@
+<?php require_once __DIR__ . '/include-url-config.php'; ?>
+
 <!DOCTYPE html>
 <html lang="en">
 

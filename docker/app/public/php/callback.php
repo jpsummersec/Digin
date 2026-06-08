@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/include-url-config.php';
 session_start();
 
 // Load Spotify credentials from config.php
@@ -66,7 +67,7 @@ $_SESSION['spotify_token_expires'] = time() + ($result['expires_in'] ?? 3600);
 // Remove the one-time state token after successful auth.
 unset($_SESSION['spotify_state']);
 
-header('Location: /Spotify_connection/play.php');
+header('Location: /php/play.php');
 exit();
 
 ?>

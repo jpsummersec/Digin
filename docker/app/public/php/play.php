@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/include-url-config.php';
 session_start();
 
 // Load helper functions and Spotify app credentials

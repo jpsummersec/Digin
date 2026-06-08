@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/include-url-config.php';
+
 $currentStepNumber = 3;
 $stepTitle = "Searing the Protein";
 $allocatedMinutes = 0.1;

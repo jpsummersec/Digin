@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/include-url-config.php';
+
 $apiKeys = [];
 
 // put all API keys in array
