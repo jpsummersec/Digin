@@ -1,9 +1,11 @@
 <?php
 
+// Keep OAuth on the configured application URL and open the user's PHP session
+// which stores the token during the session
 require_once __DIR__ . '/include-url-config.php';
 session_start();
 
-// Load Spotify credentials from config.php
+// This loads the Spotify application credentials and registered callback URL
 $config = require __DIR__ . '/config.php';
 $client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
 $client_secret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
@@ -14,7 +16,8 @@ if (!$client_id || !$client_secret) {
 
 $redirect_uri = $config['SPOTIFY_REDIRECT_URI'];
 
-// Validate the state token to avoid CSRF attacks.
+// Spotify returns the same state value created on the profile page
+// Rejecting a mismatch prevents another site from completing OAuth in this session
 if (!isset($_GET['state'], $_SESSION['spotify_state']) || $_GET['state'] !== $_SESSION['spotify_state']) {
     die('State mismatch. Please restart the Spotify login process.');
 }
@@ -24,9 +27,10 @@ if (!$code) {
     die('Error: Authorization code not found in callback.');
 }
 
-// Exchange the authorization code for access and refresh tokens.
+// Here we exchange Spotifys short-lived authorization code for session tokens
 $ch = curl_init('https://accounts.spotify.com/api/token');
 
+// Spotify requires the exact same redirect URI used during authorization
 $data = [
     'grant_type' => 'authorization_code',
     'code' => $code,
@@ -38,6 +42,7 @@ $headers = [
     'Content-Type: application/x-www-form-urlencoded'
 ];
 
+// Send the token request using HTTP Basic authentication for this Spotify app
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -59,15 +64,18 @@ if (!$result || empty($result['access_token'])) {
     die('Error: No access token received from Spotify. Check your credentials.');
 }
 
-// Save Spotify tokens in the session for the playback page.
+// Store the connection only in this PHP session no token is written to the database can change this for later
+$refreshToken = $result['refresh_token'] ?? null;
+$expiresAt = time() + ($result['expires_in'] ?? 3600);
 $_SESSION['access_token'] = $result['access_token'];
-$_SESSION['refresh_token'] = $result['refresh_token'] ?? null;
-$_SESSION['spotify_token_expires'] = time() + ($result['expires_in'] ?? 3600);
+$_SESSION['refresh_token'] = $refreshToken;
+$_SESSION['spotify_token_expires'] = $expiresAt;
 
-// Remove the one-time state token after successful auth.
+// The state token is single-use so remove it after successful authentication
 unset($_SESSION['spotify_state']);
 
-header('Location: /php/play.php');
+// Return the user to their profile after Spotify has been connected
+header('Location: /php/profile-page.php?spotify=connected');
 exit();
 
 ?>
