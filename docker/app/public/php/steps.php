@@ -15,13 +15,14 @@ if (empty($apiKeys)) {
     exit;
 }
 
+// The recipe ID identifies which recipe should be shown in cooking mode
 if (!isset($_GET['id'])) {
     die('Missing recipe ID');
 }
 
 $id = (int) $_GET['id'];
 
-// Fetch all recipe information
+// Fetch the full recipe like cuisine and analyzed instructions
 $responseData = spoonacularRequestWithKeyRotation("https://api.spoonacular.com/recipes/$id/information", [
     'includeNutrition' => 'true',
 ]);
@@ -36,7 +37,7 @@ if (!$recipe) {
     die('Invalid recipe data');
 }
 
-// Extract steps from analyzedInstructions
+// Spoonacular groups instructions, so flatten all groups into one ordered step list
 $steps = [];
 
 if (!empty($recipe['analyzedInstructions'])) {
@@ -49,10 +50,10 @@ if (!empty($recipe['analyzedInstructions'])) {
     }
 }
 
-// Get the cuisine for Spotify music
-$cuisine = 'cooking'; // default fallback
+// Use the first recipe cuisine for Spotify, or a generic cooking search as fallback
+$cuisine = 'cooking';
 if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
-    $cuisine = $recipe['cuisines'][0]; // use first cuisine
+    $cuisine = $recipe['cuisines'][0];
 }
 ?>
 
@@ -90,11 +91,13 @@ if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
             <div id="recipe-title">
                 <span class="title"><?php echo htmlspecialchars($recipe['title']); ?></span>
             </div>
+            <p id="spotify-status" aria-live="polite">Starting Spotify music...</p>
         </div>
 
         <div id="steps">
             <h2>Cooking Steps</h2>
             <div id="steps-container">
+                <!-- Render every step, while steps.js controls which one is visible. -->
                 <?php foreach ($steps as $index => $step) {
                     echo "<div class='step " . ($index === 0 ? 'active' : '') . "' data-step='" . $index . "'>";
                     echo "<h3 class='step-title'> Step " . $step['number'] . "</h3>";
@@ -124,15 +127,29 @@ if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
     <script src="../js/steps.js"></script>
 
     <script>
-        // Start playing Spotify music based on recipe cuisine when page loads
-        window.addEventListener('load', () => {
-            const cuisine = '<?php echo htmlspecialchars($cuisine); ?>';
+        // Asks the playback to start cuisine music as soon as the page is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            // json_encode safely transfers the PHP cuisine string into JavaScript (AI Generated)
+            const cuisine = <?php echo json_encode($cuisine); ?>;
+            const status = document.getElementById('spotify-status');
 
-            // Call play.php to start Spotify playback
-            fetch(`../play.php?cuisine=${encodeURIComponent(cuisine)}`)
-                .then(response => response.text())
-                .then(data => console.log('Spotify:', data))
-                .catch(error => console.log('Spotify playback note:', error));
+            try {
+                // play.php searches Spotify then chooses a device and starts the playlist
+                const response = await fetch(`play.php?cuisine=${encodeURIComponent(cuisine)}`, {
+                    headers: {
+                        Accept: 'text/plain'
+                    }
+                });
+                const message = await response.text();
+
+                // Show either the playlist being played or the returned Spotify error
+                status.textContent = message || 'Spotify music could not be started.';
+                status.dataset.state = response.ok ? 'playing' : 'error';
+            } catch (error) {
+                status.textContent = 'Spotify music could not be started.';
+                status.dataset.state = 'error';
+                console.error('Spotify playback error:', error);
+            }
         });
     </script>
 
