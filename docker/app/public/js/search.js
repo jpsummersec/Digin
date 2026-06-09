@@ -1,6 +1,8 @@
 const searchInput = document.getElementById('searchInput');
 const searchButton = document.getElementById('searchButton');
 const resultsDiv = document.getElementById('results');
+const resultsTitle = document.getElementById('resultsTitle');
+const cookingHistory = document.getElementById('cookingHistory');
 const numberOfResults = document.getElementById('numberOfResults');
 const numberOfResultsValue = document.getElementById('numberOfResultsValue');
 const searchByIngredient = document.getElementById('searchByIngredient');
@@ -189,6 +191,8 @@ function searchRecipes() {
 		return;
 	}
 
+	cookingHistory.hidden = true;
+	resultsTitle.hidden = false;
 	setLoadingState();
 
 	fetch(`../php/spoonacular-search.php?${params.toString()}`)
@@ -278,7 +282,6 @@ clearFilters.addEventListener('click', () => {
 	numberOfResults.value = '10';
 	numberOfResultsValue.value = '10';
 	numberOfResultsValue.textContent = '10';
-	returnRecipeNutrition.checked = true;
 	searchByIngredient.checked = false;
 });
 

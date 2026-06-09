@@ -99,13 +99,25 @@ button {
   color: #96a09d;
 }
 
-.results-title {
+.results-title,
+.cooking-history-text {
   width: min(100% - 3rem, 44rem);
   margin: 0.35rem auto 1.1rem;
   color: var(--primary-text);
   font-family: 'Inter-700-weight', var(--font);
   font-size: clamp(1.45rem, 5vw, 2rem);
   line-height: 1;
+}
+
+.nothing-to-show-yet {
+  display: grid;
+  min-height: calc(100vh - 8rem);
+  place-items: center;
+  padding: 1.5rem;
+  color: var(--secondary-text);
+  text-align: center;
+  font-family: 'Inter-500-weight', var(--font);
+  font-size: 1rem;
 }
 
 .recipe-list {
@@ -469,6 +481,7 @@ button {
   }
 
   .results-title,
+  .cooking-history-text,
   .recipe-list {
     width: calc(100% - 2rem);
   }
@@ -503,7 +516,8 @@ button {
   }
 
   .recipe-list,
-  .results-title {
+  .results-title,
+  .cooking-history-text {
     width: min(100% - 4rem, 50rem);
   }
 

@@ -1,6 +1,29 @@
 <?php
 require_once __DIR__ . '/include-loginrequired.php';
+include __DIR__ . '/include-dbhandler.php';
 
+$userId = (int) $_SESSION['user_id'];
+$recipeDetailsUrl = '../php/recipe.php';
+$cookedRecipes = [];
+
+// get cooked recipes based on user ID
+try {
+    $statement = $dbHandler->prepare('
+        SELECT r.`recipe_id`, r.`recipe_json`
+        FROM `user_cooked_recipe` uc
+        INNER JOIN `recipe` r
+            ON r.`recipe_id` = uc.`recipe_id`
+        WHERE uc.`user_id` = :userId
+        ORDER BY uc.`cooked_date` DESC, uc.`cooked_recipe_id` DESC
+    ');
+    $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $statement->execute();
+    $cookedRecipes = $statement->fetchAll(PDO::FETCH_ASSOC);
+    $statement->closeCursor();
+}
+catch(PDOException $exception) {
+    die('Select error: ' . $exception->getMessage());
+}
 
 // echo "User ID: " . $_SESSION["user_id"] . "<br>";
 ?>
@@ -36,7 +59,90 @@ require_once __DIR__ . '/include-loginrequired.php';
             </button>
         </div>
 
-        <h1 class="results-title">Results</h1>
+        <h1 class="results-title" id="resultsTitle" hidden>Results</h1>
+
+        <div id="cookingHistory">
+            <?php if (empty($cookedRecipes)) { ?>
+                <h1 class="nothing-to-show-yet">Nothing to show yet</h1>
+            <?php } else { ?>
+                <h1 class="cooking-history-text">Cooking History</h1>
+                <div class="recipe-list">
+                    <?php foreach ($cookedRecipes as $cookedRecipe) { ?>
+                        <?php
+                        $recipe = json_decode($cookedRecipe['recipe_json'], true);
+
+                        if (!is_array($recipe)) {
+                            continue;
+                        }
+
+                        $recipeId = $cookedRecipe['recipe_id'];
+                        $title = 'Untitled recipe';
+                        $image = '../images/hero-image-fallback.svg';
+                        $time = '- minutes';
+                        $calories = '- kcal';
+                        $spoonacularScore = 0;
+
+                        if (isset($recipe['title'])) {
+                            $title = $recipe['title'];
+                        }
+
+                        if (!empty($recipe['image'])) {
+                            $image = $recipe['image'];
+                        }
+
+                        if (isset($recipe['readyInMinutes'])) {
+                            $time = $recipe['readyInMinutes'] . ' minutes';
+                        }
+
+                        if (isset($recipe['spoonacularScore'])) {
+                            $spoonacularScore = $recipe['spoonacularScore'];
+                        }
+
+                        $starScore = min(max((float) $spoonacularScore / 20, 0), 5);
+                        $fullStars = round($starScore);
+
+                        if (isset($recipe['nutrition']['nutrients']) && is_array($recipe['nutrition']['nutrients'])) {
+                            foreach ($recipe['nutrition']['nutrients'] as $nutrient) {
+                                if (
+                                    isset($nutrient['name']) &&
+                                    isset($nutrient['amount']) &&
+                                    isset($nutrient['unit']) &&
+                                    $nutrient['name'] === 'Calories'
+                                ) {
+                                    $calories = round($nutrient['amount']) . ' ' . $nutrient['unit'];
+                                    break;
+                                }
+                            }
+                        }
+                        ?>
+                        <article class="recipe">
+                            <a class="recipe-link" href="<?php echo htmlspecialchars($recipeDetailsUrl . '?id=' . $recipeId); ?>">
+                                <img class="recipe-image" src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($title); ?>" loading="lazy">
+                                <div class="recipe-content">
+                                    <h2><?php echo htmlspecialchars($title); ?></h2>
+                                    <div class="recipe-meta">
+                                        <span><span class="meta-bolt" aria-hidden="true"><img src="../images/search-page/calories.svg"></span><?php echo htmlspecialchars($calories); ?></span>
+                                        <span><span class="meta-clock" aria-hidden="true"><img src="../images/search-page/time.svg"></span><?php echo htmlspecialchars($time); ?></span>
+                                    </div>
+                                    <span class="meta-rating" aria-hidden="true">
+                                        <?php for ($star = 0; $star < 5; $star++) { ?>
+                                            <?php
+                                            $starClass = 'is-empty';
+
+                                            if ($star < $fullStars) {
+                                                $starClass = 'is-filled';
+                                            }
+                                            ?>
+                                            <span class="rating-star <?php echo $starClass; ?>" aria-hidden="true">⭐</span>
+                                        <?php } ?>
+                                    </span>
+                                </div>
+                            </a>
+                        </article>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+        </div>
 
         <div class="filter-overlay" id="filterOverlay"></div>
 
