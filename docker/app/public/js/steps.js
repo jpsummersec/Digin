@@ -1,8 +1,8 @@
 const steps = document.querySelectorAll('.step');
-const currentStepDisplay = document.getElementById('current-step');
-const totalStepsDisplay = document.getElementById('total-steps');
+const nextButton = document.getElementById('next-step-btn');
 
 let currentStepIndex = 0;
+let isRecipeCompleted = false;
 
 const gordonAudio = document.getElementById('gordon-audio');
 const backgroundAudio = document.getElementById('background-audio');
@@ -86,7 +86,12 @@ function updateStepDisplay(playAudio = true) {
   // Show current step
   if (currentStepIndex < steps.length) {
     steps[currentStepIndex].classList.add('active');
-    currentStepDisplay.innerText = currentStepIndex + 1;
+
+    if (currentStepIndex === steps.length - 1) {
+      nextButton.innerText = 'Complete Recipe';
+    } else {
+      nextButton.innerText = 'Next';
+    }
 
     if (playAudio) {
       playStepAudio();
@@ -100,6 +105,37 @@ function updateStepDisplay(playAudio = true) {
   }
 }
 
+function completeRecipe() {
+  if (isRecipeCompleted) {
+    return;
+  }
+
+  isRecipeCompleted = true;
+
+  const params = new URLSearchParams(window.location.search);
+  const recipeId = params.get('id');
+
+  const formData = new FormData();
+  formData.append('recipe_id', recipeId);
+  formData.append('isRecipeCompleted', 'true');
+
+  fetch('steps.php', {
+    method: 'POST',
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((result) => {
+      if (result.success) {
+        window.location.href = 'search-page.php';
+      } else {
+        isRecipeCompleted = false;
+      }
+    })
+    .catch(() => {
+      isRecipeCompleted = false;
+    });
+}
+
 // Keyboard event listener
 document.addEventListener('keydown', (event) => {
   // Right arrow or Space to advance
@@ -108,6 +144,8 @@ document.addEventListener('keydown', (event) => {
     if (currentStepIndex < steps.length - 1) {
       currentStepIndex++;
       updateStepDisplay();
+    } else if (currentStepIndex === steps.length - 1) {
+      completeRecipe();
     }
   }
   // Left arrow to go back
@@ -141,12 +179,13 @@ if (prevButton) {
 }
 
 // Next step button
-const nextButton = document.getElementById('next-step-btn');
 if (nextButton) {
   nextButton.addEventListener('click', () => {
     if (currentStepIndex < steps.length - 1) {
       currentStepIndex++;
       updateStepDisplay();
+    } else if (currentStepIndex === steps.length - 1) {
+      completeRecipe();
     }
   });
 }

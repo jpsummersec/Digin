@@ -8,6 +8,59 @@ $db = $dbHandler;
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+$isRecipeCompleted = false;
+$recipeId = 0;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+
+    if (
+        isset($_POST['recipe_id']) &&
+        isset($_POST['isRecipeCompleted']) &&
+        $_POST['isRecipeCompleted'] === 'true'
+    ) {
+        $recipeId = (int) $_POST['recipe_id'];
+
+        if ($recipeId > 0) {
+            $isRecipeCompleted = true;
+        }
+    }
+
+    if ($isRecipeCompleted) {
+        try {
+            $statement = $dbHandler->prepare('
+                INSERT INTO `user_cooked_recipe` (`user_id`, `recipe_id`)
+                VALUES (:userId, :recipeId)
+            ');
+            $statement->bindValue(':userId', $_SESSION['user_id'], PDO::PARAM_INT);
+            $statement->bindValue(':recipeId', $recipeId, PDO::PARAM_INT);
+            $statement->execute();
+            $statement->closeCursor();
+        }
+        catch(PDOException $exception) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'isRecipeCompleted' => false
+            ]);
+            exit;
+        }
+
+        echo json_encode([
+            'success' => true,
+            'isRecipeCompleted' => true
+        ]);
+        exit;
+    }
+
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'isRecipeCompleted' => false
+    ]);
+    exit;
+}
+
 if (empty($apiKeys)) {
     http_response_code(500);
     echo json_encode([
