@@ -154,12 +154,12 @@ if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
                 ?>
             </div>
             <div id="step-navigation">
-                <p id="step-counter">Step <span id="current-step">1</span> of <span id="total-steps"><?php echo count($steps); ?></span></p>
+                <!-- <p id="step-counter">Step <span id="current-step">1</span> of <span id="total-steps"><?php echo count($steps); ?></span></p> -->
                 <div id="step-buttons">
                     <button id="prev-step-btn">Previous</button>
                     <button id="next-step-btn">Next</button>
                 </div>
-                <button id="reset-to-step-one">Go back to Step 1</button>
+                <!-- <button id="reset-to-step-one">Go back to Step 1</button> -->
             </div>
         </div>
     </div>

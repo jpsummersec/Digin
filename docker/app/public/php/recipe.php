@@ -235,7 +235,7 @@ $stepsTruncated = count($steps) > 3; //how many steps are there after the initia
                     foreach (array_slice($steps, 3) as $step) {
                         echo "<div class='step'>";
                         echo "<h3 class='step-title'>Step " . $step['number'] . "</h3>";
-                        echo "<div class='step-description'>" . htmlspecialchars(strip_tags($step['step'])) . "</div>";
+                        echo "<div class='step-description'>" . htmlspecialchars(strip_tags($step['step'])) . " </div>";
                         echo "</div>";
                     };
                     ?>
