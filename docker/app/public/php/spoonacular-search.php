@@ -1,35 +1,26 @@
 <?php
 require_once __DIR__ . '/include-loginrequired.php';
 require_once __DIR__ . '/include-dbhandler.php';
+require_once __DIR__ . '/include-spoonacular-api.php';
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// tells header that JSON content is being returned
 header('Content-Type: application/json');
 
 $db = $dbHandler;
 
-if (isset($_GET['query'])) {
-    $query = trim($_GET['query']);
-} else {
-	http_response_code(400);
-    echo json_encode([
-        'error' => 'Missing search query'
-    ]);
+if (empty($_GET['query'])) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Missing search query']);
     exit;
 }
 
-require_once __DIR__ . '/include-spoonacular-api.php';
-
-$MIN_SEARCH_RESULTS = 0;
-$MAX_SEARCH_RESULTS = 10;
+$query = trim($_GET['query']);
 
 if (empty($apiKeys)) {
     http_response_code(500);
-    echo json_encode([
-        'error' => 'Missing API keys'
-    ]);
+    echo json_encode(['error' => 'Missing API keys']);
     exit;
 }
 
@@ -41,24 +32,57 @@ $sort = $_GET['sort'] ?? '';
 $diet = $_GET['diet'] ?? '';
 $sortDirection = $_GET['sortDirection'] ?? 'asc';
 
-if (isset($_GET['number'])) {
-    $number = (int) $_GET['number'];
-} else {
-	$number = 1;
-}
+$number = isset($_GET['number']) ? (int)$_GET['number'] : 1;
+$number = max(0, min(10, $number));
 
-$number = max($MIN_SEARCH_RESULTS, min($MAX_SEARCH_RESULTS, $number));
+$addRecipeNutritionValue = (!empty($_GET['addRecipeNutrition']) && $_GET['addRecipeNutrition'] === 'true') ? 'true' : 'false';
+$ingredientSearch = (!empty($_GET['ingredientSearch']) && $_GET['ingredientSearch'] === 'true');
 
-if (isset($_GET['addRecipeNutrition']) && $_GET['addRecipeNutrition'] === 'true') {
-	$addRecipeNutritionValue = 'true';
-} else {
-	$addRecipeNutritionValue = 'false';
-}
+function sortRecipes(array $results, string $sort, string $direction = 'asc'): array
+{
+    if ($sort === '') return $results;
 
-if (isset($_GET['ingredientSearch']) && $_GET['ingredientSearch'] === 'true') {
-    $ingredientSearch = true;
-} else {
-    $ingredientSearch = false;
+    $dir = ($direction === 'desc') ? -1 : 1;
+
+    usort($results, function ($a, $b) use ($sort, $dir) {
+
+        switch ($sort) {
+
+            case 'time':
+            case 'readyInMinutes':
+                $aVal = $a['readyInMinutes'] ?? PHP_INT_MAX;
+                $bVal = $b['readyInMinutes'] ?? PHP_INT_MAX;
+                break;
+
+            case 'healthScore':
+                $aVal = $a['healthScore'] ?? 0;
+                $bVal = $b['healthScore'] ?? 0;
+                break;
+
+            case 'popularity':
+            case 'likes':
+                $aVal = $a['aggregateLikes'] ?? 0;
+                $bVal = $b['aggregateLikes'] ?? 0;
+                break;
+
+            case 'price':
+                $aVal = $a['pricePerServing'] ?? PHP_INT_MAX;
+                $bVal = $b['pricePerServing'] ?? PHP_INT_MAX;
+                break;
+
+            case 'calories':
+                $aVal = $a['nutrition']['nutrients'][0]['amount'] ?? PHP_INT_MAX;
+                $bVal = $b['nutrition']['nutrients'][0]['amount'] ?? PHP_INT_MAX;
+                break;
+
+            default:
+                return 0;
+        }
+
+        return ($aVal <=> $bVal) * $dir;
+    });
+
+    return $results;
 }
 
 $cacheKey = [
@@ -71,25 +95,20 @@ $cacheKey = [
     'type' => $type,
     'intolerances' => $intolerances,
     'sort' => $sort,
-    'sortDirection' => $sortDirection, 
+    'sortDirection' => $sortDirection,
     'addRecipeNutrition' => $addRecipeNutritionValue
 ];
 
 $keyString = json_encode($cacheKey, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 $hash = md5($keyString);
 
-$stmt = $db->prepare("
-    SELECT search_id, search_parameter_string
-    FROM cached_search
-");
-
+$stmt = $db->prepare("SELECT search_id, search_parameter_string FROM cached_search");
 $stmt->execute();
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $searchId = null;
 
 foreach ($rows as $row) {
-
     $stored = json_decode($row['search_parameter_string'], true);
     if (!$stored) continue;
 
@@ -110,15 +129,11 @@ if ($searchId) {
     ");
 
     $stmt->execute([$searchId]);
-
     $recipeIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     if (!empty($recipeIds)) {
 
-        $placeholders = implode(
-            ',',
-            array_fill(0, count($recipeIds), '?')
-        );
+        $placeholders = implode(',', array_fill(0, count($recipeIds), '?'));
 
         $stmt = $db->prepare("
             SELECT recipe_json
@@ -128,16 +143,18 @@ if ($searchId) {
 
         $stmt->execute($recipeIds);
 
-        $recipes = array_map(
+        $results = array_map(
             fn($row) => json_decode($row, true),
             $stmt->fetchAll(PDO::FETCH_COLUMN)
         );
 
+        $results = array_values($results);
+        $results = sortRecipes($results, $sort, $sortDirection);
+
         echo json_encode([
             'source' => 'cache',
-            'results' => array_values($recipes)
+            'results' => $results
         ]);
-
         exit;
     }
 }
@@ -145,6 +162,7 @@ if ($searchId) {
 if ($ingredientSearch) {
 
     $baseUrl = 'https://api.spoonacular.com/recipes/findByIngredients';
+
     $params = [
         'ingredients' => implode(',', preg_split('/[\s,]+/', trim($query))),
         'number' => $number,
@@ -161,30 +179,12 @@ if ($ingredientSearch) {
         'fillIngredients' => 'true'
     ];
 
-    if ($cuisine !== '') {
-        $params['cuisine'] = $cuisine;
-    }
+    if ($cuisine) $params['cuisine'] = $cuisine;
+    if ($diet) $params['diet'] = $diet;
+    if ($maxTime) $params['maxReadyTime'] = $maxTime;
+    if ($type) $params['type'] = $type;
+    if ($intolerances) $params['intolerances'] = $intolerances;
 
-    if ($diet !== '') {
-        $params['diet'] = $diet;
-    }
-
-    if ($maxTime !== '') {
-        $params['maxReadyTime'] = $maxTime;
-    }
-
-    if ($type !== '') {
-        $params['type'] = $type;
-    }
-
-    if ($intolerances !== '') {
-        $params['intolerances'] = $intolerances;
-    }
-
-    if ($sort !== '') {
-        $params['sort'] = $sort;
-        $params['sortDirection'] = $sortDirection;
-    }
     $baseUrl = 'https://api.spoonacular.com/recipes/complexSearch';
 }
 
@@ -202,22 +202,18 @@ $results = $ingredientSearch
     ? $data
     : ($data['results'] ?? []);
 
+$results = sortRecipes($results, $sort, $sortDirection);
+
 if (!empty($results)) {
 
     try {
 
         $stmt = $db->prepare("
-            INSERT INTO cached_search
-            (
-                search_parameter_string
-            )
+            INSERT INTO cached_search (search_parameter_string)
             VALUES (?)
         ");
 
-        $stmt->execute([
-            $keyString
-        ]);
-
+        $stmt->execute([$keyString]);
         $searchId = $db->lastInsertId();
 
     } catch (PDOException $e) {
@@ -230,7 +226,6 @@ if (!empty($results)) {
         ");
 
         $stmt->execute([$keyString]);
-
         $searchId = $stmt->fetchColumn();
     }
 
@@ -238,19 +233,12 @@ if (!empty($results)) {
 
         foreach ($results as $recipe) {
 
-            if (!isset($recipe['id'])) {
-                continue;
-            }
+            if (!isset($recipe['id'])) continue;
 
             $stmt = $db->prepare("
-                INSERT INTO recipe
-                (
-                    recipe_id,
-                    recipe_json
-                )
+                INSERT INTO recipe (recipe_id, recipe_json)
                 VALUES (?, ?)
-                ON DUPLICATE KEY UPDATE
-                recipe_json = VALUES(recipe_json)
+                ON DUPLICATE KEY UPDATE recipe_json = VALUES(recipe_json)
             ");
 
             $stmt->execute([
@@ -259,11 +247,7 @@ if (!empty($results)) {
             ]);
 
             $stmt = $db->prepare("
-                INSERT INTO cached_search_results
-                (
-                    search_id,
-                    recipe_id
-                )
+                INSERT INTO cached_search_results (search_id, recipe_id)
                 VALUES (?, ?)
             ");
 
@@ -275,5 +259,7 @@ if (!empty($results)) {
     }
 }
 
-
-echo $response['body'];
+echo json_encode([
+    'source' => 'api',
+    'results' => $results
+]);
