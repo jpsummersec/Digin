@@ -4,6 +4,7 @@ include("include-dbhandler.php");
 include("include-loginrequired.php");
 include_once __DIR__ . '/include-spoonacular-api.php';
 
+$db = $dbHandler;
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -22,19 +23,63 @@ if (!isset($_GET['id'])) {
 
 $id = (int) $_GET['id'];
 
-// Fetch the full recipe like cuisine and analyzed instructions
-$responseData = spoonacularRequestWithKeyRotation("https://api.spoonacular.com/recipes/$id/information", [
-    'includeNutrition' => 'true',
-]);
+$recipe = null;
 
-if (!$responseData['success']) {
-    die('Failed to fetch recipe');
+// Try cache first
+$stmt = $db->prepare("
+    SELECT recipe_json
+    FROM recipe
+    WHERE recipe_id = ?
+    LIMIT 1
+");
+
+$stmt->execute([$id]);
+
+$cachedRecipe = $stmt->fetchColumn();
+
+if ($cachedRecipe) {
+    $recipe = json_decode($cachedRecipe, true);
 }
 
-$recipe = json_decode($responseData['body'], true);
+// If recipe doesn't exist in cache OR analyzedInstructions are missing
+if (
+    !$recipe ||
+    empty($recipe['analyzedInstructions'])
+) {
 
-if (!$recipe) {
-    die('Invalid recipe data');
+    $responseData = spoonacularRequestWithKeyRotation(
+        "https://api.spoonacular.com/recipes/$id/information",
+        [
+            'includeNutrition' => 'true',
+        ]
+    );
+
+    if (!$responseData['success']) {
+        die('Failed to fetch recipe');
+    }
+
+    $recipe = json_decode($responseData['body'], true);
+
+    if (!$recipe) {
+        die('Invalid recipe data');
+    }
+
+    // Update cache with full recipe including analyzedInstructions
+    $stmt = $db->prepare("
+        INSERT INTO recipe
+        (
+            recipe_id,
+            recipe_json
+        )
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE
+            recipe_json = VALUES(recipe_json)
+    ");
+
+    $stmt->execute([
+        $id,
+        json_encode($recipe)
+    ]);
 }
 
 // Spoonacular groups instructions, so flatten all groups into one ordered step list
