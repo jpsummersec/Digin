@@ -388,8 +388,8 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  min-width: 3.25rem;
-  min-height: 3.65rem;
+  width: 4.5rem;
+  height: 4.5rem;
   padding: 0.5rem 0.35rem 0.45rem;
   border-radius: 0.15rem;
   background: #f2f3f2;
@@ -402,18 +402,6 @@ button {
 .preference-chip.active {
   background: var(--primary);
   color: #ffffff;
-}
-
-.preference-icon {
-  display: grid;
-  place-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border: 0.1rem solid currentColor;
-  border-radius: 50%;
-  font-family: 'Inter-700-weight', var(--font);
-  font-size: 0.58rem;
-  line-height: 1;
 }
 
 .range-control,
