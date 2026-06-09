@@ -111,16 +111,31 @@ hr {
   margin-block: 10px;
 }
 
-/* Achievements */
+/* Achievements & Saved Recipes */
+
+.achievements h2,
+.saved-recipes h2 {
+  font-size: 0.8rem;
+}
 
 .achievements h2 {
-  font-size: 0.80rem;
   margin-top: 50px;
+}
+
+.saved-recipes h2 {
+  margin-top: 25px;
 }
 
 .achievement-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.saved-recipes-list {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 16px;
   margin-top: 16px;
 }
@@ -139,21 +154,18 @@ hr {
 }
 
 .achievement-item p,
-.empty-achievements {
+.empty-achievements,
+.saved-recipe-item p,
+.empty-saved-recipes {
   font-size: 0.65rem;
   font-family: 'Inter-regular';
 }
 
-.empty-achievements {
+.empty-achievements,
+.empty-saved-recipes {
   margin-top: 16px;
 }
 
-
-/* Favourite Dishes */
-.favourite-dishes h2 {
-  font-size: 0.8rem;
-  margin-top: 25px;
-}
 
 /* Spotify */
 .spotify {

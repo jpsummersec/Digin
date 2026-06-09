@@ -4,6 +4,9 @@ require_once __DIR__ . '/include-cannot-access-when-loggedin.php';
 include __DIR__ . '/include-dbhandler.php';
 
 $errors = [];
+// These variables control the success overlay and fetch response.
+$showRedirect = false;
+$isAjax = isset($_SERVER["HTTP_X_REQUESTED_WITH"]);
 
 $firstName = "";
 $lastName = "";
@@ -97,10 +100,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $hashedPassword
             ]);
 
-            header("Location: redirect.php");
-            exit;
+            // Log the new user in immediately after creating the account.
+            $_SESSION["user_id"] = $dbHandler->lastInsertId();
+            $_SESSION["first_name"] = $firstName;
+            $_SESSION["last_name"] = $lastName;
+            $_SESSION["email"] = $email;
+            $_SESSION["level"] = 1;
+            $_SESSION["xp"] = 0;
+
+            $showRedirect = true;
         }
     }
+}
+
+if ($isAjax) {
+    // Send the result back to the JavaScript form submission.
+    header("Content-Type: application/json");
+    $response = new stdClass();
+    $response->success = $showRedirect;
+    $response->errors = $errors;
+    echo json_encode($response);
+    exit;
+}
+
+if ($showRedirect) {
+    // Fallback for successful form submissions without JavaScript.
+    header("Location: search-page.php");
+    exit;
 }
 
 ?>
@@ -114,10 +140,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <title>Sign Up</title>
     <link rel="stylesheet" href="../css/root.css">
     <link rel="stylesheet" href="../css/create-account.css">
+    <link rel="stylesheet" href="../css/redirect.css">
 </head>
 
 <body>
-    <form class="container" action="create-account.php" method="POST">
+    <form class="container" id="auth-form" action="create-account.php" method="POST">
         <h1 class="logo"><img src="../images/digin_logo.svg" alt="logoDigIn" class="logoDigin"></h1>
         <img src="../images/cheficon-createacc.svg" alt="chefIcon" class="chefhat-icon">
         <h2>Your next bite starts here</h2>
@@ -125,17 +152,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             Create an account and join us today
         </p>
 
-        <?php
-        if (!empty($errors)) {
-            echo '<div class="error-message">';
-
-            foreach ($errors as $error) {
-                echo htmlspecialchars($error) . '<br>';
-            }
-
-            echo '</div>';
-        }
-        ?>
+        <div class="error-message" id="auth-errors" <?php if (empty($errors)) echo "hidden"; ?>>
+            <?php echo htmlspecialchars(implode("\n", $errors)); ?>
+        </div>
 
         <div class="row">
             <div class="input-box">
@@ -188,6 +207,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     </script>
 
+    <?php
+    // Adds the hidden success overlay and shared form submission script.
+    include __DIR__ . '/include-redirect.php';
+    ?>
 </body>
 
 </html>

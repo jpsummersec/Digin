@@ -4,6 +4,9 @@ require_once __DIR__ . '/include-cannot-access-when-loggedin.php';
 include __DIR__ . '/include-dbhandler.php';
 
 $errors = [];
+// These variables control the success overlay and fetch response.
+$showRedirect = false;
+$isAjax = isset($_SERVER["HTTP_X_REQUESTED_WITH"]);
 
 $email = "";
 $password = "";
@@ -58,12 +61,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION["level"] = $user["level"];
             $_SESSION["xp"] = $user["xp"];
 
-            header("Location: search-page.php");
-            exit;
+            $showRedirect = true;
         } else {
             $errors[] = "Invalid email or password.";
         }
     }
+}
+
+if ($isAjax) {
+    // Send the result back to the JavaScript form submission.
+    header("Content-Type: application/json");
+    $response = new stdClass();
+    $response->success = $showRedirect;
+    $response->errors = $errors;
+    echo json_encode($response);
+    exit;
+}
+
+if ($showRedirect) {
+    // Fallback for successful form submissions without JavaScript.
+    header("Location: search-page.php");
+    exit;
 }
 
 ?>
@@ -77,25 +95,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <title>Sign in</title>
     <link rel="stylesheet" href="../css/create-account.css">
     <link rel="stylesheet" href="../css/root.css">
+    <link rel="stylesheet" href="../css/redirect.css">
 </head>
 
 <body>
-    <form class="container signin-container" action="signin.php" method="POST">
+    <form class="container signin-container" id="auth-form" action="signin.php" method="POST">
         <h1 class="logo"><img src="../images/digin_logo.svg" alt="logoDigIn" class="logoDigin"></h1>
         <img src="../images/burger.svg" alt="burger-icon" class="burger-icon">
         <h1>Sign in to continue to your account</h1>
 
-        <?php
-        if (!empty($errors)) {
-            echo '<div class="error-message">';
-
-            foreach ($errors as $error) {
-                echo htmlspecialchars($error) . '<br>';
-            }
-
-            echo '</div>';
-        }
-        ?>
+        <div class="error-message" id="auth-errors" <?php if (empty($errors)) echo "hidden"; ?>>
+            <?php echo htmlspecialchars(implode("\n", $errors)); ?>
+        </div>
 
         <div class="input-box">
             <img src="../images/emailIcon.svg" alt="email-icon" class="input-icon">
@@ -131,6 +142,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     </script>
 
+    <?php
+    // Adds the hidden success overlay and shared form submission script.
+    include __DIR__ . '/include-redirect.php';
+    ?>
 </body>
 
 </html>

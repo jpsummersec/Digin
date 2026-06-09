@@ -118,10 +118,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'login') {
 
 $user = null;
 $achievements = [];
+$savedRecipes = [];
 
 if (isset($dbHandler)) {
 	// get user info based on user ID
-	try { 
+	try {
 		$statement = $dbHandler->prepare('SELECT * FROM `user` WHERE `user_id` = :userId');
 		$statement->bindValue(':userId', $userId, PDO::PARAM_INT); 
 		$statement->execute();
@@ -150,7 +151,28 @@ if (isset($dbHandler)) {
 	catch(PDOException $exception) {
 		die('Select error: ' . $exception->getMessage());
 	}
+
+	// get saved recipes based on user ID
+	try {
+		$statement = $dbHandler->prepare('
+			SELECT r.`recipe_id`, r.`recipe_json`
+			FROM `user_saved_recipe` ur
+			INNER JOIN `recipe` r
+				ON r.`recipe_id` = ur.`recipe_id`
+			WHERE ur.`user_id` = :userId
+		');
+		$statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+		$statement->execute();
+		$savedRecipes = $statement->fetchAll(PDO::FETCH_ASSOC);
+		$statement->closeCursor();
+	}
+	catch(PDOException $exception) {
+		die('Select error: ' . $exception->getMessage());
+	}
 }
+
+$recipeDetailsUrl = '../php/recipe.php';
+
 ?>
 
 <!DOCTYPE html>
@@ -159,6 +181,7 @@ if (isset($dbHandler)) {
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Document</title>
+		<link rel="stylesheet" href="../css/search-page.css">
 		<link rel="stylesheet" href="../css/root.css">
 		<link rel="stylesheet" href="../css/profile-page.css">
 	</head>
@@ -216,8 +239,77 @@ if (isset($dbHandler)) {
 
 		
 
-		<div class="favourite-dishes">
-			<h2>Favorite Dishes</h2>
+		<div class="saved-recipes">
+			<h2>Saved Recipes</h2>
+
+			<?php if (empty($savedRecipes)) { ?>
+				<p class="empty-saved-recipes">No saved recipes yet.</p>
+			<?php } else { ?>
+				<div class="saved-recipes-list">
+					<?php foreach ($savedRecipes as $savedRecipe) { ?>
+						<?php
+						$recipe = json_decode($savedRecipe['recipe_json'], true);
+
+						if (!is_array($recipe)) {
+							continue;
+						}
+
+						$recipeId = $recipe['id'];
+						$title = $recipe['title'];
+						$image = $recipe['image'];
+						$time = $recipe['readyInMinutes'] . ' minutes';
+						
+						if (isset($recipe['extendedIngredients']) && is_array($recipe['extendedIngredients'])) {
+							$ingredients = $recipe['extendedIngredients'];
+						} elseif (isset($recipe['usedIngredients']) && is_array($recipe['usedIngredients'])) {
+							$ingredients = $recipe['usedIngredients'];
+						} elseif (isset($recipe['missedIngredients']) && is_array($recipe['missedIngredients'])) {
+							$ingredients = $recipe['missedIngredients'];
+						}
+
+						$spoonacularScore = $recipe['spoonacularScore'];
+						
+						$starScore = min(max((float) $spoonacularScore / 20, 0), 5);
+						$fullStars = round($starScore);
+
+						
+						foreach ($recipe['nutrition']['nutrients'] as $nutrient) {
+							if (isset($nutrient['name']) && $nutrient['name'] === 'Calories') {
+								$calorieAmount = $nutrient['amount'];
+								$calorieUnit = $nutrient['unit'];
+								$calories = round($calorieAmount) . ' ' . $calorieUnit;
+								break;
+							}
+						}
+						
+						?>
+						<article class="recipe saved-recipe-item">
+							<a class="recipe-link" href="<?php echo htmlspecialchars($recipeDetailsUrl . '?id=' . $recipeId); ?>">
+							<img class="recipe-image" src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($title); ?>" loading="lazy">
+							<div class="recipe-content">
+								<h2><?php echo htmlspecialchars($title); ?></h2>
+								<div class="recipe-meta">
+									<span><span class="meta-bolt" aria-hidden="true"><img src="../images/search-page/calories.svg"></span><?php echo htmlspecialchars($calories); ?></span>
+									<span><span class="meta-clock" aria-hidden="true"><img src="../images/search-page/time.svg"></span><?php echo htmlspecialchars($time); ?></span>
+								</div>
+								<span class="meta-rating" aria-hidden="true">
+									<?php for ($star = 0; $star < 5; $star++) { ?>
+										<?php
+										$starClass = 'is-empty';
+
+										if ($star < $fullStars) {
+											$starClass = 'is-filled';
+										}
+										?>
+										<span class="rating-star <?php echo $starClass; ?>" aria-hidden="true">⭐</span>
+									<?php } ?>
+								</span>
+							</div>
+							</a>
+						</article>
+					<?php } ?>
+				</div>
+				<?php } ?>
 			<hr>
 		</div>
 

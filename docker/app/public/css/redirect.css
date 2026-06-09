@@ -1,16 +1,23 @@
-body
+#redirect-overlay
 {
-    max-width: 420px;
-    margin: 0 auto;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
     background-color: var(--accent);
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+}
+
+/* Keep the redirect overlay out of view before authentication succeeds. */
+#redirect-overlay[hidden]
+{
+    display: none;
 }
 
 #redirect-container
 {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -30,9 +37,13 @@ body
 {
     width: 200px;
     height: auto;
-
-    animation: squat-bounce 0.75s ease-in-out infinite;
     transform-origin: bottom center;
+}
+
+/* Start the bounce only when JavaScript adds this class. */
+#brand.is-bouncing
+{
+    animation: squat-bounce 0.75s ease-in-out infinite;
 }
 
 @keyframes squat-bounce
@@ -65,14 +76,8 @@ body
     margin-top: 8px;
 }
 
-#stuck
+/* Preserve line breaks between validation errors. */
+#auth-errors
 {
-    font-size: 0.95rem;
-    font-weight: 600;
-}
-
-#stuck a
-{
-    color: var(--background);
-    text-decoration: underline;
+    white-space: pre-line;
 }
