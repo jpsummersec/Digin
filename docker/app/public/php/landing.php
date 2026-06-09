@@ -27,8 +27,8 @@ $hero_buttons = [
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?= htmlspecialchars($page_title) ?></title>
-  <link rel="stylesheet" href="../css/landing.css" />
   <link rel="stylesheet" href="../css/root.css">
+  <link rel="stylesheet" href="../css/landing.css" />
 </head>
 
 <body>
@@ -125,7 +125,7 @@ $hero_buttons = [
             <div class="blob blob-peach" aria-hidden="true"></div>
 
             <div class="hero-photo">
-              <img src="../images/hero-food.svg" alt="Various delicious meals prepared with DigIn" />
+              <img src="../images/hero-food2.jpeg" alt="Various delicious meals prepared with DigIn" />
             </div>
 
             <div class="photo-label">
@@ -153,16 +153,16 @@ $hero_buttons = [
           <div class="feat">
             <img src="../images/menu_card.svg" alt="Menu card" />
             <div class="feat-text">
-              <strong>Meal Plans</strong>
-              <span>Personalized plans for your lifestyle</span>
+              <strong>Fresh Ingredients</strong>
+              <span>Sourced locally and delivered at peak freshness</span>
             </div>
           </div>
 
           <div class="feat">
             <img src="../images/Chef.svg" alt="Community" />
             <div class="feat-text">
-              <strong>Community</strong>
-              <span>Share, ask and grow together</span>
+              <strong>Chef-Crafted</strong>
+              <span>Restaurant-quality meals made by professional chefs</span>
             </div>
           </div>
 

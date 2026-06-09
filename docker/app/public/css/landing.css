@@ -319,6 +319,8 @@ nav {
   z-index: 2;
   width: 100%;
   max-width: 520px;
+  aspect-ratio: 4 / 3;
+  max-height: min(460px, 58vh);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -363,7 +365,7 @@ nav {
 .features-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
+  gap: clamp(.9rem, 2vw, 1.25rem);
   background: #f0f4f0;
   border-radius: 1.25rem;
   padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem);
@@ -371,14 +373,27 @@ nav {
 
 .feat {
   display: flex;
-  align-items: center;
-  gap: .9rem;
+  align-items: flex-start;
+  gap: .85rem;
+  min-width: 0;
 }
 
+.feat>img,
 .feat-icon-wrap {
   flex-shrink: 0;
   width: 52px;
   height: 52px;
+}
+
+.feat>img {
+  object-fit: contain;
+  padding: .6rem;
+  border: 2px solid var(--green);
+  border-radius: 50%;
+  background: var(--white);
+}
+
+.feat-icon-wrap {
   border: 2px solid var(--green);
   border-radius: 50%;
   display: flex;
@@ -397,6 +412,8 @@ nav {
   display: flex;
   flex-direction: column;
   gap: .2rem;
+  min-width: 0;
+  padding-top: .2rem;
 }
 
 .feat-text strong {
@@ -412,6 +429,7 @@ nav {
   font-size: .8rem;
   color: var(--mid);
   line-height: 1.35;
+  text-wrap: pretty;
 }
 
 @media (max-width: 900px) {
@@ -423,6 +441,10 @@ nav {
 @media (max-width: 500px) {
   .features-strip {
     grid-template-columns: 1fr;
+  }
+
+  .feat {
+    align-items: center;
   }
 }
 
@@ -533,6 +555,7 @@ footer {
 
   .hero-photo {
     max-width: 100%;
+    max-height: 320px;
   }
 
   .blob-green {
