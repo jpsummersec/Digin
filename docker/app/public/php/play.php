@@ -3,7 +3,7 @@
 require_once __DIR__ . '/include-loginrequired.php';
 
 // Load the Spotify app credentials used when an expired token must be refreshed.
-$config = require __DIR__ . '/config.php';
+$config = require __DIR__ . '/../test/php/config.php';
 $client_id = $config['SPOTIFY_CLIENT_ID'] ?? null;
 $client_secret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
 
