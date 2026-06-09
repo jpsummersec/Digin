@@ -36,6 +36,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $statement->bindValue(':recipeId', $recipeId, PDO::PARAM_INT);
             $statement->execute();
             $statement->closeCursor();
+
+            $statement = $dbHandler->prepare('
+                SELECT `recipe_json`
+                FROM `recipe`
+                WHERE `recipe_id` = :recipeId
+            ');
+            $statement->bindValue(':recipeId', $recipeId, PDO::PARAM_INT);
+            $statement->execute();
+            $recipeJson = $statement->fetchColumn();
+            $statement->closeCursor();
+
+            $xpEarned = 0;
+            $recipeData = json_decode($recipeJson, true);
+
+            if (isset($recipeData['readyInMinutes']) && is_numeric($recipeData['readyInMinutes']) && $recipeData['readyInMinutes'] > 0) {
+                $xpEarned = (int) $recipeData['readyInMinutes'] * 10;
+            }
+
+            $statement = $dbHandler->prepare('
+                SELECT `xp`, `level`
+                FROM `user`
+                WHERE `user_id` = :userId
+            ');
+            $statement->bindValue(':userId', $_SESSION['user_id'], PDO::PARAM_INT);
+            $statement->execute();
+            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            $statement->closeCursor();
+
+            $currentXp = $user['xp'] + $xpEarned;
+            $currentLevel = $user['level'];
+            $xpToNextLevel = 100 * $currentLevel * 2;
+
+            while ($currentXp >= $xpToNextLevel) {
+                $currentXp = $currentXp - $xpToNextLevel;
+                $currentLevel++;
+
+                if ($currentLevel == 5 || $currentLevel == 10 || $currentLevel == 15 || $currentLevel == 20) {
+                    $achievementId = (int) ($currentLevel / 5);
+
+                    $statement = $dbHandler->prepare('
+                        INSERT IGNORE INTO `user_achievement` (`user_id`, `achievement_id`)
+                        VALUES (:userId, :achievementId)
+                    ');
+                    $statement->bindValue(':userId', $_SESSION['user_id'], PDO::PARAM_INT);
+                    $statement->bindValue(':achievementId', $achievementId, PDO::PARAM_INT);
+                    $statement->execute();
+                    $statement->closeCursor();
+                }
+
+                $xpToNextLevel = 100 * $currentLevel * 2;
+            }
+
+            $statement = $dbHandler->prepare('
+                UPDATE `user`
+                SET `xp` = :xp, `level` = :level
+                WHERE `user_id` = :userId
+            ');
+            $statement->bindValue(':xp', $currentXp, PDO::PARAM_INT);
+            $statement->bindValue(':level', $currentLevel, PDO::PARAM_INT);
+            $statement->bindValue(':userId', $_SESSION['user_id'], PDO::PARAM_INT);
+            $statement->execute();
+            $statement->closeCursor();
         }
         catch(PDOException $exception) {
             http_response_code(500);
