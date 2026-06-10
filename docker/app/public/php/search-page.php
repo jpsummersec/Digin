@@ -40,6 +40,7 @@ catch(PDOException $exception) {
 </head>
 
 <body>
+    <?php include __DIR__ . '/menu.php'; ?>
     <main class="search-page">
         <div class="topbar">
             <button type="button" class="back-btn" aria-label="Back">

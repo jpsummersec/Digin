@@ -121,8 +121,9 @@ $stepsTruncated = count($steps) > 3; //how many steps are there after the initia
 </head>
 
 <body>
+    <?php include __DIR__ . '/menu.php'; ?>
     <nav id="nav-bar">
-        <a id="back-button" href="recipe.php"><img src="../images/recipe-page/arrow.svg" alt="Back"></a>
+        <a id="back-button" href="search-page.php"><img src="../images/recipe-page/arrow.svg" alt="Back"></a>
         <span class="title">Recipe</span>
     </nav>
 

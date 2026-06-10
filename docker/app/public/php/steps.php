@@ -230,7 +230,7 @@ if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
 </head>
 
 <body>
-
+    <?php include __DIR__ . '/menu.php'; ?>
     <nav id="nav-bar">
         <a id="back-button" href="recipe.php?id=<?php echo htmlspecialchars($id); ?>"><img src="../images/recipe-page/arrow.svg" alt="Back"></a>
         <span class="title">Cooking Mode</span>

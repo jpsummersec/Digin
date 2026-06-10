@@ -27,6 +27,7 @@ foreach (glob(__DIR__ . '/../audio/*.mp3') ?: [] as $filePath) {
 </head>
 
 <body>
+    <?php include __DIR__ . '/menu.php'; ?>
     <main class="cooking-container">
         <div id="gordon-alert-banner" role="status" aria-live="assertive"></div>
 

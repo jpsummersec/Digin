@@ -186,6 +186,7 @@ $recipeDetailsUrl = '../php/recipe.php';
 		<link rel="stylesheet" href="../css/profile-page.css">
 	</head>
 	<body>
+		<?php include __DIR__ . '/menu.php'; ?>
 		<h1 class="page-title">Your Profile</h1>
 		<?php if ($uploadError !== '') { ?>
 			<p class="upload-error"><?php echo htmlspecialchars($uploadError); ?></p>
