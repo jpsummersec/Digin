@@ -30,41 +30,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <?php if ($isLoggedIn): ?>
             <a href="logout.php" class="digin-dropdown-link">Logout</a>
         <?php else: ?>
-            <a href="signin.php" class="digin-dropdown-link <?= ($currentPage === 'signin.php' || $currentPage === 'create-account.php') ? 'active' : '' ?>">Sign In</a>
+            <a href="signin.php" class="digin-dropdown-link <?= ($currentPage === 'signin.php' || $currentPage === 'create-account.php') ? 'active' : '' ?>">Log out</a>
         <?php endif; ?>
     </div>
 </header>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const menuBtn = document.getElementById('diginMenuBtn');
-    const dropdown = document.getElementById('diginDropdown');
-    
-    if (menuBtn && dropdown) {
-        menuBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            const isOpen = dropdown.classList.toggle('active');
-            menuBtn.classList.toggle('open');
-            menuBtn.setAttribute('aria-expanded', isOpen);
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', (event) => {
-            if (!dropdown.contains(event.target) && !menuBtn.contains(event.target)) {
-                dropdown.classList.remove('active');
-                menuBtn.classList.remove('open');
-                menuBtn.setAttribute('aria-expanded', 'false');
-            }
-        });
-        
-        // Close menu on pressing Escape key
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                dropdown.classList.remove('active');
-                menuBtn.classList.remove('open');
-                menuBtn.setAttribute('aria-expanded', 'false');
-            }
-        });
-    }
-});
-</script>
+<script src="../js/menu.js"></script>

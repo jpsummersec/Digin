@@ -6,15 +6,6 @@ include __DIR__ . '/include-dbhandler.php';
 
 $page_title = "DigIn – Cook Smarter. Eat Better. Every Day.";
 
-$nav_links = [
-
-  "Search"     => "search-page.php",
-  "Recipes"    => "recipe.php",
-  "Profile"  => "profile-page.php",
-  "Sign In"    => "signin.php",
-];
-
-
 $hero_buttons = [
   ["label" => "Sign Up", "class" => "btn-primary", "href" => "create-account.php"],
   ["label" => "Sign In", "class" => "btn-outline", "href" => "signin.php"],
@@ -33,38 +24,7 @@ $hero_buttons = [
 
 <body>
 
-  <nav>
-    <div class="container">
-      <div class="nav-inner">
-
-        <a href="#" class="logo">
-          <img src="../images/digin_logo.svg" alt="DigIn" />
-        </a>
-
-        <ul class="nav-links">
-          <?php foreach ($nav_links as $label => $href): ?>
-            <li>
-              <a href="<?= htmlspecialchars($href) ?>"
-                <?= $label === 'Sign In' ? 'class="nav-cta"' : '' ?>>
-                <?= htmlspecialchars($label) ?>
-              </a>
-            </li>
-          <?php endforeach; ?>
-        </ul>
-
-        <button class="hamburger" id="menuBtn" aria-label="Toggle menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-
-      </div>
-    </div>
-
-    <div class="mobile-nav" id="mobileNav" role="navigation">
-      <?php foreach ($nav_links as $label => $href): ?>
-        <a href="<?= htmlspecialchars($href) ?>"><?= htmlspecialchars($label) ?></a>
-      <?php endforeach; ?>
-    </div>
-  </nav>
+  <?php include __DIR__ . '/menu.php'; ?>
 
   <main>
 
@@ -188,22 +148,7 @@ $hero_buttons = [
     </div>
   </footer>
 
-  <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const mobileNav = document.getElementById('mobileNav');
 
-    menuBtn.addEventListener('click', () => {
-      const isOpen = mobileNav.classList.toggle('open');
-      menuBtn.setAttribute('aria-expanded', isOpen);
-    });
-
-    mobileNav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        mobileNav.classList.remove('open');
-        menuBtn.setAttribute('aria-expanded', 'false');
-      });
-    });
-  </script>
 
 </body>
 

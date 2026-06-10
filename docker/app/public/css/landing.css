@@ -325,7 +325,12 @@ nav {
   overflow: hidden;
   box-shadow: var(--shadow-card);
   background: var(--green-faint);
-  /* fallback */
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-photo:hover {
+  transform: scale(1.02) translateY(-6px);
+  box-shadow: 0 20px 50px rgba(30, 122, 62, 0.18);
 }
 
 .hero-photo img {
@@ -333,6 +338,11 @@ nav {
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-photo:hover img {
+  transform: scale(1.06);
 }
 
 .photo-label {
@@ -376,6 +386,11 @@ nav {
   align-items: flex-start;
   gap: .85rem;
   min-width: 0;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.feat:hover {
+  transform: translateY(-5px);
 }
 
 .feat>img,
@@ -391,6 +406,11 @@ nav {
   border: 2px solid var(--green);
   border-radius: 50%;
   background: var(--white);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+}
+
+.feat:hover>img {
+  transform: scale(1.12) rotate(6deg);
 }
 
 .feat-icon-wrap {
@@ -458,13 +478,19 @@ footer {
   margin-top: clamp(1rem, 3vw, 2rem);
 }
 
+/*   RESPONSIVE  –  Tablet  (≤ 900 px) */
+@media (max-width: 900px) {
+  .hero-grid {
+    gap: 2rem;
+  }
+}
+
 /*ANIMATIONS*/
 @keyframes fadeUp {
   from {
     opacity: 0;
     transform: translateY(28px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -475,71 +501,103 @@ footer {
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
 }
 
-@keyframes floatBlob {
-
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
+@keyframes growDivider {
+  from {
+    width: 0;
   }
-
-  50% {
-    transform: translateY(-12px) scale(1.03);
+  to {
+    width: 140px;
   }
 }
 
-/* Hero content staggered fade-up */
-.hero-content>* {
-  animation: fadeUp .7s both;
+/* Organic Morphing Blobs */
+@keyframes morphBlobGreen {
+  0%, 100% {
+    border-radius: 60% 40% 55% 45% / 50% 45% 55% 50%;
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    border-radius: 45% 55% 40% 60% / 40% 60% 50% 50%;
+    transform: translate(12px, -20px) scale(1.05);
+  }
+  66% {
+    border-radius: 50% 50% 60% 40% / 60% 40% 45% 55%;
+    transform: translate(-12px, 12px) scale(0.95);
+  }
 }
 
-.hero-content>*:nth-child(1) {
-  animation-delay: .05s;
+@keyframes morphBlobPeach {
+  0%, 100% {
+    border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    border-radius: 60% 40% 60% 40% / 40% 60% 40% 60%;
+    transform: translate(-20px, 20px) scale(1.06);
+  }
+  66% {
+    border-radius: 40% 60% 45% 55% / 55% 45% 60% 40%;
+    transform: translate(20px, -12px) scale(0.94);
+  }
 }
 
-.hero-content>*:nth-child(2) {
-  animation-delay: .15s;
+/* Hero content staggered fade-up with customized cubic-bezier */
+.hero-content > * {
+  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.hero-content>*:nth-child(3) {
-  animation-delay: .22s;
+.hero-content > *:nth-child(1) {
+  animation-delay: 0.05s;
 }
 
-.hero-content>*:nth-child(4) {
-  animation-delay: .30s;
+.hero-content > *:nth-child(2) {
+  animation-delay: 0.15s;
 }
 
-.hero-content>*:nth-child(5) {
-  animation-delay: .38s;
+.hero-content > *:nth-child(3) {
+  animation-delay: 0.22s;
+}
+
+/* Specific divider animation */
+.hero-content > .divider {
+  animation: growDivider 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.22s;
+}
+
+.hero-content > *:nth-child(4) {
+  animation-delay: 0.32s;
+}
+
+.hero-content > *:nth-child(5) {
+  animation-delay: 0.42s;
 }
 
 .hero-visual {
-  animation: fadeIn .9s .2s both;
+  animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
 .blob-green {
-  animation: floatBlob 6s ease-in-out infinite;
+  animation: morphBlobGreen 10s ease-in-out infinite;
 }
 
 .blob-peach {
-  animation: floatBlob 7s ease-in-out 1s infinite;
+  animation: morphBlobPeach 12s ease-in-out 1s infinite;
 }
 
-.features-img-wrap {
-  animation: fadeUp .7s .1s both;
+/* Staggered load entrance for features cards */
+.features-strip .feat {
+  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/*   RESPONSIVE  –  Tablet  (≤ 900 px) */
-@media (max-width: 900px) {
-  .hero-grid {
-    gap: 2rem;
-  }
-}
+.features-strip .feat:nth-child(1) { animation-delay: 0.5s; }
+.features-strip .feat:nth-child(2) { animation-delay: 0.6s; }
+.features-strip .feat:nth-child(3) { animation-delay: 0.7s; }
+.features-strip .feat:nth-child(4) { animation-delay: 0.8s; }
 
 /*    RESPONSIVE  –  Mobile  (≤ 680 px) */
 @media (max-width: 680px) {
