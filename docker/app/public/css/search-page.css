@@ -122,6 +122,7 @@ button {
 }
 
 .recipe {
+  position: relative;
   overflow: hidden;
   border-radius: 0.42rem;
   background: #effcfb;
@@ -153,12 +154,34 @@ button {
 }
 
 .recipe-content h2 {
+  padding-right: 2rem;
   margin-bottom: 0.28rem;
   color: var(--primary-text);
   font-family: 'Inter-700-weight', var(--font);
   font-size: clamp(0.94rem, 3.2vw, 1.2rem);
   line-height: 1.2;
   overflow-wrap: anywhere;
+}
+
+.favorite-btn {
+    top: 20px;
+    right: 20px;
+    position: absolute;
+    display: grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    place-items: center;
+    border: 0;
+    background-color: var(--background);
+    color: var(--primary-text);
+    cursor: pointer;
+}
+
+.favorite-btn img {
+    width: 1.25rem;
+    height: 1.25rem;
+    display: block;
 }
 
 .recipe-meta {

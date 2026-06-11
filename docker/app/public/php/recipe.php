@@ -142,6 +142,11 @@ $stepsTruncated = count($steps) > 3; //how many steps are there after the initia
             <div id="recipe-title">
                 <span class="title"><?php echo htmlspecialchars($recipe['title']); ?></span>
             </div>
+            <div id="favorite-button-div">
+                <button type="button" class="favorite-btn" aria-label="Add <?php echo htmlspecialchars($recipe['title']); ?> to favorites" aria-pressed="false">
+                    <img src="../images/search-page/heart-empty.svg" alt="heart-empty" aria-hidden="true">
+                </button>
+            </div>
             <div id="recipe-data">
                 <div id="calories-border">
                     <img src="../images/recipe-page/bolt.svg" alt="">
@@ -295,6 +300,21 @@ $stepsTruncated = count($steps) > 3; //how many steps are there after the initia
                 btn.textContent = 'View all';
             }
         }
+
+        const favoriteButton = document.querySelector('.favorite-btn');
+
+        favoriteButton.addEventListener('click', () => {
+            const isFavorite = favoriteButton.getAttribute('aria-pressed') === 'true';
+            const favoriteImage = favoriteButton.querySelector('img');
+            const recipeTitle = <?php echo json_encode($recipe['title']); ?>;
+
+            favoriteButton.setAttribute('aria-pressed', String(!isFavorite));
+            favoriteButton.setAttribute(
+                'aria-label',
+                `${isFavorite ? 'Add' : 'Remove'} ${recipeTitle} ${isFavorite ? 'to' : 'from'} favorites`
+            );
+            favoriteImage.src = `../images/search-page/heart-${isFavorite ? 'empty' : 'full'}.svg`;
+        });
     </script>
 </body>
 

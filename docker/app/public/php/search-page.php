@@ -134,6 +134,9 @@ try {
                                     </span>
                                 </div>
                             </a>
+                            <button type="button" class="favorite-btn" aria-label="Add <?php echo htmlspecialchars($title); ?> to favorites" aria-pressed="false">
+                                <img src="../images/search-page/heart-empty.svg" alt="" aria-hidden="true">
+                            </button>
                         </article>
                     <?php } ?>
                 </div>

@@ -139,6 +139,9 @@ function renderRecipe(recipe) {
 				<span class="meta-rating" aria-hidden="true">${rating}</span>
 			</div>
 		</a>
+		<button type="button" class="favorite-btn" aria-label="Add ${title} to favorites" aria-pressed="false">
+			<img src="../images/search-page/heart-empty.svg" alt="" aria-hidden="true">
+		</button>
 	`;
 
 	resultsDiv.appendChild(recipeDiv);
@@ -288,6 +291,25 @@ clearFilters.addEventListener('click', () => {
 numberOfResults.addEventListener('input', () => {
 	numberOfResultsValue.value = numberOfResults.value;
 	numberOfResultsValue.textContent = numberOfResults.value;
+});
+
+document.addEventListener('click', event => {
+	const favoriteButton = event.target.closest('.favorite-btn');
+
+	if (!favoriteButton) {
+		return;
+	}
+
+	const isFavorite = favoriteButton.getAttribute('aria-pressed') === 'true';
+	const favoriteImage = favoriteButton.querySelector('img');
+	const recipeTitle = favoriteButton.closest('.recipe')?.querySelector('h2')?.textContent.trim() || 'recipe';
+
+	favoriteButton.setAttribute('aria-pressed', String(!isFavorite));
+	favoriteButton.setAttribute(
+		'aria-label',
+		`${isFavorite ? 'Add' : 'Remove'} ${recipeTitle} ${isFavorite ? 'to' : 'from'} favorites`
+	);
+	favoriteImage.src = `../images/search-page/heart-${isFavorite ? 'empty' : 'full'}.svg`;
 });
 
 document.addEventListener('keydown', event => {
