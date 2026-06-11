@@ -9,7 +9,7 @@ const backgroundAudio = document.getElementById('background-audio');
 
 const stepAudios = [
   '../audio/idkwheretostart.mp3',
-  '../audio/idkwheretostart.mp3',
+  '../audio/yourunashithole.mp3',
   '../audio/idkwheretostart.mp3',
 ];
 
@@ -17,9 +17,28 @@ const randomPressureAudios = [
   '../audio/idtyoucancook.mp3',
   '../audio/waitingfortalent.mp3',
   '../audio/burntpan.mp3',
+  '../audio/whatisthatshit.mp3',
+  '../audio/youwastedmostexpensive.mp3',
+  '../audio/areuconsistantlyshit.mp3',
+  '../audio/whatthatstink.mp3',
+  '../audio/iaskedwhatyoudoing.mp3',
+];
+
+function setSpotifyVolume(volume) {
+  fetch(`/php/spotify-volume.php?volume=${volume}`)
+    .then((response) => response.text())
+    .then((data) => console.log('Spotify volume:', data))
+    .catch((error) => console.log('Spotify volume error:', error));
+}
+
+const finishAudios = [
+  '../audio/goodjob.mp3',
+  '../audio/welldone.mp3',
+  '../audio/finally.mp3',
 ];
 
 let pressureTimer = null;
+let lastPressureAudio = -1;
 
 function startRandomPressureTimer() {
   clearTimeout(pressureTimer);
@@ -37,31 +56,43 @@ function startRandomPressureTimer() {
 }
 
 function playRandomPressureAudio() {
-  const randomIndex = Math.floor(Math.random() * randomPressureAudios.length);
+  let randomIndex;
 
-  backgroundAudio.pause();
+  do {
+    randomIndex = Math.floor(Math.random() * randomPressureAudios.length);
+  } while (
+    randomPressureAudios.length > 1 &&
+    randomIndex === lastPressureAudio
+  );
+
+  lastPressureAudio = randomIndex;
+
+  setSpotifyVolume(30); // lower Spotify BEFORE Gordon starts
 
   gordonAudio.pause();
   gordonAudio.currentTime = 0;
+  gordonAudio.volume = 1.0;
   gordonAudio.src = randomPressureAudios[randomIndex];
 
-  gordonAudio.play().catch((error) => {
-    console.log('Pressure audio error:', error);
-  });
+  setTimeout(() => {
+    gordonAudio.play().catch((error) => {
+      console.log('Pressure audio error:', error);
+    });
+  }, 500);
 
   gordonAudio.onended = function () {
-    backgroundAudio.play();
+    setSpotifyVolume(80);
   };
 }
 
 function playStepAudio() {
   const audioIndex = currentStepIndex % stepAudios.length;
 
-  backgroundAudio.pause();
-  backgroundAudio.currentTime = 0;
+  setSpotifyVolume(15); // Spotify quieter
 
   gordonAudio.pause();
   gordonAudio.currentTime = 0;
+  gordonAudio.volume = 1.0; // Gordon loud
   gordonAudio.src = stepAudios[audioIndex];
 
   gordonAudio.play().catch((error) => {
@@ -69,8 +100,7 @@ function playStepAudio() {
   });
 
   gordonAudio.onended = function () {
-    backgroundAudio.volume = 0.25;
-    backgroundAudio.play();
+    setSpotifyVolume(80);
   };
 
   startRandomPressureTimer();
@@ -94,7 +124,7 @@ function updateStepDisplay(playAudio = true) {
     }
 
     if (playAudio) {
-      playStepAudio();
+      startRandomPressureTimer();
     }
 
     // Scroll to the step
@@ -195,5 +225,5 @@ updateStepDisplay(false);
 
 if (sessionStorage.getItem('playStepOneAudio') === 'yes') {
   sessionStorage.removeItem('playStepOneAudio');
-  playStepAudio();
+  startRandomPressureTimer();
 }
