@@ -20,8 +20,7 @@ try {
     $statement->execute();
     $cookedRecipes = $statement->fetchAll(PDO::FETCH_ASSOC);
     $statement->closeCursor();
-}
-catch(PDOException $exception) {
+} catch (PDOException $exception) {
     die('Select error: ' . $exception->getMessage());
 }
 
@@ -316,13 +315,13 @@ catch(PDOException $exception) {
 
                     <div class="chip-group text-chip-group" id="sortSelect" data-single-select="true">
                         <button type="button" data-value="popularity">Popularity</button>
-                        <button type="button" data-value="meta-score">Score</button>
+                        <button type="button" data-value="spoonacularScore">Score</button>
                         <button type="button" data-value="time">Time</button>
-                        <button type="button" data-value="healthiness">Healthiness</button>
+                        <button type="button" data-value="healthScore">Healthiness</button>
                         <button type="button" data-value="price">Price</button>
                         <button type="button" data-value="random">Random</button>
                         <button type="button" data-value="calories">Calories</button>
-                        <button type="button" data-value="max-used-ingredients">Max used ingredients</button>
+                        <button type="button" data-value="likes">Likes</button>
                     </div>
 
                     <div class="sort-direction">

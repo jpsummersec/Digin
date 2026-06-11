@@ -168,7 +168,7 @@ function buildSearchParams() {
 		number: numberOfResults.value,
 		addRecipeNutrition: 'true',
 		ingredientSearch: ingredientMode ? 'true' : 'false',
-		sortDirection 
+		sortDirection: sortDirection 
 	});
 
 	if (!ingredientMode) {

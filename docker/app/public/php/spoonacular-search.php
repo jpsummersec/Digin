@@ -47,8 +47,6 @@ function sortRecipes(array $results, string $sort, string $direction = 'asc'): a
     usort($results, function ($a, $b) use ($sort, $dir) {
 
         switch ($sort) {
-
-            case 'time':
             case 'readyInMinutes':
                 $aVal = $a['readyInMinutes'] ?? PHP_INT_MAX;
                 $bVal = $b['readyInMinutes'] ?? PHP_INT_MAX;
@@ -59,10 +57,18 @@ function sortRecipes(array $results, string $sort, string $direction = 'asc'): a
                 $bVal = $b['healthScore'] ?? 0;
                 break;
 
+            case 'spoonacularScore':
+                $aVal = $a['spoonacularScore'] ?? 0;
+                $bVal = $b['spoonacularScore'] ?? 0;
+                break;
+
             case 'popularity':
+                $aVal = $a['popularity'] ?? 0;
+                $bVal = $b['popularity'] ?? 0;
+                break;
             case 'likes':
-                $aVal = $a['aggregateLikes'] ?? 0;
-                $bVal = $b['aggregateLikes'] ?? 0;
+                $aVal = $a['likes'] ?? 0;
+                $bVal = $b['likes'] ?? 0;
                 break;
 
             case 'price':
