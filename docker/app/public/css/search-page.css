@@ -173,7 +173,7 @@ button {
     padding: 0;
     place-items: center;
     border: 0;
-    background-color: var(--background);
+    background-color: #effcfb;
     color: var(--primary-text);
     cursor: pointer;
 }
