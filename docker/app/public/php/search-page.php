@@ -42,10 +42,6 @@ try {
     <?php include __DIR__ . '/menu.php'; ?>
     <main class="search-page">
         <div class="topbar">
-            <button type="button" class="back-btn" aria-label="Back">
-                <img src="../images/search-page/arrow.svg" alt="back-arrow">
-            </button>
-
             <div class="search-wrap">
                 <button type="button" class="search-icon" id="searchButton" aria-label="Search recipes">
                     <img src="../images/search-page/search.svg" alt="search-button">
