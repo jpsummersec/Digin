@@ -14,6 +14,7 @@ const stepAudios = [
 ];
 
 const randomPressureAudios = [
+  //add audios for this folder, thats the folder that contains the random quotes that play during cooking
   '../audio/idtyoucancook.mp3',
   '../audio/waitingfortalent.mp3',
   '../audio/burntpan.mp3',
@@ -24,6 +25,11 @@ const randomPressureAudios = [
   '../audio/iaskedwhatyoudoing.mp3',
 ];
 
+const nextStepAudios = ['../audio/getinthere.mp3'];
+
+let pressureTimer = null;
+let lastPressureAudio = -1;
+
 function setSpotifyVolume(volume) {
   fetch(`/php/spotify-volume.php?volume=${volume}`)
     .then((response) => response.text())
@@ -31,21 +37,11 @@ function setSpotifyVolume(volume) {
     .catch((error) => console.log('Spotify volume error:', error));
 }
 
-const finishAudios = [
-  '../audio/goodjob.mp3',
-  '../audio/welldone.mp3',
-  '../audio/finally.mp3',
-];
-
-let pressureTimer = null;
-let lastPressureAudio = -1;
-
 function startRandomPressureTimer() {
   clearTimeout(pressureTimer);
 
-  const minTime = 5000; // 5 sec
-  const maxTime = 10000; // 10 sec
-
+  const minTime = 20 * 1000; // 30s
+  const maxTime = 35 * 1000;
   const randomTime =
     Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
 
@@ -79,6 +75,24 @@ function playRandomPressureAudio() {
       console.log('Pressure audio error:', error);
     });
   }, 500);
+
+  gordonAudio.onended = function () {
+    setSpotifyVolume(80);
+  };
+}
+
+function playNextStepAudio() {
+  const randomIndex = Math.floor(Math.random() * nextStepAudios.length);
+
+  setSpotifyVolume(30);
+
+  gordonAudio.pause();
+  gordonAudio.currentTime = 0;
+  gordonAudio.src = nextStepAudios[randomIndex];
+
+  gordonAudio.play().catch((error) => {
+    console.log('Next step audio error:', error);
+  });
 
   gordonAudio.onended = function () {
     setSpotifyVolume(80);
@@ -212,6 +226,8 @@ if (prevButton) {
 if (nextButton) {
   nextButton.addEventListener('click', () => {
     if (currentStepIndex < steps.length - 1) {
+      playNextStepAudio();
+
       currentStepIndex++;
       updateStepDisplay();
     } else if (currentStepIndex === steps.length - 1) {
@@ -222,6 +238,8 @@ if (nextButton) {
 
 // Initialize display
 updateStepDisplay(false);
+
+setSpotifyVolume(80);
 
 if (sessionStorage.getItem('playStepOneAudio') === 'yes') {
   sessionStorage.removeItem('playStepOneAudio');

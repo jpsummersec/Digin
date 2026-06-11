@@ -98,8 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $statement->bindValue(':userId', $_SESSION['user_id'], PDO::PARAM_INT);
             $statement->execute();
             $statement->closeCursor();
-        }
-        catch(PDOException $exception) {
+        } catch (PDOException $exception) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
@@ -281,8 +280,7 @@ if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
 
     <?php include("footer.php"); ?>
 
-    <audio id="gordon-audio" src="../audio/gordontest.mp3"></audio>
-    <audio id="background-audio" src="../audio/kitchendramaticsound.mp3" loop></audio>
+    <audio id="gordon-audio"></audio>
 
     <script src="../js/steps.js"></script>
 
