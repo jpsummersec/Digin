@@ -7,25 +7,35 @@ let isRecipeCompleted = false;
 const gordonAudio = document.getElementById('gordon-audio');
 const backgroundAudio = document.getElementById('background-audio');
 
-const stepAudios = [
-  '../audio/idkwheretostart.mp3',
-  '../audio/yourunashithole.mp3',
-  '../audio/idkwheretostart.mp3',
-];
-
 const randomPressureAudios = [
   //add audios for this folder, thats the folder that contains the random quotes that play during cooking
   '../audio/idtyoucancook.mp3',
   '../audio/waitingfortalent.mp3',
-  '../audio/burntpan.mp3',
   '../audio/whatisthatshit.mp3',
-  '../audio/youwastedmostexpensive.mp3',
   '../audio/areuconsistantlyshit.mp3',
   '../audio/whatthatstink.mp3',
-  '../audio/iaskedwhatyoudoing.mp3',
+  '../audio/itsfuckingrotten.mp3',
+  '../audio/kitchendramaticsound.mp3',
+  '../audio/youresoshit.mp3',
+  '../audio/youreuseless.mp3',
+  '../audio/iknowyoumaybestupid.mp3',
+  '../audio/disaster.mp3',
+  '../audio/yourefirstclasscunt.mp3',
+  '../audio/wtfisgoingon.mp3',
 ];
 
-const nextStepAudios = ['../audio/getinthere.mp3'];
+const nextStepAudios = [
+  //audios that start to play once you click ''next''
+  '../audio/getinthere.mp3',
+  '../audio/lookatthemess.mp3',
+];
+
+const completeRecipeAudios = [
+  '../audio/thatsit.mp3',
+  '../audio/icookedthatshit.mp3',
+  '../audio/ittasteslikegunk.mp3',
+  '../audio/youarenoteatingthat.mp3',
+];
 
 let pressureTimer = null;
 let lastPressureAudio = -1;
