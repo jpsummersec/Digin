@@ -28,6 +28,9 @@ const nextStepAudios = [
   //audios that start to play once you click ''next''
   '../audio/getinthere.mp3',
   '../audio/lookatthemess.mp3',
+  '../audio/youre-making-me-mad.mp3',
+  '../audio/surprise.mp3',
+  '../audio/kitchendramaticsound.mp3',
 ];
 
 const completeRecipeAudios = [
@@ -35,6 +38,7 @@ const completeRecipeAudios = [
   '../audio/icookedthatshit.mp3',
   '../audio/ittasteslikegunk.mp3',
   '../audio/youarenoteatingthat.mp3',
+  '../audio/kys.mp3',
 ];
 
 let pressureTimer = null;
@@ -109,25 +113,18 @@ function playNextStepAudio() {
   };
 }
 
-function playStepAudio() {
-  const audioIndex = currentStepIndex % stepAudios.length;
+function playCompleteRecipeAudio() {
+  const randomIndex = Math.floor(Math.random() * completeRecipeAudios.length);
 
-  setSpotifyVolume(15); // Spotify quieter
+  setSpotifyVolume(30);
 
   gordonAudio.pause();
   gordonAudio.currentTime = 0;
-  gordonAudio.volume = 1.0; // Gordon loud
-  gordonAudio.src = stepAudios[audioIndex];
+  gordonAudio.src = completeRecipeAudios[randomIndex];
 
   gordonAudio.play().catch((error) => {
-    console.log('Audio error:', error);
+    console.log('Complete audio error:', error);
   });
-
-  gordonAudio.onended = function () {
-    setSpotifyVolume(80);
-  };
-
-  startRandomPressureTimer();
 }
 
 // Function to update the display
@@ -180,7 +177,24 @@ function completeRecipe() {
     .then((response) => response.json())
     .then((result) => {
       if (result.success) {
-        window.location.href = 'search-page.php';
+        const randomIndex = Math.floor(
+          Math.random() * completeRecipeAudios.length,
+        );
+
+        setSpotifyVolume(30);
+
+        gordonAudio.pause();
+        gordonAudio.currentTime = 0;
+        gordonAudio.src = completeRecipeAudios[randomIndex];
+
+        gordonAudio.play().catch((error) => {
+          console.log('Complete audio error:', error);
+        });
+
+        gordonAudio.onended = function () {
+          setSpotifyVolume(80);
+          window.location.href = 'search-page.php';
+        };
       } else {
         isRecipeCompleted = false;
       }
