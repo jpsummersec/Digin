@@ -24,7 +24,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
     
     <div class="digin-dropdown" id="diginDropdown" role="navigation">
-        <a href="<?= htmlspecialchars($homeUrl) ?>" class="digin-dropdown-link <?= ($currentPage === 'landing.php' || ($isLoggedIn && $currentPage === 'search-page.php' && !isset($_GET['query']))) ? 'active' : '' ?>">Home</a>
+       
         <a href="search-page.php" class="digin-dropdown-link <?= ($currentPage === 'search-page.php' && isset($_GET['query'])) ? 'active' : '' ?>">Search</a>
         <a href="profile-page.php" class="digin-dropdown-link <?= ($currentPage === 'profile-page.php') ? 'active' : '' ?>">Profile</a>
         <?php if ($isLoggedIn): ?>
