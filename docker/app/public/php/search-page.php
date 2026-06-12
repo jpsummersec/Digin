@@ -36,6 +36,7 @@ try {
     <title>Recipe Finder</title>
     <link rel="stylesheet" href="../css/root.css" />
     <link rel="stylesheet" href="../css/search-page.css" />
+    <link rel="stylesheet" href="../css/landing.css" />
 </head>
 
 <body>
@@ -354,6 +355,47 @@ try {
         </aside>
 
         <div class="recipe-list" id="results"></div>
+
+        
+    <section class="features-section">
+      <div class="container">
+        <div class="features-strip">
+
+          <div class="feat">
+            <img src="../images/cooking_book.svg" alt="Easy Recipes" />
+            <div class="feat-text">
+              <strong>Easy Recipes</strong>
+              <span>Simple steps, delicious result</span>
+            </div>
+          </div>
+
+          <div class="feat">
+            <img src="../images/menu_card.svg" alt="Menu card" />
+            <div class="feat-text">
+              <strong>Fresh Ingredients</strong>
+              <span>Sourced locally and delivered at peak freshness</span>
+            </div>
+          </div>
+
+          <div class="feat">
+            <img src="../images/Chef.svg" alt="Community" />
+            <div class="feat-text">
+              <strong>Chef-Crafted</strong>
+              <span>Restaurant-quality meals made by professional chefs</span>
+            </div>
+          </div>
+
+          <div class="feat">
+            <img src="../images/chef2.svg" alt="Eat Better" />
+            <div class="feat-text">
+              <strong>Eat Better</strong>
+              <span>Healthier choices for a better you</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
 
     </main>
 
