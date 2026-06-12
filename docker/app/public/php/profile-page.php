@@ -184,6 +184,7 @@ $recipeDetailsUrl = '../php/recipe.php';
 		<link rel="stylesheet" href="../css/search-page.css">
 		<link rel="stylesheet" href="../css/root.css">
 		<link rel="stylesheet" href="../css/profile-page.css">
+		<link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
 	</head>
 	<body>
 		<?php include __DIR__ . '/menu.php'; ?>

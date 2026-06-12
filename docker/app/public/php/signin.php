@@ -96,6 +96,7 @@ if ($showRedirect) {
     <link rel="stylesheet" href="../css/create-account.css">
     <link rel="stylesheet" href="../css/root.css">
     <link rel="stylesheet" href="../css/redirect.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
 </head>
 
 <body>

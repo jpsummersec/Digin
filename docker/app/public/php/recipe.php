@@ -152,6 +152,7 @@ if ($isFavorite) {
     <title>RECIPE - <?php echo htmlspecialchars($recipe['title']); ?></title>
     <link rel="stylesheet" href="../css/root.css">
     <link rel="stylesheet" href="../css/recipe.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
 </head>
 
 <body>

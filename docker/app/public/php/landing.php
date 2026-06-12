@@ -20,6 +20,7 @@ $hero_buttons = [
   <title><?= htmlspecialchars($page_title) ?></title>
   <link rel="stylesheet" href="../css/root.css">
   <link rel="stylesheet" href="../css/landing.css" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
 </head>
 
 <body>

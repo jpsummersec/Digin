@@ -226,6 +226,7 @@ if (!empty($recipe['cuisines']) && is_array($recipe['cuisines'])) {
     <link rel="stylesheet" href="../css/root.css">
     <link rel="stylesheet" href="../css/recipe.css">
     <link rel="stylesheet" href="../css/steps.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
 </head>
 
 <body>

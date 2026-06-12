@@ -53,6 +53,7 @@ try {
     <link rel="stylesheet" href="../css/root.css" />
     <link rel="stylesheet" href="../css/search-page.css" />
     <link rel="stylesheet" href="../css/landing.css" />
+    <link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
 </head>
 
 <body>
