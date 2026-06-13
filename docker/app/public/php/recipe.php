@@ -107,6 +107,40 @@ $descriptionTruncated = count($descriptionWords) > 27; //how many words are ther
 
 $previewSteps = array_slice($steps, 0, 3); //preview steps -> the first 3 steps
 $stepsTruncated = count($steps) > 3; //how many steps are there after the initial 3
+
+$isFavorite = false;
+
+try {
+    $statement = $dbHandler->prepare('
+        SELECT `recipe_id`
+        FROM `user_saved_recipe`
+        WHERE `user_id` = :userId AND `recipe_id` = :recipeId
+    ');
+    $statement->bindValue(':userId', $_SESSION['user_id'], PDO::PARAM_INT);
+    $statement->bindValue(':recipeId', $id, PDO::PARAM_INT);
+    $statement->execute();
+
+    if ($statement->fetchColumn()) {
+        $isFavorite = true;
+    }
+
+    $statement->closeCursor();
+}
+catch(PDOException $exception) {
+    die('Select error: ' . $exception->getMessage());
+}
+
+$favoriteAction = 'Add';
+$favoriteDirection = 'to';
+$favoritePressed = 'false';
+$heartImage = 'heart-empty.svg';
+
+if ($isFavorite) {
+    $favoriteAction = 'Remove';
+    $favoriteDirection = 'from';
+    $favoritePressed = 'true';
+    $heartImage = 'heart-full.svg';
+}
 ?>
 
 <!DOCTYPE html>
@@ -118,6 +152,7 @@ $stepsTruncated = count($steps) > 3; //how many steps are there after the initia
     <title>RECIPE - <?php echo htmlspecialchars($recipe['title']); ?></title>
     <link rel="stylesheet" href="../css/root.css">
     <link rel="stylesheet" href="../css/recipe.css">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
 </head>
 
 <body>
@@ -143,8 +178,8 @@ $stepsTruncated = count($steps) > 3; //how many steps are there after the initia
                 <span class="title"><?php echo htmlspecialchars($recipe['title']); ?></span>
             </div>
             <div id="favorite-button-div">
-                <button type="button" class="favorite-btn" aria-label="Add <?php echo htmlspecialchars($recipe['title']); ?> to favorites" aria-pressed="false">
-                    <img src="../images/search-page/heart-empty.svg" alt="heart-empty" aria-hidden="true">
+                <button type="button" class="favorite-btn" aria-label="<?php echo $favoriteAction . ' ' . htmlspecialchars($recipe['title']) . ' ' . $favoriteDirection; ?> favorites" aria-pressed="<?php echo $favoritePressed; ?>">
+                    <img src="../images/search-page/<?php echo $heartImage; ?>" alt="" aria-hidden="true">
                 </button>
             </div>
             <div id="recipe-data">
@@ -305,15 +340,33 @@ $stepsTruncated = count($steps) > 3; //how many steps are there after the initia
 
         favoriteButton.addEventListener('click', () => {
             const isFavorite = favoriteButton.getAttribute('aria-pressed') === 'true';
-            const favoriteImage = favoriteButton.querySelector('img');
             const recipeTitle = <?php echo json_encode($recipe['title']); ?>;
+            const newFavoriteState = !isFavorite;
+            const formData = new FormData();
+            formData.append('recipe_id', <?php echo $id; ?>);
+            formData.append('isFavorite', String(newFavoriteState));
 
-            favoriteButton.setAttribute('aria-pressed', String(!isFavorite));
-            favoriteButton.setAttribute(
-                'aria-label',
-                `${isFavorite ? 'Add' : 'Remove'} ${recipeTitle} ${isFavorite ? 'to' : 'from'} favorites`
-            );
-            favoriteImage.src = `../images/search-page/heart-${isFavorite ? 'empty' : 'full'}.svg`;
+            fetch('favorite-recipe.php', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (!result.success) {
+                        return;
+                    }
+
+                    const favoriteImage = favoriteButton.querySelector('img');
+                    favoriteButton.setAttribute('aria-pressed', String(newFavoriteState));
+
+                    if (newFavoriteState) {
+                        favoriteButton.setAttribute('aria-label', `Remove ${recipeTitle} from favorites`);
+                        favoriteImage.src = '../images/search-page/heart-full.svg';
+                    } else {
+                        favoriteButton.setAttribute('aria-label', `Add ${recipeTitle} to favorites`);
+                        favoriteImage.src = '../images/search-page/heart-empty.svg';
+                    }
+                });
         });
     </script>
 </body>

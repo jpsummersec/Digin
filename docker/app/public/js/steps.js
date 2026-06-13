@@ -7,25 +7,39 @@ let isRecipeCompleted = false;
 const gordonAudio = document.getElementById('gordon-audio');
 const backgroundAudio = document.getElementById('background-audio');
 
-const stepAudios = [
-  '../audio/idkwheretostart.mp3',
-  '../audio/yourunashithole.mp3',
-  '../audio/idkwheretostart.mp3',
-];
-
 const randomPressureAudios = [
   //add audios for this folder, thats the folder that contains the random quotes that play during cooking
   '../audio/idtyoucancook.mp3',
   '../audio/waitingfortalent.mp3',
-  '../audio/burntpan.mp3',
   '../audio/whatisthatshit.mp3',
-  '../audio/youwastedmostexpensive.mp3',
   '../audio/areuconsistantlyshit.mp3',
   '../audio/whatthatstink.mp3',
-  '../audio/iaskedwhatyoudoing.mp3',
+  '../audio/itsfuckingrotten.mp3',
+  '../audio/kitchendramaticsound.mp3',
+  '../audio/youresoshit.mp3',
+  '../audio/youreuseless.mp3',
+  '../audio/iknowyoumaybestupid.mp3',
+  '../audio/disaster.mp3',
+  '../audio/yourefirstclasscunt.mp3',
+  '../audio/wtfisgoingon.mp3',
 ];
 
-const nextStepAudios = ['../audio/getinthere.mp3'];
+const nextStepAudios = [
+  //audios that start to play once you click ''next''
+  '../audio/getinthere.mp3',
+  '../audio/lookatthemess.mp3',
+  '../audio/youre-making-me-mad.mp3',
+  '../audio/surprise.mp3',
+  '../audio/kitchendramaticsound.mp3',
+];
+
+const completeRecipeAudios = [
+  '../audio/thatsit.mp3',
+  '../audio/icookedthatshit.mp3',
+  '../audio/ittasteslikegunk.mp3',
+  '../audio/youarenoteatingthat.mp3',
+  '../audio/kys.mp3',
+];
 
 let pressureTimer = null;
 let lastPressureAudio = -1;
@@ -99,25 +113,18 @@ function playNextStepAudio() {
   };
 }
 
-function playStepAudio() {
-  const audioIndex = currentStepIndex % stepAudios.length;
+function playCompleteRecipeAudio() {
+  const randomIndex = Math.floor(Math.random() * completeRecipeAudios.length);
 
-  setSpotifyVolume(15); // Spotify quieter
+  setSpotifyVolume(30);
 
   gordonAudio.pause();
   gordonAudio.currentTime = 0;
-  gordonAudio.volume = 1.0; // Gordon loud
-  gordonAudio.src = stepAudios[audioIndex];
+  gordonAudio.src = completeRecipeAudios[randomIndex];
 
   gordonAudio.play().catch((error) => {
-    console.log('Audio error:', error);
+    console.log('Complete audio error:', error);
   });
-
-  gordonAudio.onended = function () {
-    setSpotifyVolume(80);
-  };
-
-  startRandomPressureTimer();
 }
 
 // Function to update the display
@@ -170,7 +177,24 @@ function completeRecipe() {
     .then((response) => response.json())
     .then((result) => {
       if (result.success) {
-        window.location.href = 'search-page.php';
+        const randomIndex = Math.floor(
+          Math.random() * completeRecipeAudios.length,
+        );
+
+        setSpotifyVolume(30);
+
+        gordonAudio.pause();
+        gordonAudio.currentTime = 0;
+        gordonAudio.src = completeRecipeAudios[randomIndex];
+
+        gordonAudio.play().catch((error) => {
+          console.log('Complete audio error:', error);
+        });
+
+        gordonAudio.onended = function () {
+          setSpotifyVolume(80);
+          window.location.href = 'search-page.php';
+        };
       } else {
         isRecipeCompleted = false;
       }

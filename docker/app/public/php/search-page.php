@@ -5,6 +5,7 @@ include __DIR__ . '/include-dbhandler.php';
 $userId = (int) $_SESSION['user_id'];
 $recipeDetailsUrl = '../php/recipe.php';
 $cookedRecipes = [];
+$savedRecipeIds = [];
 
 // get cooked recipes based on user ID
 try {
@@ -24,6 +25,21 @@ try {
     die('Select error: ' . $exception->getMessage());
 }
 
+// get saved recipe IDs based on user ID
+try {
+    $statement = $dbHandler->prepare('
+        SELECT `recipe_id`
+        FROM `user_saved_recipe`
+        WHERE `user_id` = :userId
+    ');
+    $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $statement->execute();
+    $savedRecipeIds = $statement->fetchAll(PDO::FETCH_COLUMN);
+    $statement->closeCursor();
+} catch (PDOException $exception) {
+    die('Select error: ' . $exception->getMessage());
+}
+
 // echo "User ID: " . $_SESSION["user_id"] . "<br>";
 ?>
 
@@ -37,6 +53,7 @@ try {
     <link rel="stylesheet" href="../css/root.css" />
     <link rel="stylesheet" href="../css/search-page.css" />
     <link rel="stylesheet" href="../css/landing.css" />
+    <link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
 </head>
 
 <body>
@@ -111,6 +128,19 @@ try {
                                 }
                             }
                         }
+
+                        $isFavorite = in_array($recipeId, $savedRecipeIds);
+                        $favoriteAction = 'Add';
+                        $favoriteDirection = 'to';
+                        $favoritePressed = 'false';
+                        $heartImage = 'heart-empty.svg';
+
+                        if ($isFavorite) {
+                            $favoriteAction = 'Remove';
+                            $favoriteDirection = 'from';
+                            $favoritePressed = 'true';
+                            $heartImage = 'heart-full.svg';
+                        }
                         ?>
                         <article class="recipe">
                             <a class="recipe-link" href="<?php echo htmlspecialchars($recipeDetailsUrl . '?id=' . $recipeId); ?>">
@@ -135,8 +165,8 @@ try {
                                     </span>
                                 </div>
                             </a>
-                            <button type="button" class="favorite-btn" aria-label="Add <?php echo htmlspecialchars($title); ?> to favorites" aria-pressed="false">
-                                <img src="../images/search-page/heart-empty.svg" alt="" aria-hidden="true">
+                            <button type="button" class="favorite-btn" data-recipe-id="<?php echo htmlspecialchars($recipeId); ?>" aria-label="<?php echo $favoriteAction . ' ' . htmlspecialchars($title) . ' ' . $favoriteDirection; ?> favorites" aria-pressed="<?php echo $favoritePressed; ?>">
+                                <img src="../images/search-page/<?php echo $heartImage; ?>" alt="" aria-hidden="true">
                             </button>
                         </article>
                     <?php } ?>
@@ -399,6 +429,9 @@ try {
 
     </main>
 
+    <script>
+        const savedRecipeIds = <?php echo json_encode(array_map('strval', $savedRecipeIds)); ?>;
+    </script>
     <script src="../js/search.js"></script>
 </body>
 

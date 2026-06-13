@@ -105,6 +105,7 @@ function getStarRating(recipe) {
 
 function renderRecipe(recipe) {
 	const id = encodeURIComponent(recipe.id);
+	const recipeId = String(recipe.id);
 	const title = escapeHtml(recipe.title || 'Untitled recipe');
 	const image = escapeHtml(recipe.image || '../images/');
 	const time = recipe.readyInMinutes ? `${recipe.readyInMinutes} minutes` : '- minutes';
@@ -116,6 +117,17 @@ function renderRecipe(recipe) {
 	const ingredientItems = previewIngredients
 		.map(ingredient => `<li>${escapeHtml(ingredient)}</li>`)
 		.join('');
+	let favoriteAction = 'Add';
+	let favoriteDirection = 'to';
+	let favoritePressed = 'false';
+	let heartImage = 'heart-empty.svg';
+
+	if (savedRecipeIds.includes(recipeId)) {
+		favoriteAction = 'Remove';
+		favoriteDirection = 'from';
+		favoritePressed = 'true';
+		heartImage = 'heart-full.svg';
+	}
 
 	const recipeDiv = document.createElement('article');
 	recipeDiv.className = 'recipe';
@@ -139,8 +151,8 @@ function renderRecipe(recipe) {
 				<span class="meta-rating" aria-hidden="true">${rating}</span>
 			</div>
 		</a>
-		<button type="button" class="favorite-btn" aria-label="Add ${title} to favorites" aria-pressed="false">
-			<img src="../images/search-page/heart-empty.svg" alt="" aria-hidden="true">
+		<button type="button" class="favorite-btn" data-recipe-id="${id}" aria-label="${favoriteAction} ${title} ${favoriteDirection} favorites" aria-pressed="${favoritePressed}">
+			<img src="../images/search-page/${heartImage}" alt="" aria-hidden="true">
 		</button>
 	`;
 
@@ -301,15 +313,46 @@ document.addEventListener('click', event => {
 	}
 
 	const isFavorite = favoriteButton.getAttribute('aria-pressed') === 'true';
-	const favoriteImage = favoriteButton.querySelector('img');
 	const recipeTitle = favoriteButton.closest('.recipe')?.querySelector('h2')?.textContent.trim() || 'recipe';
+	const recipeId = favoriteButton.dataset.recipeId;
+	const newFavoriteState = !isFavorite;
+	const formData = new FormData();
+	formData.append('recipe_id', recipeId);
+	formData.append('isFavorite', String(newFavoriteState));
 
-	favoriteButton.setAttribute('aria-pressed', String(!isFavorite));
-	favoriteButton.setAttribute(
-		'aria-label',
-		`${isFavorite ? 'Add' : 'Remove'} ${recipeTitle} ${isFavorite ? 'to' : 'from'} favorites`
-	);
-	favoriteImage.src = `../images/search-page/heart-${isFavorite ? 'empty' : 'full'}.svg`;
+	fetch('../php/favorite-recipe.php', {
+		method: 'POST',
+		body: formData,
+	})
+		.then(response => response.json())
+		.then(result => {
+			if (!result.success) {
+				return;
+			}
+
+			if (newFavoriteState) {
+				savedRecipeIds.push(recipeId);
+			} else {
+				const savedRecipeIndex = savedRecipeIds.indexOf(recipeId);
+
+				if (savedRecipeIndex !== -1) {
+					savedRecipeIds.splice(savedRecipeIndex, 1);
+				}
+			}
+
+			document.querySelectorAll(`.favorite-btn[data-recipe-id="${recipeId}"]`).forEach(button => {
+				const favoriteImage = button.querySelector('img');
+				button.setAttribute('aria-pressed', String(newFavoriteState));
+
+				if (newFavoriteState) {
+					button.setAttribute('aria-label', `Remove ${recipeTitle} from favorites`);
+					favoriteImage.src = '../images/search-page/heart-full.svg';
+				} else {
+					button.setAttribute('aria-label', `Add ${recipeTitle} to favorites`);
+					favoriteImage.src = '../images/search-page/heart-empty.svg';
+				}
+			});
+		});
 });
 
 document.addEventListener('keydown', event => {
