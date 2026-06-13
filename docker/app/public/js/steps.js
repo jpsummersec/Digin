@@ -5,11 +5,9 @@ let currentStepIndex = 0;
 let isRecipeCompleted = false;
 
 const gordonAudio = document.getElementById('gordon-audio');
-const backgroundAudio = document.getElementById('background-audio');
 
 const randomPressureAudios = [
-  //add audios for this folder, thats the folder that contains the random quotes that play during cooking
-  '../audio/idtyoucancook.mp3',
+  //add audios to this array, this array contains the random quotes that play during cooking
   '../audio/waitingfortalent.mp3',
   '../audio/whatisthatshit.mp3',
   '../audio/areuconsistantlyshit.mp3',
@@ -22,6 +20,17 @@ const randomPressureAudios = [
   '../audio/disaster.mp3',
   '../audio/yourefirstclasscunt.mp3',
   '../audio/wtfisgoingon.mp3',
+  '../audio/youtakethepiss.mp3',
+  '../audio/wtfishedoin.mp3',
+  '../audio/toneyourvoicedown.mp3',
+  '../audio/tellhim.mp3',
+  '../audio/emailyouthat.mp3',
+  '../audio/iamshitting.mp3',
+  '../audio/youwombat.mp3',
+  '../audio/youdonkey.mp3',
+  '../audio/wherelambsauce.mp3',
+  '../audio/idiotsandwitch.mp3',
+  '../audio/morepumpkin.mp3',
 ];
 
 const nextStepAudios = [
@@ -31,6 +40,13 @@ const nextStepAudios = [
   '../audio/youre-making-me-mad.mp3',
   '../audio/surprise.mp3',
   '../audio/kitchendramaticsound.mp3',
+  '../audio/whyoven.mp3',
+  '../audio/idtyoucancook.mp3',
+  '../audio/youpushingme.mp3',
+  '../audio/ifeellikedoing.mp3',
+  '../audio/whatherb.mp3',
+  '../audio/wecantcookaburger.mp3',
+  '../audio/stubbornfcker.mp3',
 ];
 
 const completeRecipeAudios = [
@@ -39,10 +55,36 @@ const completeRecipeAudios = [
   '../audio/ittasteslikegunk.mp3',
   '../audio/youarenoteatingthat.mp3',
   '../audio/kys.mp3',
+  '../audio/whatsthatomg.mp3',
+  '../audio/wtfisthat.mp3',
+  '../audio/welldonetoyou.mp3',
+  '../audio/yoursurpriseme.mp3',
 ];
 
+let pressureBag = [];
+let nextStepBag = [];
+let completeBag = [];
+
+function refillBag(sourceArray) {
+  const bag = [...sourceArray];
+
+  for (let i = bag.length - 1; i > 0; i--) {
+    const randomIndex = Math.floor(Math.random() * (i + 1));
+    [bag[i], bag[randomIndex]] = [bag[randomIndex], bag[i]];
+  }
+
+  return bag;
+}
+
+function getNextFromBag(bagName, sourceArray) {
+  if (bagName.length === 0) {
+    bagName.push(...refillBag(sourceArray));
+  }
+
+  return bagName.pop();
+}
+
 let pressureTimer = null;
-let lastPressureAudio = -1;
 
 function setSpotifyVolume(volume) {
   fetch(`/php/spotify-volume.php?volume=${volume}`)
@@ -66,23 +108,14 @@ function startRandomPressureTimer() {
 }
 
 function playRandomPressureAudio() {
-  let randomIndex;
-
-  do {
-    randomIndex = Math.floor(Math.random() * randomPressureAudios.length);
-  } while (
-    randomPressureAudios.length > 1 &&
-    randomIndex === lastPressureAudio
-  );
-
-  lastPressureAudio = randomIndex;
+  const selectedAudio = getNextFromBag(pressureBag, randomPressureAudios);
 
   setSpotifyVolume(30); // lower Spotify BEFORE Gordon starts
 
   gordonAudio.pause();
   gordonAudio.currentTime = 0;
   gordonAudio.volume = 1.0;
-  gordonAudio.src = randomPressureAudios[randomIndex];
+  gordonAudio.src = selectedAudio;
 
   setTimeout(() => {
     gordonAudio.play().catch((error) => {
@@ -96,13 +129,13 @@ function playRandomPressureAudio() {
 }
 
 function playNextStepAudio() {
-  const randomIndex = Math.floor(Math.random() * nextStepAudios.length);
+  const selectedAudio = getNextFromBag(nextStepBag, nextStepAudios);
 
   setSpotifyVolume(30);
 
   gordonAudio.pause();
   gordonAudio.currentTime = 0;
-  gordonAudio.src = nextStepAudios[randomIndex];
+  gordonAudio.src = selectedAudio;
 
   gordonAudio.play().catch((error) => {
     console.log('Next step audio error:', error);
@@ -114,13 +147,13 @@ function playNextStepAudio() {
 }
 
 function playCompleteRecipeAudio() {
-  const randomIndex = Math.floor(Math.random() * completeRecipeAudios.length);
+  const selectedAudio = getNextFromBag(completeBag, completeRecipeAudios);
 
   setSpotifyVolume(30);
 
   gordonAudio.pause();
   gordonAudio.currentTime = 0;
-  gordonAudio.src = completeRecipeAudios[randomIndex];
+  gordonAudio.src = selectedAudio;
 
   gordonAudio.play().catch((error) => {
     console.log('Complete audio error:', error);
@@ -177,15 +210,13 @@ function completeRecipe() {
     .then((response) => response.json())
     .then((result) => {
       if (result.success) {
-        const randomIndex = Math.floor(
-          Math.random() * completeRecipeAudios.length,
-        );
+        const selectedAudio = getNextFromBag(completeBag, completeRecipeAudios);
 
         setSpotifyVolume(30);
 
         gordonAudio.pause();
         gordonAudio.currentTime = 0;
-        gordonAudio.src = completeRecipeAudios[randomIndex];
+        gordonAudio.src = selectedAudio;
 
         gordonAudio.play().catch((error) => {
           console.log('Complete audio error:', error);
