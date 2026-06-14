@@ -451,6 +451,121 @@ button {
   accent-color: var(--primary);
 }
 
+.calorie-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.95rem;
+  color: var(--primary-text);
+  font-size: 0.88rem;
+}
+
+.calorie-control span,
+.calorie-control output {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.calorie-control output {
+  text-align: right;
+  font-family: 'Inter-500-weight', var(--font);
+}
+
+.calorie-slider {
+  position: relative;
+  display: grid;
+  grid-column: 1 / -1;
+  align-items: center;
+  width: 100%;
+  height: 1.9rem;
+}
+
+.calorie-slider-track,
+.calorie-slider-range {
+  position: absolute;
+  top: 50%;
+  height: 0.32rem;
+  border-radius: 1rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.calorie-slider-track {
+  right: 0;
+  left: 0;
+  background: #e1e7e3;
+}
+
+.calorie-slider-range {
+  background: var(--primary);
+}
+
+.calorie-slider input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 1.9rem;
+  margin: 0;
+  border: 0;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.calorie-slider input:focus {
+  outline: none;
+}
+
+.calorie-slider input::-webkit-slider-runnable-track {
+  height: 0.32rem;
+  border: 0;
+  background: transparent;
+  color: transparent;
+}
+
+.calorie-slider input::-webkit-slider-thumb {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: -0.39rem;
+  border: 0.13rem solid #ffffff;
+  border-radius: 50%;
+  background: #73717f;
+  box-shadow: 0 0.08rem 0.22rem rgba(4, 15, 15, 0.26);
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.calorie-slider input::-moz-range-track {
+  height: 0.32rem;
+  border: 0;
+  background: transparent;
+}
+
+.calorie-slider input::-moz-range-progress {
+  height: 0.32rem;
+  border: 0;
+  background: transparent;
+}
+
+.calorie-slider input::-moz-range-thumb {
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 0.13rem solid #ffffff;
+  border-radius: 50%;
+  background: #73717f;
+  box-shadow: 0 0.08rem 0.22rem rgba(4, 15, 15, 0.26);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.calorie-slider input::-moz-focus-outer {
+  border: 0;
+}
+
 .toggle-control {
   grid-template-columns: auto 1fr;
   align-items: center;

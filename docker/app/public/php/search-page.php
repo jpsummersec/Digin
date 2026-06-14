@@ -339,6 +339,20 @@ try {
                 </section>
 
                 <section class="filter-section">
+                    <div class="calorie-control">
+                        <h3>Calories</h3>
+                        <output id="calorieRangeValue" for="minCalories maxCalories" aria-live="polite">Any - Any</output>
+
+                        <div class="calorie-slider" aria-label="Calories range">
+                            <div class="calorie-slider-track"></div>
+                            <div class="calorie-slider-range" id="calorieSliderRange"></div>
+                            <input type="range" id="minCalories" min="0" max="850" step="50" value="0" aria-label="Minimum calories">
+                            <input type="range" id="maxCalories" min="0" max="850" step="50" value="850" aria-label="Maximum calories">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="filter-section">
                     <div class="filter-section-title">
                         <h3>Sort Type</h3>
                     </div>

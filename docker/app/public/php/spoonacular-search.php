@@ -31,6 +31,12 @@ $intolerances = $_GET['intolerances'] ?? '';
 $sort = $_GET['sort'] ?? '';
 $diet = $_GET['diet'] ?? '';
 $sortDirection = $_GET['sortDirection'] ?? 'asc';
+$minCalories = normalizeCalorieBound($_GET['minCalories'] ?? '');
+$maxCalories = normalizeCalorieBound($_GET['maxCalories'] ?? '');
+
+if ($minCalories !== '' && $maxCalories !== '' && (int)$minCalories > (int)$maxCalories) {
+    [$minCalories, $maxCalories] = [$maxCalories, $minCalories];
+}
 
 $number = isset($_GET['number']) ? (int)$_GET['number'] : 1;
 $number = max(0, min(10, $number));
@@ -91,6 +97,21 @@ function sortRecipes(array $results, string $sort, string $direction = 'asc'): a
     return $results;
 }
 
+function normalizeCalorieBound($value): string
+{
+    if ($value === '' || !is_numeric($value)) {
+        return '';
+    }
+
+    $calories = (int)$value;
+
+    if ($calories < 50 || $calories > 800) {
+        return '';
+    }
+
+    return (string)$calories;
+}
+
 $cacheKey = [
     'query' => strtolower(trim($query)),
     'number' => $number,
@@ -104,6 +125,14 @@ $cacheKey = [
     'sortDirection' => $sortDirection,
     'addRecipeNutrition' => $addRecipeNutritionValue
 ];
+
+if ($minCalories !== '') {
+    $cacheKey['minCalories'] = $minCalories;
+}
+
+if ($maxCalories !== '') {
+    $cacheKey['maxCalories'] = $maxCalories;
+}
 
 $keyString = json_encode($cacheKey, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 $hash = md5($keyString);
@@ -190,6 +219,8 @@ if ($ingredientSearch) {
     if ($maxTime) $params['maxReadyTime'] = $maxTime;
     if ($type) $params['type'] = $type;
     if ($intolerances) $params['intolerances'] = $intolerances;
+    if ($minCalories !== '') $params['minCalories'] = $minCalories;
+    if ($maxCalories !== '') $params['maxCalories'] = $maxCalories;
 
     $baseUrl = 'https://api.spoonacular.com/recipes/complexSearch';
 }

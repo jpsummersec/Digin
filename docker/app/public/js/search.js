@@ -14,9 +14,17 @@ const applyFilters = document.getElementById('applyFilters');
 const clearFilters = document.getElementById('clearFilters');
 const sortAscBtn = document.getElementById('sortAsc');
 const sortDescBtn = document.getElementById('sortDesc');
+const minCaloriesInput = document.getElementById('minCalories');
+const maxCaloriesInput = document.getElementById('maxCalories');
+const calorieRangeValue = document.getElementById('calorieRangeValue');
+const calorieSliderRange = document.getElementById('calorieSliderRange');
 let sortDirection = 'asc';
 
 const recipeDetailsUrl = '../php/recipe.php';
+const CALORIE_MIN_ANY_LIMIT = 50;
+const CALORIE_MAX_ANY_LIMIT = 800;
+const CALORIE_SLIDER_MIN = 0;
+const CALORIE_SLIDER_MAX = 850;
 
 function openFilter() {
 	filterPanel.classList.add('open');
@@ -58,6 +66,21 @@ function getSelectedIntolerances() {
 		.map(button => button.dataset.value || button.textContent.trim());
 }
 
+function getCalorieBounds() {
+	const minCalories = Number(minCaloriesInput.value);
+	const maxCalories = Number(maxCaloriesInput.value);
+
+	return {
+		minCalories: minCalories >= CALORIE_MIN_ANY_LIMIT && minCalories <= CALORIE_MAX_ANY_LIMIT ? String(minCalories) : '',
+		maxCalories: maxCalories >= CALORIE_MIN_ANY_LIMIT && maxCalories <= CALORIE_MAX_ANY_LIMIT ? String(maxCalories) : '',
+	};
+}
+
+function hasSelectedCalories() {
+	const calorieBounds = getCalorieBounds();
+	return Boolean(calorieBounds.minCalories || calorieBounds.maxCalories);
+}
+
 function hasSelectedFilters() {
 	return Boolean(
 		getSelectedValue('diet') ||
@@ -65,6 +88,7 @@ function hasSelectedFilters() {
 		getSelectedValue('dishType') ||
 		getSelectedValue('maxTime') ||
 		getSelectedValue('sortSelect') ||
+		hasSelectedCalories() ||
 		getSelectedIntolerances().length
 	);
 }
@@ -167,12 +191,80 @@ function setMessage(message, className = 'status-message') {
 	resultsDiv.innerHTML = `<div class="${className}">${escapeHtml(message)}</div>`;
 }
 
+function formatCalorieRange(calorieBounds) {
+	const minCalories = calorieBounds.minCalories || 'Any';
+	const maxCalories = calorieBounds.maxCalories || 'Any';
+
+	if (calorieBounds.minCalories && calorieBounds.maxCalories) {
+		return `${minCalories} - ${maxCalories} kcal`;
+	}
+
+	if (calorieBounds.minCalories) {
+		return `${minCalories}+ kcal - Any`;
+	}
+
+	if (calorieBounds.maxCalories) {
+		return `Any - ${maxCalories} kcal`;
+	}
+
+	return 'Any - Any';
+}
+
+function updateCalorieSlider(changedInput = null) {
+	let minCalories = Number(minCaloriesInput.value);
+	let maxCalories = Number(maxCaloriesInput.value);
+
+	if (minCalories < CALORIE_MIN_ANY_LIMIT) {
+		minCalories = CALORIE_SLIDER_MIN;
+	}
+
+	if (minCalories > CALORIE_MAX_ANY_LIMIT) {
+		minCalories = CALORIE_MAX_ANY_LIMIT;
+	}
+
+	if (maxCalories < CALORIE_MIN_ANY_LIMIT) {
+		maxCalories = CALORIE_MIN_ANY_LIMIT;
+	}
+
+	if (maxCalories > CALORIE_MAX_ANY_LIMIT) {
+		maxCalories = CALORIE_SLIDER_MAX;
+	}
+
+	if (minCalories > maxCalories) {
+		if (changedInput === minCaloriesInput) {
+			maxCalories = minCalories;
+		} else {
+			minCalories = maxCalories;
+		}
+	}
+
+	minCaloriesInput.value = String(minCalories);
+	maxCaloriesInput.value = String(maxCalories);
+
+	const calorieBounds = getCalorieBounds();
+	const minPercent = ((minCalories - CALORIE_SLIDER_MIN) / (CALORIE_SLIDER_MAX - CALORIE_SLIDER_MIN)) * 100;
+	const maxPercent = ((maxCalories - CALORIE_SLIDER_MIN) / (CALORIE_SLIDER_MAX - CALORIE_SLIDER_MIN)) * 100;
+
+	calorieSliderRange.style.left = `${minPercent}%`;
+	calorieSliderRange.style.right = `${100 - maxPercent}%`;
+	minCaloriesInput.style.zIndex = minCalories >= maxCalories ? '3' : '2';
+	maxCaloriesInput.style.zIndex = minCalories >= maxCalories ? '2' : '3';
+	calorieRangeValue.textContent = formatCalorieRange(calorieBounds);
+}
+
+function resetCalorieSlider() {
+	minCaloriesInput.value = String(CALORIE_SLIDER_MIN);
+	maxCaloriesInput.value = String(CALORIE_SLIDER_MAX);
+	updateCalorieSlider();
+}
+
 function buildSearchParams() {
 	const typedQuery = searchInput.value.trim();
 	const ingredientMode = searchByIngredient.checked;
 	const dishQuery = getSelectedQuery('dishType');
 	const fallbackQuery = hasSelectedFilters() ? (dishQuery || 'recipe') : '';
 	const query = typedQuery || fallbackQuery;
+	const calorieBounds = getCalorieBounds();
 
 	if (!query) {
 		return null;
@@ -183,7 +275,9 @@ function buildSearchParams() {
 		number: numberOfResults.value,
 		addRecipeNutrition: 'true',
 		ingredientSearch: ingredientMode ? 'true' : 'false',
-		sortDirection: sortDirection 
+		sortDirection: sortDirection,
+		minCalories: calorieBounds.minCalories,
+		maxCalories: calorieBounds.maxCalories
 	});
 
 	if (!ingredientMode) {
@@ -298,12 +392,17 @@ clearFilters.addEventListener('click', () => {
 	numberOfResultsValue.value = '10';
 	numberOfResultsValue.textContent = '10';
 	searchByIngredient.checked = false;
+	resetCalorieSlider();
 });
 
 numberOfResults.addEventListener('input', () => {
 	numberOfResultsValue.value = numberOfResults.value;
 	numberOfResultsValue.textContent = numberOfResults.value;
 });
+
+minCaloriesInput.addEventListener('input', () => updateCalorieSlider(minCaloriesInput));
+maxCaloriesInput.addEventListener('input', () => updateCalorieSlider(maxCaloriesInput));
+updateCalorieSlider();
 
 document.addEventListener('click', event => {
 	const favoriteButton = event.target.closest('.favorite-btn');
