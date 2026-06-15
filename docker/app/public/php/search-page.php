@@ -1,14 +1,16 @@
 <?php
+
 require_once __DIR__ . '/include-loginrequired.php';
-include __DIR__ . '/include-dbhandler.php';
+require_once __DIR__ . '/include-dbhandler.php';
 
 $userId = (int) $_SESSION['user_id'];
 $recipeDetailsUrl = '../php/recipe.php';
 $cookedRecipes = [];
 $savedRecipeIds = [];
 
-// get cooked recipes based on user ID
-try {
+// Load the user's cooking history for the initial page view.
+try
+{
     $statement = $dbHandler->prepare('
         SELECT r.`recipe_id`, r.`recipe_json`
         FROM `user_cooked_recipe` uc
@@ -21,12 +23,15 @@ try {
     $statement->execute();
     $cookedRecipes = $statement->fetchAll(PDO::FETCH_ASSOC);
     $statement->closeCursor();
-} catch (PDOException $exception) {
+}
+catch (PDOException $exception)
+{
     die('Select error: ' . $exception->getMessage());
 }
 
-// get saved recipe IDs based on user ID
-try {
+// Load saved recipe IDs so favorite buttons have the correct initial state.
+try
+{
     $statement = $dbHandler->prepare('
         SELECT `recipe_id`
         FROM `user_saved_recipe`
@@ -36,11 +41,12 @@ try {
     $statement->execute();
     $savedRecipeIds = $statement->fetchAll(PDO::FETCH_COLUMN);
     $statement->closeCursor();
-} catch (PDOException $exception) {
+}
+catch (PDOException $exception)
+{
     die('Select error: ' . $exception->getMessage());
 }
 
-// echo "User ID: " . $_SESSION["user_id"] . "<br>";
 ?>
 
 <!DOCTYPE html>
@@ -85,44 +91,52 @@ try {
                         <?php
                         $recipe = json_decode($cookedRecipe['recipe_json'], true);
 
-                        if (!is_array($recipe)) {
+                        if (!is_array($recipe))
+                        {
                             continue;
                         }
 
                         $recipeId = $cookedRecipe['recipe_id'];
                         $title = 'Untitled recipe';
-                        $image = '../images/hero-image-fallback.svg';
+                        $image = '../images/hero-food2.jpeg';
                         $time = '- minutes';
                         $calories = '- kcal';
                         $spoonacularScore = 0;
 
-                        if (isset($recipe['title'])) {
+                        if (isset($recipe['title']))
+                        {
                             $title = $recipe['title'];
                         }
 
-                        if (!empty($recipe['image'])) {
+                        if (!empty($recipe['image']))
+                        {
                             $image = $recipe['image'];
                         }
 
-                        if (isset($recipe['readyInMinutes'])) {
+                        if (isset($recipe['readyInMinutes']))
+                        {
                             $time = $recipe['readyInMinutes'] . ' minutes';
                         }
 
-                        if (isset($recipe['spoonacularScore'])) {
+                        if (isset($recipe['spoonacularScore']))
+                        {
                             $spoonacularScore = $recipe['spoonacularScore'];
                         }
 
                         $starScore = min(max((float) $spoonacularScore / 20, 0), 5);
                         $fullStars = round($starScore);
 
-                        if (isset($recipe['nutrition']['nutrients']) && is_array($recipe['nutrition']['nutrients'])) {
-                            foreach ($recipe['nutrition']['nutrients'] as $nutrient) {
+                        if (isset($recipe['nutrition']['nutrients']) && is_array($recipe['nutrition']['nutrients']))
+                        {
+                            foreach ($recipe['nutrition']['nutrients'] as $nutrient)
+                            {
                                 if (
                                     isset($nutrient['name']) &&
                                     isset($nutrient['amount']) &&
                                     isset($nutrient['unit']) &&
                                     $nutrient['name'] === 'Calories'
-                                ) {
+                                )
+                                {
                                     $calories = round($nutrient['amount']) . ' ' . $nutrient['unit'];
                                     break;
                                 }
@@ -135,7 +149,8 @@ try {
                         $favoritePressed = 'false';
                         $heartImage = 'heart-empty.svg';
 
-                        if ($isFavorite) {
+                        if ($isFavorite)
+                        {
                             $favoriteAction = 'Remove';
                             $favoriteDirection = 'from';
                             $favoritePressed = 'true';
@@ -156,7 +171,8 @@ try {
                                             <?php
                                             $starClass = 'is-empty';
 
-                                            if ($star < $fullStars) {
+                                            if ($star < $fullStars)
+                                            {
                                                 $starClass = 'is-filled';
                                             }
                                             ?>
@@ -179,7 +195,7 @@ try {
         <aside class="filter-panel" id="filterPanel" aria-hidden="true">
             <div class="filter-header">
                 <h2 class="filter-title">Filters</h2>
-                <button class="close-btn" id="closeFilter" aria-label="Close filters"></button>
+                <button type="button" class="close-btn" id="closeFilter" aria-label="Close filters"></button>
             </div>
 
             <div class="filter-body">
@@ -196,7 +212,7 @@ try {
                         </button>
                         <button type="button" class="preference-chip" data-value="vegetarian">
                             Vegetarian
-                            <img src="../images/search-page/vegeterian.svg" alt="vegeterian icon">
+                            <img src="../images/search-page/vegetarian.svg" alt="vegetarian icon">
                         </button>
                         <button type="button" class="preference-chip" data-value="paleo">
                             Paleo
@@ -360,10 +376,9 @@ try {
                     <div class="chip-group text-chip-group" id="sortSelect" data-single-select="true">
                         <button type="button" data-value="popularity">Popularity</button>
                         <button type="button" data-value="spoonacularScore">Score</button>
-                        <button type="button" data-value="time">Time</button>
+                        <button type="button" data-value="readyInMinutes">Time</button>
                         <button type="button" data-value="healthScore">Healthiness</button>
                         <button type="button" data-value="price">Price</button>
-                        <button type="button" data-value="random">Random</button>
                         <button type="button" data-value="calories">Calories</button>
                         <button type="button" data-value="likes">Likes</button>
                     </div>
@@ -399,48 +414,40 @@ try {
         </aside>
 
         <div class="recipe-list" id="results"></div>
-
-        
-    <section class="features-section">
-      <div class="container">
-        <div class="features-strip">
-
-          <div class="feat">
-            <img src="../images/cooking_book.svg" alt="Easy Recipes" />
-            <div class="feat-text">
-              <strong>Easy Recipes</strong>
-              <span>Simple steps, delicious result</span>
+        <section class="features-section">
+            <div class="container">
+                <div class="features-strip">
+                    <div class="feat">
+                        <img src="../images/cooking_book.svg" alt="Easy Recipes" />
+                        <div class="feat-text">
+                            <strong>Easy Recipes</strong>
+                            <span>Simple steps, delicious result</span>
+                        </div>
+                    </div>
+                    <div class="feat">
+                        <img src="../images/menu_card.svg" alt="Menu card" />
+                        <div class="feat-text">
+                            <strong>Fresh Ingredients</strong>
+                            <span>Sourced locally and delivered at peak freshness</span>
+                        </div>
+                    </div>
+                    <div class="feat">
+                        <img src="../images/chef.svg" alt="Community" />
+                        <div class="feat-text">
+                            <strong>Chef-Crafted</strong>
+                            <span>Restaurant-quality meals made by professional chefs</span>
+                        </div>
+                    </div>
+                    <div class="feat">
+                        <img src="../images/chef2.svg" alt="Eat Better" />
+                        <div class="feat-text">
+                            <strong>Eat Better</strong>
+                            <span>Healthier choices for a better you</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <div class="feat">
-            <img src="../images/menu_card.svg" alt="Menu card" />
-            <div class="feat-text">
-              <strong>Fresh Ingredients</strong>
-              <span>Sourced locally and delivered at peak freshness</span>
-            </div>
-          </div>
-
-          <div class="feat">
-            <img src="../images/Chef.svg" alt="Community" />
-            <div class="feat-text">
-              <strong>Chef-Crafted</strong>
-              <span>Restaurant-quality meals made by professional chefs</span>
-            </div>
-          </div>
-
-          <div class="feat">
-            <img src="../images/chef2.svg" alt="Eat Better" />
-            <div class="feat-text">
-              <strong>Eat Better</strong>
-              <span>Healthier choices for a better you</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
+        </section>
     </main>
 
     <script>

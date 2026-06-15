@@ -1,14 +1,11 @@
 <?php
+
 require_once __DIR__ . '/include-loginrequired.php';
 require_once __DIR__ . '/include-dbhandler.php';
 require_once __DIR__ . '/include-spoonacular-api.php';
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-$db = $dbHandler;
-
-if (empty($apiKeys)) {
+if (empty($apiKeys))
+{
     http_response_code(500);
     echo json_encode([
         'error' => 'Missing API keys'
@@ -16,117 +13,134 @@ if (empty($apiKeys)) {
     exit;
 }
 
-if (!isset($_GET['id'])) {
+if (!isset($_GET['id']))
+{
     header('Location: search-page.php');
     exit;
 }
 
-$id = (int) $_GET['id'];
+$recipeId = (int) $_GET['id'];
 
-$stmt = $db->prepare("
-        SELECT recipe_json
-        FROM recipe
-        WHERE recipe_id = ?
-        LIMIT 1
-    ");
+// Use cached recipe data before requesting it from Spoonacular.
+$statement = $dbHandler->prepare("
+    SELECT recipe_json
+    FROM recipe
+    WHERE recipe_id = ?
+    LIMIT 1
+");
 
-$stmt->execute([$id]);
+$statement->execute([$recipeId]);
 
-$cachedRecipe = $stmt->fetchColumn();
+$cachedRecipe = $statement->fetchColumn();
 
-if ($cachedRecipe) {
-
+if ($cachedRecipe)
+{
     $recipe = json_decode($cachedRecipe, true);
-} else {
-
+}
+else
+{
     $responseData = spoonacularRequestWithKeyRotation(
-        "https://api.spoonacular.com/recipes/$id/information",
+        "https://api.spoonacular.com/recipes/$recipeId/information",
         [
             'includeNutrition' => 'true',
         ]
     );
 
-    if (!$responseData['success']) {
+    if (!$responseData['success'])
+    {
         die('Failed to fetch recipe');
     }
 
     $recipe = json_decode($responseData['body'], true);
 
-    $stmt = $db->prepare("
-            INSERT INTO recipe
-            (
-                recipe_id,
-                recipe_json
-            )
-            VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE
+    $statement = $dbHandler->prepare("
+        INSERT INTO recipe
+        (
+            recipe_id,
+            recipe_json
+        )
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE
             recipe_json = VALUES(recipe_json)
-        ");
+    ");
 
-    $stmt->execute([
-        $id,
+    $statement->execute([
+        $recipeId,
         json_encode($recipe)
     ]);
 }
 
 $calories = 'N/A';
 
-if (isset($recipe['nutrition']['nutrients'])) {
-    foreach ($recipe['nutrition']['nutrients'] as $nutrient) {
-        if ($nutrient['name'] === 'Calories') {
+if (isset($recipe['nutrition']['nutrients']))
+{
+    foreach ($recipe['nutrition']['nutrients'] as $nutrient)
+    {
+        if ($nutrient['name'] === 'Calories')
+        {
             $calories = round($nutrient['amount']) . ' ' . $nutrient['unit'];
             break;
         }
     }
 }
 
+// Spoonacular groups instructions, so flatten them into one ordered step list.
 $steps = [];
 
-if (!empty($recipe['analyzedInstructions'])) {
-    foreach ($recipe['analyzedInstructions'] as $group) {
-        if (!empty($group['steps'])) {
-            foreach ($group['steps'] as $step) {
+if (!empty($recipe['analyzedInstructions']))
+{
+    foreach ($recipe['analyzedInstructions'] as $group)
+    {
+        if (!empty($group['steps']))
+        {
+            foreach ($group['steps'] as $step)
+            {
                 $steps[] = $step;
             }
         }
     }
 }
 
-if (!$recipe) {
+if (!$recipe)
+{
     die('Invalid recipe data');
 }
 
-$showAll = isset($_GET['showAll']) && $_GET['showAll'] == 1;
 $ingredients = $recipe['extendedIngredients'];
 $previewIngredients = array_slice($ingredients, 0, 5);
 
-$descriptionWords = explode(' ', strip_tags($recipe['summary'])); //store description as an array of words
-$shortDescription = implode(' ', array_slice($descriptionWords, 0, 27)); //short version -> the first 27 words
+// Prepare shortened descriptions and steps for the expandable preview sections.
+$descriptionWords = explode(' ', strip_tags($recipe['summary']));
+$shortDescription = implode(' ', array_slice($descriptionWords, 0, 27));
 $longDescription = strip_tags($recipe['summary']);
-$descriptionTruncated = count($descriptionWords) > 27; //how many words are there after the initial 27
+$descriptionTruncated = count($descriptionWords) > 27;
 
-$previewSteps = array_slice($steps, 0, 3); //preview steps -> the first 3 steps
-$stepsTruncated = count($steps) > 3; //how many steps are there after the initial 3
+$previewSteps = array_slice($steps, 0, 3);
+$stepsTruncated = count($steps) > 3;
 
 $isFavorite = false;
 
-try {
+// Determine the initial state of the favorite button for this user.
+try
+{
     $statement = $dbHandler->prepare('
         SELECT `recipe_id`
         FROM `user_saved_recipe`
         WHERE `user_id` = :userId AND `recipe_id` = :recipeId
     ');
     $statement->bindValue(':userId', $_SESSION['user_id'], PDO::PARAM_INT);
-    $statement->bindValue(':recipeId', $id, PDO::PARAM_INT);
+    $statement->bindValue(':recipeId', $recipeId, PDO::PARAM_INT);
     $statement->execute();
 
-    if ($statement->fetchColumn()) {
+    if ($statement->fetchColumn())
+    {
         $isFavorite = true;
     }
 
     $statement->closeCursor();
 }
-catch(PDOException $exception) {
+catch (PDOException $exception)
+{
     die('Select error: ' . $exception->getMessage());
 }
 
@@ -135,7 +149,8 @@ $favoriteDirection = 'to';
 $favoritePressed = 'false';
 $heartImage = 'heart-empty.svg';
 
-if ($isFavorite) {
+if ($isFavorite)
+{
     $favoriteAction = 'Remove';
     $favoriteDirection = 'from';
     $favoritePressed = 'true';
@@ -168,7 +183,7 @@ if ($isFavorite) {
         </div>
     <?php else: ?>
         <div class="hero">
-            <img class="hero-image" src="../images/hero-image-fallback.svg" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
+            <img class="hero-image" src="../images/hero-food2.jpeg" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
         </div>
     <?php endif; ?>
 
@@ -185,11 +200,11 @@ if ($isFavorite) {
             <div id="recipe-data">
                 <div id="calories-border">
                     <img src="../images/recipe-page/bolt.svg" alt="">
-                    <?php echo htmlspecialchars($calories) ?>
+                    <?php echo htmlspecialchars($calories); ?>
                 </div>
                 <div>
                     <img src="../images/recipe-page/clock.svg" alt="">
-                    <?php echo htmlspecialchars($recipe['readyInMinutes']) ?> minutes
+                    <?php echo htmlspecialchars($recipe['readyInMinutes']); ?> minutes
                 </div>
             </div>
             <div id="recipe-description">
@@ -201,7 +216,7 @@ if ($isFavorite) {
                 </span>
                 <?php if ($descriptionTruncated): ?>
                     <span id="desc-full" style="display:none;"><?php echo htmlspecialchars($longDescription); ?></span>
-                    <br><button class="toggle-btn" onclick="toggleDesc()">View all</button>
+                    <br><button type="button" class="toggle-btn" onclick="toggleDesc()">View all</button>
                 <?php endif; ?>
             </div>
             <div id="recipe-tags">
@@ -209,110 +224,116 @@ if ($isFavorite) {
                 <?php
                 $tags = array_merge($recipe['cuisines'], $recipe['dishTypes']);
 
-                foreach ($tags as $tag) {
-                    echo "<span class='tag'>" . htmlspecialchars(ucfirst($tag)) . "</span>";
-                };
+                foreach ($tags as $tag)
+                {
+                    echo '<span class="tag">' . htmlspecialchars(ucfirst($tag)) . '</span>';
+                }
                 ?>
             </div>
         </div>
         <div id="ingredients">
-            <h2>
-                <ul>Ingredients</ul>
-            </h2>
+            <h2>Ingredients</h2>
             <div id="ingredients-container">
                 <div class="ingredient-details">
                     <?php
-                    foreach ($previewIngredients as $ingredient) {
-                        echo "<li class='ingredient'>" . htmlspecialchars(ucfirst($ingredient['name'])) . "</li>";
-                    };
+                    foreach ($previewIngredients as $ingredient)
+                    {
+                        echo '<div class="ingredient">' . htmlspecialchars(ucfirst($ingredient['name'])) . '</div>';
+                    }
 
                     if (count($ingredients) > 5): ?>
                         <div id="ingredient-names-extra" style="display:none;">
                             <?php
-                            foreach (array_slice($ingredients, 5) as $ingredient) {
-                                echo "<li class='ingredient'>" . htmlspecialchars(ucfirst($ingredient['name'])) . "</li>";
-                            };
+                            foreach (array_slice($ingredients, 5) as $ingredient)
+                            {
+                                echo '<div class="ingredient">' . htmlspecialchars(ucfirst($ingredient['name'])) . '</div>';
+                            }
                             ?>
                         </div>
                     <?php endif; ?>
                 </div>
                 <div class="ingredient-details">
                     <?php
-                    foreach ($previewIngredients as $ingredient) {
-                        echo "<li class='amount'>" . htmlspecialchars(ucfirst($ingredient['amount'])) . " " . htmlspecialchars($ingredient['unit']) . "</li>";
-                    };
+                    foreach ($previewIngredients as $ingredient)
+                    {
+                        echo '<div class="amount">' . htmlspecialchars(ucfirst($ingredient['amount'])) . ' ' . htmlspecialchars($ingredient['unit']) . '</div>';
+                    }
 
                     if (count($ingredients) > 5) : ?>
                         <div id="ingredient-amounts-extra" style="display:none;">
                             <?php
-                            foreach (array_slice($ingredients, 5) as $ingredient) {
-                                echo "<li class='amount'>" . htmlspecialchars($ingredient['amount']) . " " . htmlspecialchars($ingredient['unit']) . "</li>";
-                            };
+                            foreach (array_slice($ingredients, 5) as $ingredient)
+                            {
+                                echo '<div class="amount">' . htmlspecialchars($ingredient['amount']) . ' ' . htmlspecialchars($ingredient['unit']) . '</div>';
+                            }
                             ?>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
             <?php if (count($ingredients) > 5): ?>
-                <button class="toggle-btn" onclick="toggleIngredients()">View All</button>
+                <button type="button" class="toggle-btn" onclick="toggleIngredients()">View All</button>
             <?php endif; ?>
         </div>
 
         <div id="steps">
             <h2>Steps</h2>
             <?php
-            foreach ($previewSteps as $step) {
-                echo "<div class='step'>";
-                echo "<h3 class='step-title'>Step " . $step['number'] . "</h3>";
-                echo "<div class='step-description'>";
+            foreach ($previewSteps as $step)
+            {
+                echo '<div class="step">';
+                echo '<h3 class="step-title">Step ' . $step['number'] . '</h3>';
+                echo '<div class="step-description">';
                 echo htmlspecialchars(strip_tags($step['step']));
-                echo "</div>";
-                echo "</div>";
-            };
+                echo '</div>';
+                echo '</div>';
+            }
 
             if ($stepsTruncated): ?>
                 <div id="steps-extra" style="display:none;">
                     <?php
-                    foreach (array_slice($steps, 3) as $step) {
-                        echo "<div class='step'>";
-                        echo "<h3 class='step-title'>Step " . $step['number'] . "</h3>";
-                        echo "<div class='step-description'>" . htmlspecialchars(strip_tags($step['step'])) . " </div>";
-                        echo "</div>";
-                    };
+                    foreach (array_slice($steps, 3) as $step)
+                    {
+                        echo '<div class="step">';
+                        echo '<h3 class="step-title">Step ' . $step['number'] . '</h3>';
+                        echo '<div class="step-description">' . htmlspecialchars(strip_tags($step['step'])) . ' </div>';
+                        echo '</div>';
+                    }
                     ?>
                 </div>
-                <button class="toggle-btn" id="steps-btn" onclick="toggleSteps()">View All</button>
+                <button type="button" class="toggle-btn" id="steps-btn" onclick="toggleSteps()">View All</button>
             <?php endif; ?>
         </div>
         <div id="button">
-            <a href="steps.php?id=<?php echo htmlspecialchars($id); ?>" onclick="sessionStorage.setItem('playStepOneAudio', 'yes')">
-                <button id="cooking-button">
-                    Start Cooking
-                </button>
-            </a>
+            <a id="cooking-button" href="steps.php?id=<?php echo htmlspecialchars($recipeId); ?>" onclick="sessionStorage.setItem('playStepOneAudio', 'yes')">Start Cooking</a>
         </div>
     </div>
 
-    <?php require_once __DIR__ . '/footer.php'; ?>
+    <?php include __DIR__ . '/footer.php'; ?>
 
     <script>
-        function toggleDesc() {
+        function toggleDesc()
+        {
             const short = document.getElementById('desc-short');
             const full = document.getElementById('desc-full');
             const btn = event.target;
 
-            if (full.style.display === 'none') {
+            if (full.style.display === 'none')
+            {
                 short.style.display = 'none';
                 full.style.display = 'inline';
                 btn.textContent = 'View less';
-            } else {
+            }
+            else
+            {
                 short.style.display = 'inline';
                 full.style.display = 'none';
                 btn.textContent = 'View all';
             }
         }
 
-        function toggleIngredients() {
+        function toggleIngredients()
+        {
             const namesExtra = document.getElementById('ingredient-names-extra');
             const amountsExtra = document.getElementById('ingredient-amounts-extra');
             const btn = event.target;
@@ -323,14 +344,18 @@ if ($isFavorite) {
             btn.textContent = isHidden ? 'View less' : 'View all';
         }
 
-        function toggleSteps() {
+        function toggleSteps()
+        {
             const extra = document.getElementById('steps-extra');
             const btn = document.getElementById('steps-btn');
 
-            if (extra.style.display === 'none') {
+            if (extra.style.display === 'none')
+            {
                 extra.style.display = 'block';
                 btn.textContent = 'View less';
-            } else {
+            }
+            else
+            {
                 extra.style.display = 'none';
                 btn.textContent = 'View all';
             }
@@ -338,31 +363,38 @@ if ($isFavorite) {
 
         const favoriteButton = document.querySelector('.favorite-btn');
 
-        favoriteButton.addEventListener('click', () => {
+        favoriteButton.addEventListener('click', () =>
+        {
             const isFavorite = favoriteButton.getAttribute('aria-pressed') === 'true';
             const recipeTitle = <?php echo json_encode($recipe['title']); ?>;
             const newFavoriteState = !isFavorite;
             const formData = new FormData();
-            formData.append('recipe_id', <?php echo $id; ?>);
+            formData.append('recipe_id', <?php echo $recipeId; ?>);
             formData.append('isFavorite', String(newFavoriteState));
 
-            fetch('favorite-recipe.php', {
-                    method: 'POST',
-                    body: formData,
-                })
+            fetch('favorite-recipe.php',
+            {
+                method: 'POST',
+                body: formData,
+            })
                 .then(response => response.json())
-                .then(result => {
-                    if (!result.success) {
+                .then(result =>
+                {
+                    if (!result.success)
+                    {
                         return;
                     }
 
                     const favoriteImage = favoriteButton.querySelector('img');
                     favoriteButton.setAttribute('aria-pressed', String(newFavoriteState));
 
-                    if (newFavoriteState) {
+                    if (newFavoriteState)
+                    {
                         favoriteButton.setAttribute('aria-label', `Remove ${recipeTitle} from favorites`);
                         favoriteImage.src = '../images/search-page/heart-full.svg';
-                    } else {
+                    }
+                    else
+                    {
                         favoriteButton.setAttribute('aria-label', `Add ${recipeTitle} to favorites`);
                         favoriteImage.src = '../images/search-page/heart-empty.svg';
                     }

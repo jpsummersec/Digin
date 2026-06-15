@@ -1,334 +1,333 @@
-<?php 
-include __DIR__ . '/include-loginrequired.php';
-include __DIR__ . '/include-dbhandler.php';
+<?php
 
-if (isset($_GET['action']) && $_GET['action'] === 'logout') {
-	session_unset();
-	session_destroy();
-
-	header('Location: landing.php');
-	exit();
-}
+require_once __DIR__ . '/include-loginrequired.php';
+require_once __DIR__ . '/include-dbhandler.php';
 
 $userId = (int) $_SESSION['user_id'];
 $uploadError = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture'])) {
-	$profilePicture = $_FILES['profile_picture'];
-	$maximumFileSize = 10 * 1024 * 1024;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture']))
+{
+    $profilePicture = $_FILES['profile_picture'];
+    $maximumFileSize = 10 * 1024 * 1024;
 
-	if ($profilePicture['error'] !== UPLOAD_ERR_OK) {
-		$uploadError = 'The image could not be uploaded.';
-	} elseif ($profilePicture['size'] > $maximumFileSize) {
-		$uploadError = 'The image must be smaller than 10 MiB.';
-	} else {
-		$imageInfo = getimagesize($profilePicture['tmp_name']);
-		$allowedImageTypes = array(
-			IMAGETYPE_JPEG => 'jpg',
-			IMAGETYPE_PNG => 'png',
-			IMAGETYPE_WEBP => 'webp',
-			IMAGETYPE_GIF => 'gif'
-		);
+    if ($profilePicture['error'] !== UPLOAD_ERR_OK)
+    {
+        $uploadError = 'The image could not be uploaded.';
+    }
+    elseif ($profilePicture['size'] > $maximumFileSize)
+    {
+        $uploadError = 'The image must be smaller than 10 MiB.';
+    }
+    else
+    {
+        $imageInfo = getimagesize($profilePicture['tmp_name']);
+        $allowedImageTypes = [
+            IMAGETYPE_JPEG => 'jpg',
+            IMAGETYPE_PNG => 'png',
+            IMAGETYPE_WEBP => 'webp',
+            IMAGETYPE_GIF => 'gif'
+        ];
 
-		if ($imageInfo === false || !isset($allowedImageTypes[$imageInfo[2]])) {
-			$uploadError = 'Please upload a JPEG, PNG, WebP, or GIF image.';
-		} else {
-			$fileName = 'user-' . $userId . '-' . uniqid() . '.' . $allowedImageTypes[$imageInfo[2]];
-			$uploadDirectory = __DIR__ . '/../database/profile-pictures/';
-			$newFileLocation = $uploadDirectory . $fileName;
-			$newDatabasePath = '../database/profile-pictures/' . $fileName;
+        if ($imageInfo === false || !isset($allowedImageTypes[$imageInfo[2]]))
+        {
+            $uploadError = 'Please upload a JPEG, PNG, WebP, or GIF image.';
+        }
+        else
+        {
+            $fileName = 'user-' . $userId . '-' . uniqid() . '.' . $allowedImageTypes[$imageInfo[2]];
+            $uploadDirectory = __DIR__ . '/../database/profile-pictures/';
+            $newFileLocation = $uploadDirectory . $fileName;
+            $newDatabasePath = '../database/profile-pictures/' . $fileName;
 
-			try {
-				$statement = $dbHandler->prepare('SELECT `path_to_icon` FROM `user` WHERE `user_id` = :userId');
-				$statement->bindValue(':userId', $userId, PDO::PARAM_INT);
-				$statement->execute();
-				$oldDatabasePath = $statement->fetchColumn();
-				$statement->closeCursor();
+            try
+            {
+                $statement = $dbHandler->prepare('SELECT `path_to_icon` FROM `user` WHERE `user_id` = :userId');
+                $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+                $statement->execute();
+                $oldDatabasePath = $statement->fetchColumn();
+                $statement->closeCursor();
 
-				if (move_uploaded_file($profilePicture['tmp_name'], $newFileLocation)) {
-					$statement = $dbHandler->prepare('UPDATE `user` SET `path_to_icon` = :pathToIcon WHERE `user_id` = :userId');
-					$statement->bindValue(':pathToIcon', $newDatabasePath);
-					$statement->bindValue(':userId', $userId, PDO::PARAM_INT);
-					$statement->execute();
-					$statement->closeCursor();
+                if (move_uploaded_file($profilePicture['tmp_name'], $newFileLocation))
+                {
+                    $statement = $dbHandler->prepare('UPDATE `user` SET `path_to_icon` = :pathToIcon WHERE `user_id` = :userId');
+                    $statement->bindValue(':pathToIcon', $newDatabasePath);
+                    $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+                    $statement->execute();
+                    $statement->closeCursor();
 
-					if ($oldDatabasePath !== '../database/profile-pictures/default.png') {
-						$oldFileLocation = $uploadDirectory . basename($oldDatabasePath);
+                    if ($oldDatabasePath !== '../database/profile-pictures/default.png')
+                    {
+                        $oldFileLocation = $uploadDirectory . basename($oldDatabasePath);
 
-						if (is_file($oldFileLocation)) {
-							unlink($oldFileLocation);
-						}
-					}
+                        if (is_file($oldFileLocation))
+                        {
+                            unlink($oldFileLocation);
+                        }
+                    }
 
-					header('Location: profile-page.php');
-					exit();
-				} else {
-					$uploadError = 'The image could not be saved.';
-				}
-			}
-			catch(PDOException $exception) {
-				if (is_file($newFileLocation)) {
-					unlink($newFileLocation);
-				}
+                    header('Location: profile-page.php');
+                    exit;
+                }
+                else
+                {
+                    $uploadError = 'The image could not be saved.';
+                }
+            }
+            catch (PDOException $exception)
+            {
+                if (is_file($newFileLocation))
+                {
+                    unlink($newFileLocation);
+                }
 
-				$uploadError = 'The profile picture could not be updated.';
-			}
-		}
-	}
+                $uploadError = 'The profile picture could not be updated.';
+            }
+        }
+    }
 }
 
-// Load the Spotify client ID from config.php.
+// Load the Spotify client ID and callback URL used to build the authorization link.
 $config = require __DIR__ . '/config.php';
-if (isset($config['SPOTIFY_CLIENT_ID'])) {
-    $client_id = $config['SPOTIFY_CLIENT_ID'];
-} else {
-    $client_id = null;
+
+if (isset($config['SPOTIFY_CLIENT_ID']))
+{
+    $clientId = $config['SPOTIFY_CLIENT_ID'];
+}
+else
+{
+    $clientId = null;
 }
 
-if (!$client_id) {
+if (!$clientId)
+{
     die('Error: SPOTIFY_CLIENT_ID not found in config.php');
 }
 
-$redirect_uri = $config['SPOTIFY_REDIRECT_URI'];
+$redirectUri = $config['SPOTIFY_REDIRECT_URI'];
 
-// Generate a random state token and keep it in the session.
-// Spotify will send it back so we can verify the callback.
+// Spotify returns this state value to the callback so the response can be
+// verified against the current session.
 $state = bin2hex(random_bytes(16));
 $_SESSION['spotify_state'] = $state;
 
-// These scopes let us read playback state and start playback.
-$scope = "user-read-playback-state user-modify-playback-state";
+// These scopes allow the application to read and control Spotify playback.
+$scope = 'user-read-playback-state user-modify-playback-state';
 
 $spotifyParams = [];
-$spotifyParams["response_type"] = "code";
-$spotifyParams["client_id"] = $client_id;
-$spotifyParams["scope"] = $scope;
-$spotifyParams["redirect_uri"] = $redirect_uri;
-$spotifyParams["state"] = $state;
-$spotifyParams["show_dialog"] = "true"; // Keep the login prompt visible for fresh auth.
+$spotifyParams['response_type'] = 'code';
+$spotifyParams['client_id'] = $clientId;
+$spotifyParams['scope'] = $scope;
+$spotifyParams['redirect_uri'] = $redirectUri;
+$spotifyParams['state'] = $state;
+$spotifyParams['show_dialog'] = 'true';
 
-$params = http_build_query($spotifyParams);
+$queryParameters = http_build_query($spotifyParams);
+$authorizeUrl = "https://accounts.spotify.com/authorize?$queryParameters";
 
-$authorize_url = "https://accounts.spotify.com/authorize?$params";
-
-if (isset($_GET['action']) && $_GET['action'] === 'login') {
-    header("Location: $authorize_url");
-    exit();
+if (isset($_GET['action']) && $_GET['action'] === 'login')
+{
+    header("Location: $authorizeUrl");
+    exit;
 }
 
 $user = null;
 $achievements = [];
 $savedRecipes = [];
 
-if (isset($dbHandler)) {
-	// get user info based on user ID
-	try {
-		$statement = $dbHandler->prepare('SELECT * FROM `user` WHERE `user_id` = :userId');
-		$statement->bindValue(':userId', $userId, PDO::PARAM_INT); 
-		$statement->execute();
-		$user = $statement->fetch(PDO::FETCH_ASSOC);  
-		$statement->closeCursor(); 
-	}
-	catch(PDOException $exception) {
-		die('Select error: ' . $exception->getMessage());
-	}
+if (isset($dbHandler))
+{
+    // Load the profile information displayed in the banner.
+    try
+    {
+        $statement = $dbHandler->prepare('SELECT * FROM `user` WHERE `user_id` = :userId');
+        $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+        $statement->execute();
+        $user = $statement->fetch(PDO::FETCH_ASSOC);
+        $statement->closeCursor();
+    }
+    catch (PDOException $exception)
+    {
+        die('Select error: ' . $exception->getMessage());
+    }
 
-	// get user achievements based on user ID
-	try { 
-		$statement = $dbHandler->prepare('
-			SELECT a.`achievement_id`, a.`achievement_name`, a.`path_to_icon`
-			FROM `user_achievement` ua
-			INNER JOIN `achievement` a
-				ON a.`achievement_id` = ua.`achievement_id`
-			WHERE ua.`user_id` = :userId
-			ORDER BY a.`achievement_id`
-		');
-		$statement->bindValue(':userId', $userId, PDO::PARAM_INT); 
-		$statement->execute();
-		$achievements = $statement->fetchAll(PDO::FETCH_ASSOC);  
-		$statement->closeCursor(); 
-	}
-	catch(PDOException $exception) {
-		die('Select error: ' . $exception->getMessage());
-	}
+    // Load achievements earned by this user.
+    try
+    {
+        $statement = $dbHandler->prepare('
+            SELECT a.`achievement_id`, a.`achievement_name`, a.`path_to_icon`
+            FROM `user_achievement` ua
+            INNER JOIN `achievement` a
+                ON a.`achievement_id` = ua.`achievement_id`
+            WHERE ua.`user_id` = :userId
+            ORDER BY a.`achievement_id`
+        ');
+        $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+        $statement->execute();
+        $achievements = $statement->fetchAll(PDO::FETCH_ASSOC);
+        $statement->closeCursor();
+    }
+    catch (PDOException $exception)
+    {
+        die('Select error: ' . $exception->getMessage());
+    }
 
-	// get saved recipes based on user ID
-	try {
-		$statement = $dbHandler->prepare('
-			SELECT r.`recipe_id`, r.`recipe_json`
-			FROM `user_saved_recipe` ur
-			INNER JOIN `recipe` r
-				ON r.`recipe_id` = ur.`recipe_id`
-			WHERE ur.`user_id` = :userId
-		');
-		$statement->bindValue(':userId', $userId, PDO::PARAM_INT);
-		$statement->execute();
-		$savedRecipes = $statement->fetchAll(PDO::FETCH_ASSOC);
-		$statement->closeCursor();
-	}
-	catch(PDOException $exception) {
-		die('Select error: ' . $exception->getMessage());
-	}
+    // Load recipes saved by this user.
+    try
+    {
+        $statement = $dbHandler->prepare('
+            SELECT r.`recipe_id`, r.`recipe_json`
+            FROM `user_saved_recipe` ur
+            INNER JOIN `recipe` r
+                ON r.`recipe_id` = ur.`recipe_id`
+            WHERE ur.`user_id` = :userId
+        ');
+        $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+        $statement->execute();
+        $savedRecipes = $statement->fetchAll(PDO::FETCH_ASSOC);
+        $statement->closeCursor();
+    }
+    catch (PDOException $exception)
+    {
+        die('Select error: ' . $exception->getMessage());
+    }
 }
 
 $recipeDetailsUrl = '../php/recipe.php';
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Document</title>
-		<link rel="stylesheet" href="../css/search-page.css">
-		<link rel="stylesheet" href="../css/root.css">
-		<link rel="stylesheet" href="../css/profile-page.css">
-		<link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
-	</head>
-	<body>
-		<?php include __DIR__ . '/menu.php'; ?>
-		<h1 class="page-title">Your Profile</h1>
-		<?php if ($uploadError !== '') { ?>
-			<p class="upload-error"><?php echo htmlspecialchars($uploadError); ?></p>
-		<?php } ?>
-		<div class="profile-banner">
-			<form class="profile-picture" action="profile-page.php" method="post" enctype="multipart/form-data">
-				<label for="profile-picture-input">
-					<img src="<?php echo '../' . htmlspecialchars($user['path_to_icon']); ?>" alt="Profile Picture">
-				</label>
-				<input id="profile-picture-input" type="file" name="profile_picture" accept="image/jpeg,image/png,image/webp,image/gif" onchange="this.form.submit()">
-			</form>
-			<h1><?php echo htmlspecialchars($user['first_name']) . ' ' . htmlspecialchars($user['last_name']); ?></h1>
-			<h2><?php echo htmlspecialchars($user['email_address']); ?></h2>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your Profile</title>
+        <link rel="stylesheet" href="../css/search-page.css">
+        <link rel="stylesheet" href="../css/root.css">
+        <link rel="stylesheet" href="../css/profile-page.css">
+        <link rel="icon" type="image/svg+xml" href="../images/favicon/favicon.svg" />
+    </head>
+    <body>
+        <?php include __DIR__ . '/menu.php'; ?>
+        <h1 class="page-title">Your Profile</h1>
+        <?php if ($uploadError !== '') { ?>
+            <p class="upload-error"><?php echo htmlspecialchars($uploadError); ?></p>
+        <?php } ?>
+        <div class="profile-banner">
+            <form class="profile-picture" action="profile-page.php" method="post" enctype="multipart/form-data">
+                <label for="profile-picture-input">
+                    <img src="<?php echo '../' . htmlspecialchars($user['path_to_icon']); ?>" alt="Profile Picture">
+                </label>
+                <input id="profile-picture-input" type="file" name="profile_picture" accept="image/jpeg,image/png,image/webp,image/gif" onchange="this.form.submit()">
+            </form>
+            <h1><?php echo htmlspecialchars($user['first_name']) . ' ' . htmlspecialchars($user['last_name']); ?></h1>
+            <h2><?php echo htmlspecialchars($user['email_address']); ?></h2>
+            <?php
+            $currentXp = $user['xp'];
+            $currentLevel = $user['level'];
+            $xpToNextLevel = 100 * $currentLevel * 2;
 
-			<?php
-			$currentXp = $user['xp'];
-			$currentLevel = $user['level'];
-			$xpToNextLevel = 100 * $currentLevel * 2;
+            $progressPercent = ($currentXp / $xpToNextLevel) * 100;
+            $progressPercent = max(0, min(100, $progressPercent));
+            ?>
+            <div class="xp-bar">
+                <div class="xp-bar-fill" style="width: <?php echo $progressPercent; ?>%;"></div>
+            </div>
+            <h3 class="xp-progress">
+                <?php echo $currentXp; ?> / <?php echo $xpToNextLevel; ?> XP
+            </h3>
+            <h3 class="level-counter">Level <?php echo $currentLevel; ?></h3>
+        </div>
+        <div class="achievements">
+            <h2>Achievements</h2>
+            <?php if (empty($achievements)) { ?>
+                <p class="empty-achievements">No achievements yet.</p>
+            <?php } else { ?>
+                <div class="achievement-list">
+                    <?php foreach ($achievements as $achievement) { ?>
+                        <div class="achievement-item">
+                            <img src="<?php echo htmlspecialchars($achievement['path_to_icon']); ?>" alt="<?php echo htmlspecialchars($achievement['achievement_name']); ?>">
+                        </div>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+            <hr>
+        </div>
+        <div class="saved-recipes">
+            <h2>Saved Recipes</h2>
+            <?php if (empty($savedRecipes)) { ?>
+                <p class="empty-saved-recipes">No saved recipes yet.</p>
+            <?php } else { ?>
+                <div class="saved-recipes-list">
+                    <?php foreach ($savedRecipes as $savedRecipe) { ?>
+                        <?php
+                        $recipe = json_decode($savedRecipe['recipe_json'], true);
 
-			$progressPercent = ($currentXp / $xpToNextLevel) * 100;
-			$progressPercent = max(0, min(100, $progressPercent));
-			?>
+                        if (!is_array($recipe))
+                        {
+                            continue;
+                        }
 
-			<div class="xp-bar">
-				<div class="xp-bar-fill" style="width: <?php echo $progressPercent; ?>%;"></div>
-			</div>
+                        $recipeId = $recipe['id'];
+                        $title = $recipe['title'];
+                        $image = $recipe['image'];
+                        $time = $recipe['readyInMinutes'] . ' minutes';
 
-			<h3 class="xp-progress">
-				<?php echo $currentXp; ?> / <?php echo $xpToNextLevel; ?> XP
-			</h3>
+                        $spoonacularScore = $recipe['spoonacularScore'];
+                        $starScore = min(max((float) $spoonacularScore / 20, 0), 5);
+                        $fullStars = round($starScore);
 
-			<h3 class="level-counter">Level <?php echo $currentLevel; ?></h3>
-		</div>
+                        foreach ($recipe['nutrition']['nutrients'] as $nutrient)
+                        {
+                            if (isset($nutrient['name']) && $nutrient['name'] === 'Calories')
+                            {
+                                $calorieAmount = $nutrient['amount'];
+                                $calorieUnit = $nutrient['unit'];
+                                $calories = round($calorieAmount) . ' ' . $calorieUnit;
+                                break;
+                            }
+                        }
+                        ?>
+                        <article class="recipe saved-recipe-item">
+                            <a class="recipe-link" href="<?php echo htmlspecialchars($recipeDetailsUrl . '?id=' . $recipeId); ?>">
+                                <img class="recipe-image" src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($title); ?>" loading="lazy">
+                                <div class="recipe-content">
+                                    <h2><?php echo htmlspecialchars($title); ?></h2>
+                                    <div class="recipe-meta">
+                                        <span><span class="meta-bolt" aria-hidden="true"><img src="../images/search-page/calories.svg"></span><?php echo htmlspecialchars($calories); ?></span>
+                                        <span><span class="meta-clock" aria-hidden="true"><img src="../images/search-page/time.svg"></span><?php echo htmlspecialchars($time); ?></span>
+                                    </div>
+                                    <span class="meta-rating" aria-hidden="true">
+                                        <?php for ($star = 0; $star < 5; $star++) { ?>
+                                            <?php
+                                            $starClass = 'is-empty';
 
-		<div class="achievements">
-			<h2>Achievements</h2>
-
-			<?php if (empty($achievements)) { ?>
-				<p class="empty-achievements">No achievements yet.</p>
-			<?php } else { ?>
-				<div class="achievement-list">
-					<?php foreach ($achievements as $achievement) { ?>
-						<div class="achievement-item">
-							<img src="<?php echo htmlspecialchars($achievement['path_to_icon']); ?>" alt="<?php echo htmlspecialchars($achievement['achievement_name']); ?>">
-						</div>
-					<?php } ?>
-				</div>
-			<?php } ?>
-			<hr>
-		</div>
-
-		
-
-		<div class="saved-recipes">
-			<h2>Saved Recipes</h2>
-
-			<?php if (empty($savedRecipes)) { ?>
-				<p class="empty-saved-recipes">No saved recipes yet.</p>
-			<?php } else { ?>
-				<div class="saved-recipes-list">
-					<?php foreach ($savedRecipes as $savedRecipe) { ?>
-						<?php
-						$recipe = json_decode($savedRecipe['recipe_json'], true);
-
-						if (!is_array($recipe)) {
-							continue;
-						}
-
-						$recipeId = $recipe['id'];
-						$title = $recipe['title'];
-						$image = $recipe['image'];
-						$time = $recipe['readyInMinutes'] . ' minutes';
-						
-						if (isset($recipe['extendedIngredients']) && is_array($recipe['extendedIngredients'])) {
-							$ingredients = $recipe['extendedIngredients'];
-						} elseif (isset($recipe['usedIngredients']) && is_array($recipe['usedIngredients'])) {
-							$ingredients = $recipe['usedIngredients'];
-						} elseif (isset($recipe['missedIngredients']) && is_array($recipe['missedIngredients'])) {
-							$ingredients = $recipe['missedIngredients'];
-						}
-
-						$spoonacularScore = $recipe['spoonacularScore'];
-						
-						$starScore = min(max((float) $spoonacularScore / 20, 0), 5);
-						$fullStars = round($starScore);
-
-						
-						foreach ($recipe['nutrition']['nutrients'] as $nutrient) {
-							if (isset($nutrient['name']) && $nutrient['name'] === 'Calories') {
-								$calorieAmount = $nutrient['amount'];
-								$calorieUnit = $nutrient['unit'];
-								$calories = round($calorieAmount) . ' ' . $calorieUnit;
-								break;
-							}
-						}
-						
-						?>
-						<article class="recipe saved-recipe-item">
-							<a class="recipe-link" href="<?php echo htmlspecialchars($recipeDetailsUrl . '?id=' . $recipeId); ?>">
-							<img class="recipe-image" src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($title); ?>" loading="lazy">
-							<div class="recipe-content">
-								<h2><?php echo htmlspecialchars($title); ?></h2>
-								<div class="recipe-meta">
-									<span><span class="meta-bolt" aria-hidden="true"><img src="../images/search-page/calories.svg"></span><?php echo htmlspecialchars($calories); ?></span>
-									<span><span class="meta-clock" aria-hidden="true"><img src="../images/search-page/time.svg"></span><?php echo htmlspecialchars($time); ?></span>
-								</div>
-								<span class="meta-rating" aria-hidden="true">
-									<?php for ($star = 0; $star < 5; $star++) { ?>
-										<?php
-										$starClass = 'is-empty';
-
-										if ($star < $fullStars) {
-											$starClass = 'is-filled';
-										}
-										?>
-										<span class="rating-star <?php echo $starClass; ?>" aria-hidden="true">⭐</span>
-									<?php } ?>
-								</span>
-							</div>
-							</a>
-						</article>
-					<?php } ?>
-				</div>
-				<?php } ?>
-			<hr>
-		</div>
-
-		<div class="spotify">
-			<hr>
-			<img src="../images/profile-page/spotify-logo.svg" alt="spotify-logo">
-			<a href="?action=login" class="button">Connect to Spotify</a>
-			<p>Cook with Spotify. Taste the vibe.</p>
-		</div>
-
-		<div class="logout">
-			<form action="profile-page.php?action=logout" method="post">
-				<button type="submit">Logout</button>
-			</form>
-		</div>
-
-	</body>
-
-	
+                                            if ($star < $fullStars)
+                                            {
+                                                $starClass = 'is-filled';
+                                            }
+                                            ?>
+                                            <span class="rating-star <?php echo $starClass; ?>" aria-hidden="true">⭐</span>
+                                        <?php } ?>
+                                    </span>
+                                </div>
+                            </a>
+                        </article>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+            <hr>
+        </div>
+        <div class="spotify">
+            <hr>
+            <img src="../images/profile-page/spotify-logo.svg" alt="spotify-logo">
+            <a href="?action=login" class="button">Connect to Spotify</a>
+            <p>Cook with Spotify. Taste the vibe.</p>
+        </div>
+        <div class="logout">
+            <form action="logout.php" method="post">
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </body>
 </html>

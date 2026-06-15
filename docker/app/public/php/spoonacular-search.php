@@ -1,16 +1,13 @@
 <?php
+
 require_once __DIR__ . '/include-loginrequired.php';
 require_once __DIR__ . '/include-dbhandler.php';
 require_once __DIR__ . '/include-spoonacular-api.php';
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 header('Content-Type: application/json');
 
-$db = $dbHandler;
-
-if (empty($_GET['query'])) {
+if (empty($_GET['query']))
+{
     http_response_code(400);
     echo json_encode(['error' => 'Missing search query']);
     exit;
@@ -18,7 +15,8 @@ if (empty($_GET['query'])) {
 
 $query = trim($_GET['query']);
 
-if (empty($apiKeys)) {
+if (empty($apiKeys))
+{
     http_response_code(500);
     echo json_encode(['error' => 'Missing API keys']);
     exit;
@@ -34,64 +32,71 @@ $sortDirection = $_GET['sortDirection'] ?? 'asc';
 $minCalories = normalizeCalorieBound($_GET['minCalories'] ?? '');
 $maxCalories = normalizeCalorieBound($_GET['maxCalories'] ?? '');
 
-if ($minCalories !== '' && $maxCalories !== '' && (int)$minCalories > (int)$maxCalories) {
+if ($minCalories !== '' && $maxCalories !== '' && (int) $minCalories > (int) $maxCalories)
+{
     [$minCalories, $maxCalories] = [$maxCalories, $minCalories];
 }
 
-$number = isset($_GET['number']) ? (int)$_GET['number'] : 1;
+$number = isset($_GET['number']) ? (int) $_GET['number'] : 1;
 $number = max(0, min(10, $number));
 
 $addRecipeNutritionValue = (!empty($_GET['addRecipeNutrition']) && $_GET['addRecipeNutrition'] === 'true') ? 'true' : 'false';
 $ingredientSearch = (!empty($_GET['ingredientSearch']) && $_GET['ingredientSearch'] === 'true');
 
+// Sort cached and API results using the values exposed by the search page.
 function sortRecipes(array $results, string $sort, string $direction = 'asc'): array
 {
-    if ($sort === '') return $results;
+    if ($sort === '')
+    {
+        return $results;
+    }
 
-    $dir = ($direction === 'desc') ? -1 : 1;
+    $directionMultiplier = ($direction === 'desc') ? -1 : 1;
 
-    usort($results, function ($a, $b) use ($sort, $dir) {
-
-        switch ($sort) {
+    usort($results, function ($firstRecipe, $secondRecipe) use ($sort, $directionMultiplier)
+    {
+        switch ($sort)
+        {
             case 'readyInMinutes':
-                $aVal = $a['readyInMinutes'] ?? PHP_INT_MAX;
-                $bVal = $b['readyInMinutes'] ?? PHP_INT_MAX;
+                $firstValue = $firstRecipe['readyInMinutes'] ?? PHP_INT_MAX;
+                $secondValue = $secondRecipe['readyInMinutes'] ?? PHP_INT_MAX;
                 break;
 
             case 'healthScore':
-                $aVal = $a['healthScore'] ?? 0;
-                $bVal = $b['healthScore'] ?? 0;
+                $firstValue = $firstRecipe['healthScore'] ?? 0;
+                $secondValue = $secondRecipe['healthScore'] ?? 0;
                 break;
 
             case 'spoonacularScore':
-                $aVal = $a['spoonacularScore'] ?? 0;
-                $bVal = $b['spoonacularScore'] ?? 0;
+                $firstValue = $firstRecipe['spoonacularScore'] ?? 0;
+                $secondValue = $secondRecipe['spoonacularScore'] ?? 0;
                 break;
 
             case 'popularity':
-                $aVal = $a['popularity'] ?? 0;
-                $bVal = $b['popularity'] ?? 0;
+                $firstValue = $firstRecipe['popularity'] ?? 0;
+                $secondValue = $secondRecipe['popularity'] ?? 0;
                 break;
+
             case 'likes':
-                $aVal = $a['likes'] ?? 0;
-                $bVal = $b['likes'] ?? 0;
+                $firstValue = $firstRecipe['likes'] ?? 0;
+                $secondValue = $secondRecipe['likes'] ?? 0;
                 break;
 
             case 'price':
-                $aVal = $a['pricePerServing'] ?? PHP_INT_MAX;
-                $bVal = $b['pricePerServing'] ?? PHP_INT_MAX;
+                $firstValue = $firstRecipe['pricePerServing'] ?? PHP_INT_MAX;
+                $secondValue = $secondRecipe['pricePerServing'] ?? PHP_INT_MAX;
                 break;
 
             case 'calories':
-                $aVal = $a['nutrition']['nutrients'][0]['amount'] ?? PHP_INT_MAX;
-                $bVal = $b['nutrition']['nutrients'][0]['amount'] ?? PHP_INT_MAX;
+                $firstValue = $firstRecipe['nutrition']['nutrients'][0]['amount'] ?? PHP_INT_MAX;
+                $secondValue = $secondRecipe['nutrition']['nutrients'][0]['amount'] ?? PHP_INT_MAX;
                 break;
 
             default:
                 return 0;
         }
 
-        return ($aVal <=> $bVal) * $dir;
+        return ($firstValue <=> $secondValue) * $directionMultiplier;
     });
 
     return $results;
@@ -99,19 +104,22 @@ function sortRecipes(array $results, string $sort, string $direction = 'asc'): a
 
 function normalizeCalorieBound($value): string
 {
-    if ($value === '' || !is_numeric($value)) {
+    if ($value === '' || !is_numeric($value))
+    {
         return '';
     }
 
-    $calories = (int)$value;
+    $calories = (int) $value;
 
-    if ($calories < 50 || $calories > 800) {
+    if ($calories < 50 || $calories > 800)
+    {
         return '';
     }
 
     return (string)$calories;
 }
 
+// Use all active search options to identify an equivalent cached search.
 $cacheKey = [
     'query' => strtolower(trim($query)),
     'number' => $number,
@@ -126,61 +134,69 @@ $cacheKey = [
     'addRecipeNutrition' => $addRecipeNutritionValue
 ];
 
-if ($minCalories !== '') {
+if ($minCalories !== '')
+{
     $cacheKey['minCalories'] = $minCalories;
 }
 
-if ($maxCalories !== '') {
+if ($maxCalories !== '')
+{
     $cacheKey['maxCalories'] = $maxCalories;
 }
 
 $keyString = json_encode($cacheKey, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-$hash = md5($keyString);
+$cacheHash = md5($keyString);
 
-$stmt = $db->prepare("SELECT search_id, search_parameter_string FROM cached_search");
-$stmt->execute();
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$statement = $dbHandler->prepare('SELECT search_id, search_parameter_string FROM cached_search');
+$statement->execute();
+$rows = $statement->fetchAll(PDO::FETCH_ASSOC);
 
 $searchId = null;
 
-foreach ($rows as $row) {
+foreach ($rows as $row)
+{
     $stored = json_decode($row['search_parameter_string'], true);
-    if (!$stored) continue;
+    if (!$stored)
+    {
+        continue;
+    }
 
     $storedHash = md5(json_encode($stored, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
-    if ($storedHash === $hash) {
+    if ($storedHash === $cacheHash)
+    {
         $searchId = $row['search_id'];
         break;
     }
 }
 
-if ($searchId) {
-
-    $stmt = $db->prepare("
+// Return cached recipes before making a Spoonacular request.
+if ($searchId)
+{
+    $statement = $dbHandler->prepare("
         SELECT recipe_id
         FROM cached_search_results
         WHERE search_id = ?
     ");
 
-    $stmt->execute([$searchId]);
-    $recipeIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $statement->execute([$searchId]);
+    $recipeIds = $statement->fetchAll(PDO::FETCH_COLUMN);
 
-    if (!empty($recipeIds)) {
-
+    if (!empty($recipeIds))
+    {
         $placeholders = implode(',', array_fill(0, count($recipeIds), '?'));
 
-        $stmt = $db->prepare("
+        $statement = $dbHandler->prepare("
             SELECT recipe_json
             FROM recipe
             WHERE recipe_id IN ($placeholders)
         ");
 
-        $stmt->execute($recipeIds);
+        $statement->execute($recipeIds);
 
         $results = array_map(
             fn($row) => json_decode($row, true),
-            $stmt->fetchAll(PDO::FETCH_COLUMN)
+            $statement->fetchAll(PDO::FETCH_COLUMN)
         );
 
         $results = array_values($results);
@@ -194,18 +210,19 @@ if ($searchId) {
     }
 }
 
-if ($ingredientSearch) {
-
+// Ingredient searches and normal recipe searches use different endpoints.
+if ($ingredientSearch)
+{
     $baseUrl = 'https://api.spoonacular.com/recipes/findByIngredients';
 
-    $params = [
+    $parameters = [
         'ingredients' => implode(',', preg_split('/[\s,]+/', trim($query))),
         'number' => $number,
     ];
-
-} else {
-
-    $params = [
+}
+else
+{
+    $parameters = [
         'query' => $query,
         'number' => $number,
         'addRecipeNutrition' => $addRecipeNutritionValue,
@@ -214,20 +231,48 @@ if ($ingredientSearch) {
         'fillIngredients' => 'true'
     ];
 
-    if ($cuisine) $params['cuisine'] = $cuisine;
-    if ($diet) $params['diet'] = $diet;
-    if ($maxTime) $params['maxReadyTime'] = $maxTime;
-    if ($type) $params['type'] = $type;
-    if ($intolerances) $params['intolerances'] = $intolerances;
-    if ($minCalories !== '') $params['minCalories'] = $minCalories;
-    if ($maxCalories !== '') $params['maxCalories'] = $maxCalories;
+    if ($cuisine)
+    {
+        $parameters['cuisine'] = $cuisine;
+    }
+
+    if ($diet)
+    {
+        $parameters['diet'] = $diet;
+    }
+
+    if ($maxTime)
+    {
+        $parameters['maxReadyTime'] = $maxTime;
+    }
+
+    if ($type)
+    {
+        $parameters['type'] = $type;
+    }
+
+    if ($intolerances)
+    {
+        $parameters['intolerances'] = $intolerances;
+    }
+
+    if ($minCalories !== '')
+    {
+        $parameters['minCalories'] = $minCalories;
+    }
+
+    if ($maxCalories !== '')
+    {
+        $parameters['maxCalories'] = $maxCalories;
+    }
 
     $baseUrl = 'https://api.spoonacular.com/recipes/complexSearch';
 }
 
-$response = spoonacularRequestWithKeyRotation($baseUrl, $params);
+$response = spoonacularRequestWithKeyRotation($baseUrl, $parameters);
 
-if (!$response['success']) {
+if (!$response['success'])
+{
     http_response_code($response['status']);
     echo $response['body'];
     exit;
@@ -241,54 +286,59 @@ $results = $ingredientSearch
 
 $results = sortRecipes($results, $sort, $sortDirection);
 
-if (!empty($results)) {
-
-    try {
-
-        $stmt = $db->prepare("
+// Cache successful search results and their recipe data for future requests.
+if (!empty($results))
+{
+    try
+    {
+        $statement = $dbHandler->prepare("
             INSERT INTO cached_search (search_parameter_string)
             VALUES (?)
         ");
 
-        $stmt->execute([$keyString]);
-        $searchId = $db->lastInsertId();
+        $statement->execute([$keyString]);
+        $searchId = $dbHandler->lastInsertId();
 
-    } catch (PDOException $e) {
-
-        $stmt = $db->prepare("
+    }
+    catch (PDOException $exception)
+    {
+        $statement = $dbHandler->prepare("
             SELECT search_id
             FROM cached_search
             WHERE search_parameter_string = ?
             LIMIT 1
         ");
 
-        $stmt->execute([$keyString]);
-        $searchId = $stmt->fetchColumn();
+        $statement->execute([$keyString]);
+        $searchId = $statement->fetchColumn();
     }
 
-    if ($searchId) {
+    if ($searchId)
+    {
+        foreach ($results as $recipe)
+        {
+            if (!isset($recipe['id']))
+            {
+                continue;
+            }
 
-        foreach ($results as $recipe) {
-
-            if (!isset($recipe['id'])) continue;
-
-            $stmt = $db->prepare("
+            $statement = $dbHandler->prepare("
                 INSERT INTO recipe (recipe_id, recipe_json)
                 VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE recipe_json = VALUES(recipe_json)
             ");
 
-            $stmt->execute([
+            $statement->execute([
                 $recipe['id'],
                 json_encode($recipe)
             ]);
 
-            $stmt = $db->prepare("
+            $statement = $dbHandler->prepare("
                 INSERT INTO cached_search_results (search_id, recipe_id)
                 VALUES (?, ?)
             ");
 
-            $stmt->execute([
+            $statement->execute([
                 $searchId,
                 $recipe['id']
             ]);

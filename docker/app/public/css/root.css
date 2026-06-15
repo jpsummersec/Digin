@@ -26,30 +26,24 @@
 
 @font-face {
     font-family: "Inter-regular";
-    src: url(../fonts/Inter_18pt-Regular.ttf);
-}
-
-@font-face {
-    font-family: 'Inter-400-weight';
-    src: url(../fonts/Inter_18pt-Regular.ttf);
-    font-weight: 400;
+    src: url(../fonts/inter-18pt-regular.ttf);
 }
 
 @font-face {
     font-family: 'Inter-500-weight';
-    src: url(../fonts/Inter_18pt-Medium.ttf);
+    src: url(../fonts/inter-18pt-medium.ttf);
     font-weight: 500;
 }
 
 @font-face {
     font-family: 'Inter-600-weight';
-    src: url(../fonts/Inter_18pt-SemiBold.ttf);
+    src: url(../fonts/inter-18pt-semibold.ttf);
     font-weight: 600;
 }
 
 @font-face {
     font-family: 'Inter-700-weight';
-    src: url(../fonts/Inter_18pt-Bold.ttf);
+    src: url(../fonts/inter-18pt-bold.ttf);
     font-weight: 700;
 }
 

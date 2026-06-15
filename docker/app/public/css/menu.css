@@ -1,6 +1,4 @@
-/* DigIn Responsive Top Menu Stylesheet */
-
-/* Header & Navbar Container */
+/* Header and navigation container */
 .digin-header {
     position: sticky;
     top: 0;
@@ -44,7 +42,7 @@
     transform: scale(1.05);
 }
 
-/* Hamburger Button */
+/* Hamburger button */
 .digin-hamburger {
     display: flex;
     flex-direction: column;
@@ -65,11 +63,11 @@
     background-color: #111c13;
     border-radius: 4px;
     transition: transform 0.4s cubic-bezier(0.075, 0.82, 0.165, 1),
-                opacity 0.3s ease,
-                background-color 0.4s ease;
+        opacity 0.3s ease,
+        background-color 0.4s ease;
 }
 
-/* Hamburger Open State (morphs to X) */
+/* Hamburger open state */
 .digin-hamburger.open span:nth-child(1) {
     transform: translateY(8px) rotate(45deg);
     background-color: #1e7a3e;
@@ -84,7 +82,7 @@
     background-color: #1e7a3e;
 }
 
-/* Dropdown Menu Container */
+/* Dropdown menu container */
 .digin-dropdown {
     position: absolute;
     top: 70px;
@@ -100,8 +98,8 @@
     opacity: 0;
     visibility: hidden;
     transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.3s ease,
-                visibility 0.3s ease;
+        opacity 0.3s ease,
+        visibility 0.3s ease;
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -116,7 +114,7 @@
     padding: 24px 0;
 }
 
-/* Dropdown Links */
+/* Dropdown links */
 .digin-dropdown-link {
     display: block;
     width: 85%;
@@ -139,11 +137,22 @@
     transform: translateY(0);
 }
 
-/* Staggered transition/animation delays for slide-down list elements */
-.digin-dropdown.active .digin-dropdown-link:nth-child(1) { transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) 0.05s; }
-.digin-dropdown.active .digin-dropdown-link:nth-child(2) { transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) 0.1s; }
-.digin-dropdown.active .digin-dropdown-link:nth-child(3) { transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) 0.15s; }
-.digin-dropdown.active .digin-dropdown-link:nth-child(4) { transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) 0.2s; }
+/* Staggered link transitions */
+.digin-dropdown.active .digin-dropdown-link:nth-child(1) {
+    transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) 0.05s;
+}
+
+.digin-dropdown.active .digin-dropdown-link:nth-child(2) {
+    transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) 0.1s;
+}
+
+.digin-dropdown.active .digin-dropdown-link:nth-child(3) {
+    transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) 0.15s;
+}
+
+.digin-dropdown.active .digin-dropdown-link:nth-child(4) {
+    transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) 0.2s;
+}
 
 .digin-dropdown-link:hover {
     background: #edf5f0;
@@ -152,7 +161,7 @@
     box-shadow: 0 4px 15px rgba(30, 122, 62, 0.06);
 }
 
-/* Active Link Highlight */
+/* Active link highlight */
 .digin-dropdown-link.active {
     color: #1e7a3e;
     background: #edf5f0;

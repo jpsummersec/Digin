@@ -1,99 +1,123 @@
 <?php
 
 require_once __DIR__ . '/include-cannot-access-when-loggedin.php';
-include __DIR__ . '/include-dbhandler.php';
+require_once __DIR__ . '/include-dbhandler.php';
 
 $errors = [];
-// These variables control the success overlay and fetch response.
+// These values control the success overlay and the asynchronous form response.
 $showRedirect = false;
-$isAjax = isset($_SERVER["HTTP_X_REQUESTED_WITH"]);
+$isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']);
 
-$firstName = "";
-$lastName = "";
-$email = "";
-$password = "";
-$confirmPassword = "";
+$firstName = '';
+$lastName = '';
+$email = '';
+$password = '';
+$confirmPassword = '';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-    if (isset($_POST["first_name"])) {
-        $firstName = trim($_POST["first_name"]);
-    } else {
-        $firstName = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+{
+    if (isset($_POST['first_name']))
+    {
+        $firstName = trim($_POST['first_name']);
+    }
+    else
+    {
+        $firstName = '';
     }
 
-    if (isset($_POST["last_name"])) {
-        $lastName = trim($_POST["last_name"]);
-    } else {
-        $lastName = "";
+    if (isset($_POST['last_name']))
+    {
+        $lastName = trim($_POST['last_name']);
+    }
+    else
+    {
+        $lastName = '';
     }
 
-    if (isset($_POST["email"])) {
-        $email = trim($_POST["email"]);
-    } else {
-        $email = "";
+    if (isset($_POST['email']))
+    {
+        $email = trim($_POST['email']);
+    }
+    else
+    {
+        $email = '';
     }
 
-    if (isset($_POST["password"])) {
-        $password = $_POST["password"];
-    } else {
-        $password = "";
+    if (isset($_POST['password']))
+    {
+        $password = $_POST['password'];
+    }
+    else
+    {
+        $password = '';
     }
 
-    if (isset($_POST["confirm_password"])) {
-        $confirmPassword = $_POST["confirm_password"];
-    } else {
-        $confirmPassword = "";
+    if (isset($_POST['confirm_password']))
+    {
+        $confirmPassword = $_POST['confirm_password'];
+    }
+    else
+    {
+        $confirmPassword = '';
     }
 
-    $errors = [];
-    //first name//
-    if ($firstName === "") {
-        $errors[] = "First name is required.";
+    if ($firstName === '')
+    {
+        $errors[] = 'First name is required.';
     }
 
-    //last name//
-    if ($lastName === "") {
-        $errors[] = "Last name is required.";
+    if ($lastName === '')
+    {
+        $errors[] = 'Last name is required.';
     }
 
-    //email//
-    if ($email === "") {
-        $errors[] = "Email is required.";
-    } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-        $errors[] = "Invalid email address.";
+    if ($email === '')
+    {
+        $errors[] = 'Email is required.';
+    }
+    elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false)
+    {
+        $errors[] = 'Invalid email address.';
     }
 
-    //password//
-    if ($password === "") {
-        $errors[] = "Password is required.";
-    } elseif (strlen($password) < 8) {
-        $errors[] = "Password must be at least 8 characters.";
+    if ($password === '')
+    {
+        $errors[] = 'Password is required.';
+    }
+    elseif (strlen($password) < 8)
+    {
+        $errors[] = 'Password must be at least 8 characters.';
     }
 
-    //confirmpassword//
-    if ($confirmPassword === "") {
-        $errors[] = "Confirm password is required.";
-    } elseif ($password !== $confirmPassword) {
-        $errors[] = "Passwords do not match.";
+    if ($confirmPassword === '')
+    {
+        $errors[] = 'Confirm password is required.';
+    }
+    elseif ($password !== $confirmPassword)
+    {
+        $errors[] = 'Passwords do not match.';
     }
 
-    if (empty($errors)) {
+    if (empty($errors))
+    {
         $checkEmail = $dbHandler->prepare("SELECT user_id FROM user WHERE email_address = ?");
         $checkEmail->execute([$email]);
 
-        if ($checkEmail->fetch()) {
-            $errors[] = "Email address already exists.";
-        } else {
+        if ($checkEmail->fetch())
+        {
+            $errors[] = 'Email address already exists.';
+        }
+        else
+        {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            $stmt = $dbHandler->prepare("
+            $statement = $dbHandler->prepare("
                 INSERT INTO user
                 (first_name, last_name, email_address, password_hash, level, xp, spotify_token)
                 VALUES (?, ?, ?, ?, 1, 0, NULL)
             ");
 
-            $stmt->execute([
+            $statement->execute([
                 $firstName,
                 $lastName,
                 $email,
@@ -101,21 +125,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             ]);
 
             // Log the new user in immediately after creating the account.
-            $_SESSION["user_id"] = $dbHandler->lastInsertId();
-            $_SESSION["first_name"] = $firstName;
-            $_SESSION["last_name"] = $lastName;
-            $_SESSION["email"] = $email;
-            $_SESSION["level"] = 1;
-            $_SESSION["xp"] = 0;
+            $_SESSION['user_id'] = $dbHandler->lastInsertId();
+            $_SESSION['first_name'] = $firstName;
+            $_SESSION['last_name'] = $lastName;
+            $_SESSION['email'] = $email;
+            $_SESSION['level'] = 1;
+            $_SESSION['xp'] = 0;
 
             $showRedirect = true;
         }
     }
 }
 
-if ($isAjax) {
-    // Send the result back to the JavaScript form submission.
-    header("Content-Type: application/json");
+if ($isAjax)
+{
+    // Return validation results to the shared JavaScript form handler.
+    header('Content-Type: application/json');
     $response = new stdClass();
     $response->success = $showRedirect;
     $response->errors = $errors;
@@ -123,9 +148,10 @@ if ($isAjax) {
     exit;
 }
 
-if ($showRedirect) {
-    // Fallback for successful form submissions without JavaScript.
-    header("Location: search-page.php");
+if ($showRedirect)
+{
+    // Support successful form submissions when JavaScript is unavailable.
+    header('Location: search-page.php');
     exit;
 }
 
@@ -145,7 +171,7 @@ if ($showRedirect) {
 </head>
 
 <body>
-    <form class="container" id="auth-form" action="create-account.php" method="POST">
+    <form class="container" id="auth-form" action="create-account.php" method="post">
         <h1 class="logo"><img src="../images/digin_logo.svg" alt="logoDigIn" class="logoDigin"></h1>
         <img src="../images/cheficon-createacc.svg" alt="chefIcon" class="chefhat-icon">
         <h2>Your next bite starts here</h2>
@@ -153,7 +179,7 @@ if ($showRedirect) {
             Create an account and join us today
         </p>
 
-        <div class="error-message" id="auth-errors" <?php if (empty($errors)) echo "hidden"; ?>>
+        <div class="error-message" id="auth-errors" <?php if (empty($errors)) { echo 'hidden'; } ?>>
             <?php echo htmlspecialchars(implode("\n", $errors)); ?>
         </div>
 
@@ -168,7 +194,7 @@ if ($showRedirect) {
             </div>
         </div>
         <div class="input-box">
-            <img src="../images/emailIcon.svg" alt="email-icon" class="input-icon">
+            <img src="../images/email-icon.svg" alt="email-icon" class="input-icon">
             <input type="email" name="email" placeholder="email@example.com" value="<?php echo htmlspecialchars($email); ?>">
         </div>
         <div class="input-box">
@@ -194,22 +220,26 @@ if ($showRedirect) {
     </form>
 
     <script>
-        function togglePassword(inputId, button) {
+        function togglePassword(inputId, button)
+        {
             const input = document.getElementById(inputId);
-            const icon = button.querySelector("img");
+            const icon = button.querySelector('img');
 
-            if (input.type === "password") {
-                input.type = "text";
-                icon.src = "../images/eyeopen.svg";
-            } else {
-                input.type = "password";
-                icon.src = "../images/eyeclosed.svg";
+            if (input.type === 'password')
+            {
+                input.type = 'text';
+                icon.src = '../images/eyeopen.svg';
+            }
+            else
+            {
+                input.type = 'password';
+                icon.src = '../images/eyeclosed.svg';
             }
         }
     </script>
 
     <?php
-    // Adds the hidden success overlay and shared form submission script.
+    // Add the shared success overlay and asynchronous form handler.
     include __DIR__ . '/include-redirect.php';
     ?>
 </body>

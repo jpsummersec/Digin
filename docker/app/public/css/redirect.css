@@ -1,5 +1,4 @@
-#redirect-overlay
-{
+#redirect-overlay {
     position: fixed;
     inset: 0;
     z-index: 1000;
@@ -10,13 +9,11 @@
 }
 
 /* Keep the redirect overlay out of view before authentication succeeds. */
-#redirect-overlay[hidden]
-{
+#redirect-overlay[hidden] {
     display: none;
 }
 
-#redirect-container
-{
+#redirect-container {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -27,57 +24,48 @@
     padding: 20px;
 }
 
-#thank-you
-{
+#thank-you {
     font-size: 1rem;
     padding-bottom: 20px;
 }
 
-#brand
-{
+#brand {
     width: 200px;
     height: auto;
     transform-origin: bottom center;
 }
 
 /* Start the bounce only when JavaScript adds this class. */
-#brand.is-bouncing
-{
+#brand.is-bouncing {
     animation: squat-bounce 0.75s ease-in-out infinite;
 }
 
-@keyframes squat-bounce
-{
-    0%, 100%
-    {
+@keyframes squat-bounce {
+    0%,
+    100% {
         transform: translateY(0);
     }
 
-    35%
-    {
+    35% {
         transform: translateY(-25px);
     }
 
-    65%
-    {
+    65% {
         transform: translateY(-25px);
     }
 
-    85%
-    {
+    85% {
         transform: translateY(18px);
     }
 }
 
-#redirect-message
-{
+#redirect-message {
     font-size: 0.95rem;
     font-weight: 600;
     margin-top: 8px;
 }
 
 /* Preserve line breaks between validation errors. */
-#auth-errors
-{
+#auth-errors {
     white-space: pre-line;
 }

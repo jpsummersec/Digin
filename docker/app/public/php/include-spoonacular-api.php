@@ -4,54 +4,63 @@ require_once __DIR__ . '/include-url-config.php';
 
 $apiKeys = [];
 
-// put all API keys in array
-try {
+// Load every configured API key so requests can continue when one key reaches
+// its quota or temporarily fails.
+try
+{
     $statement = $dbHandler->prepare('SELECT `api_key_value` FROM `spoonacular_api_key`');
     $statement->execute();
     $apiKeys = $statement->fetchAll(PDO::FETCH_COLUMN);
     $statement->closeCursor();
-} catch (PDOException $exception) {
+}
+catch (PDOException $exception)
+{
     $apiKeys = [];
 }
 
-// ensure it returns 200
+// Extract the HTTP status code from the first response header.
 function spoonacularParseStatusCode(array $headers): int
 {
-    if (!isset($headers[0])) {
+    if (!isset($headers[0]))
+    {
         return 0;
     }
 
-    // Gets status code that starts with "HTTP"
-    if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $headers[0], $matches)) {
+    if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $headers[0], $matches))
+    {
         return (int) $matches[1];
     }
 
     return 0;
 }
 
-// decide if next key should be tried
+// Decide whether a failed request should be retried with the next API key.
 function spoonacularShouldTryNextKey(int $statusCode, bool $networkFailure): bool
 {
-    if ($networkFailure) {
+    if ($networkFailure)
+    {
         return true;
     }
 
-    if (in_array($statusCode, [401, 402, 403, 429], true)) {
+    if (in_array($statusCode, [401, 402, 403, 429], true))
+    {
         return true;
     }
 
     return $statusCode >= 500;
 }
 
-function spoonacularRequestWithKeyRotation(string $baseUrl, array $params): array
+function spoonacularRequestWithKeyRotation(string $baseUrl, array $parameters): array
 {
     global $apiKeys;
 
-    foreach ($apiKeys as $apiKey) {
-        $requestParams = $params;
-        $requestParams['apiKey'] = $apiKey;
+    // Try each key until a request succeeds or returns a non-retryable error.
+    foreach ($apiKeys as $apiKey)
+    {
+        $requestParameters = $parameters;
+        $requestParameters['apiKey'] = $apiKey;
 
-        $url = $baseUrl . '?' . http_build_query($requestParams);
+        $url = $baseUrl . '?' . http_build_query($requestParameters);
 
         $httpOptions = [];
         $httpOptions['ignore_errors'] = true;
@@ -64,16 +73,20 @@ function spoonacularRequestWithKeyRotation(string $baseUrl, array $params): arra
 
         $response = @file_get_contents($url, false, $context);
         $lastResponseHeaders = http_get_last_response_headers();
-        if (is_array($lastResponseHeaders)) {
+        if (is_array($lastResponseHeaders))
+        {
             $responseHeaders = $lastResponseHeaders;
-        } else {
+        }
+        else
+        {
             $responseHeaders = [];
         }
 
         $statusCode = spoonacularParseStatusCode($responseHeaders);
         $networkFailure = $response === false;
 
-        if (!$networkFailure && $statusCode >= 200 && $statusCode < 300) {
+        if (!$networkFailure && $statusCode >= 200 && $statusCode < 300)
+        {
             $successResult = [];
             $successResult['success'] = true;
             $successResult['status'] = $statusCode;
@@ -82,16 +95,23 @@ function spoonacularRequestWithKeyRotation(string $baseUrl, array $params): arra
             return $successResult;
         }
 
-        if (!spoonacularShouldTryNextKey($statusCode, $networkFailure)) {
-            if ($statusCode > 0) {
+        if (!spoonacularShouldTryNextKey($statusCode, $networkFailure))
+        {
+            if ($statusCode > 0)
+            {
                 $failedStatusCode = $statusCode;
-            } else {
+            }
+            else
+            {
                 $failedStatusCode = 502;
             }
 
-            if ($response !== false) {
+            if ($response !== false)
+            {
                 $failedBody = $response;
-            } else {
+            }
+            else
+            {
                 $errorBody = [];
                 $errorBody['error'] = 'Failed to fetch from Spoonacular';
                 $failedBody = json_encode($errorBody);

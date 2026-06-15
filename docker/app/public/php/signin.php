@@ -1,41 +1,50 @@
 <?php
 
 require_once __DIR__ . '/include-cannot-access-when-loggedin.php';
-include __DIR__ . '/include-dbhandler.php';
+require_once __DIR__ . '/include-dbhandler.php';
 
 $errors = [];
-// These variables control the success overlay and fetch response.
+// These values control the success overlay and the asynchronous form response.
 $showRedirect = false;
-$isAjax = isset($_SERVER["HTTP_X_REQUESTED_WITH"]);
+$isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']);
 
-$email = "";
-$password = "";
+$email = '';
+$password = '';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-    if (isset($_POST["email"])) {
-        $email = trim($_POST["email"]);
-    } else {
-        $email = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST')
+{
+    if (isset($_POST['email']))
+    {
+        $email = trim($_POST['email']);
+    }
+    else
+    {
+        $email = '';
     }
 
-    if (isset($_POST["password"])) {
-        $password = $_POST["password"];
-    } else {
-        $password = "";
+    if (isset($_POST['password']))
+    {
+        $password = $_POST['password'];
+    }
+    else
+    {
+        $password = '';
     }
 
-    if ($email === "") {
-        $errors[] = "Email is required.";
+    if ($email === '')
+    {
+        $errors[] = 'Email is required.';
     }
 
-    if ($password === "") {
-        $errors[] = "Password is required.";
+    if ($password === '')
+    {
+        $errors[] = 'Password is required.';
     }
 
-    if (empty($errors)) {
+    if (empty($errors))
+    {
 
-        $stmt = $dbHandler->prepare("
+        $statement = $dbHandler->prepare("
             SELECT user_id,
                    first_name,
                    last_name,
@@ -48,29 +57,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ");
 
 
-        $stmt->execute([$email]);
+        $statement->execute([$email]);
 
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $statement->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user["password_hash"])) {
-
-            $_SESSION["user_id"] = $user["user_id"];
-            $_SESSION["first_name"] = $user["first_name"];
-            $_SESSION["last_name"] = $user["last_name"];
-            $_SESSION["email"] = $user["email_address"];
-            $_SESSION["level"] = $user["level"];
-            $_SESSION["xp"] = $user["xp"];
+        if ($user && password_verify($password, $user['password_hash']))
+        {
+            $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['first_name'] = $user['first_name'];
+            $_SESSION['last_name'] = $user['last_name'];
+            $_SESSION['email'] = $user['email_address'];
+            $_SESSION['level'] = $user['level'];
+            $_SESSION['xp'] = $user['xp'];
 
             $showRedirect = true;
-        } else {
-            $errors[] = "Invalid email or password.";
+        }
+        else
+        {
+            $errors[] = 'Invalid email or password.';
         }
     }
 }
 
-if ($isAjax) {
-    // Send the result back to the JavaScript form submission.
-    header("Content-Type: application/json");
+if ($isAjax)
+{
+    // Return validation results to the shared JavaScript form handler.
+    header('Content-Type: application/json');
     $response = new stdClass();
     $response->success = $showRedirect;
     $response->errors = $errors;
@@ -78,9 +90,10 @@ if ($isAjax) {
     exit;
 }
 
-if ($showRedirect) {
-    // Fallback for successful form submissions without JavaScript.
-    header("Location: search-page.php");
+if ($showRedirect)
+{
+    // Support successful form submissions when JavaScript is unavailable.
+    header('Location: search-page.php');
     exit;
 }
 
@@ -100,17 +113,17 @@ if ($showRedirect) {
 </head>
 
 <body>
-    <form class="container signin-container" id="auth-form" action="signin.php" method="POST">
+    <form class="container signin-container" id="auth-form" action="signin.php" method="post">
         <h1 class="logo"><img src="../images/digin_logo.svg" alt="logoDigIn" class="logoDigin"></h1>
         <img src="../images/burger.svg" alt="burger-icon" class="burger-icon">
         <h1>Sign in to continue to your account</h1>
 
-        <div class="error-message" id="auth-errors" <?php if (empty($errors)) echo "hidden"; ?>>
+        <div class="error-message" id="auth-errors" <?php if (empty($errors)) { echo 'hidden'; } ?>>
             <?php echo htmlspecialchars(implode("\n", $errors)); ?>
         </div>
 
         <div class="input-box">
-            <img src="../images/emailIcon.svg" alt="email-icon" class="input-icon">
+            <img src="../images/email-icon.svg" alt="email-icon" class="input-icon">
             <input type="email" name="email" placeholder="email@example.com">
         </div>
         <div class="input-box">
@@ -129,22 +142,26 @@ if ($showRedirect) {
     </form>
 
     <script>
-        function togglePassword(inputId, button) {
+        function togglePassword(inputId, button)
+        {
             const input = document.getElementById(inputId);
-            const icon = button.querySelector("img");
+            const icon = button.querySelector('img');
 
-            if (input.type === "password") {
-                input.type = "text";
-                icon.src = "../images/eyeopen.svg";
-            } else {
-                input.type = "password";
-                icon.src = "../images/eyeclosed.svg";
+            if (input.type === 'password')
+            {
+                input.type = 'text';
+                icon.src = '../images/eyeopen.svg';
+            }
+            else
+            {
+                input.type = 'password';
+                icon.src = '../images/eyeclosed.svg';
             }
         }
     </script>
 
     <?php
-    // Adds the hidden success overlay and shared form submission script.
+    // Add the shared success overlay and asynchronous form handler.
     include __DIR__ . '/include-redirect.php';
     ?>
 </body>

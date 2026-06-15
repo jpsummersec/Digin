@@ -1,228 +1,227 @@
 body {
-  display: flex;
-  padding-inline: 10%;
-  padding-block: 0;
+    display: flex;
+    padding-inline: 10%;
+    padding-block: 0;
 }
 
-
 .profile-banner {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  grid-template-rows: 2fr 1fr 2fr;
-  width: 100%;
-  padding: 10%;
-  padding-left: 2%;
-  background-color: var(--accent-50-opaque);
-  justify-self: center;
-  border-radius: var(--main-border-radius);
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: 2fr 1fr 2fr;
+    width: 100%;
+    padding: 10%;
+    padding-left: 2%;
+    background-color: var(--accent-50-opaque);
+    justify-self: center;
+    border-radius: var(--main-border-radius);
 }
 
 .profile-banner h1 {
-  grid-column: 2/3;
-  grid-row: 1/2;
-  font-size: 0.75rem;
-  align-self: self-end;
+    grid-column: 2/3;
+    grid-row: 1/2;
+    font-size: 0.75rem;
+    align-self: self-end;
 }
 
 .profile-banner h2 {
-  grid-column: 2/3;
-  grid-row: 2/3;
-  font-size: 0.65rem;
-  font-family: 'Inter-regular';
-  align-self: self-end;
+    grid-column: 2/3;
+    grid-row: 2/3;
+    font-size: 0.65rem;
+    font-family: 'Inter-regular';
+    align-self: self-end;
 }
 
 .profile-banner h3 {
-  grid-column: 2/3;
-  grid-row: 3/4;
-  font-size: 0.5rem;
+    grid-column: 2/3;
+    grid-row: 3/4;
+    font-size: 0.5rem;
 }
 
 .profile-banner .profile-picture {
-  grid-column: 1 / 2;
-  grid-row: 1 / 4;
-  width: 100px;
-  height: 100px;
-  clip-path: circle(35%);
-  margin-right: 7.5px;
-  align-self: center;
+    grid-column: 1 / 2;
+    grid-row: 1 / 4;
+    width: 100px;
+    height: 100px;
+    clip-path: circle(35%);
+    margin-right: 7.5px;
+    align-self: center;
 }
 
 .profile-banner .profile-picture label {
-  display: block;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
 }
 
 .profile-banner .profile-picture input {
-  display: none;
+    display: none;
 }
 
 .profile-banner .profile-picture img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  justify-self: start;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    justify-self: start;
 }
 
 .profile-banner .profile-picture img:hover {
-  opacity: 0.8;
+    opacity: 0.8;
 }
 
 .upload-error {
-  color: var(--error);
-  margin-bottom: 10px;
-  text-align: center;
+    color: var(--error);
+    margin-bottom: 10px;
+    text-align: center;
 }
 
 .profile-banner .level-counter {
-  justify-self: start;
-  align-self: end;
+    justify-self: start;
+    align-self: end;
 }
 
-.profile-banner .xp-bar, .xp-bar-fill, .xp-progress {
-  grid-column: 2/3;
+.profile-banner .xp-bar,
+.profile-banner .xp-bar-fill,
+.profile-banner .xp-progress {
+    grid-column: 2/3;
 }
 
 .profile-banner .xp-progress {
-  justify-self: end;
-  align-self: end;
+    justify-self: end;
+    align-self: end;
 }
 
 .profile-banner .xp-bar {
-  width: 100%;
-  height: 5px;
-  background-color: rgba(94, 106, 113, 0.25);
-  border-radius: 3px;
-  overflow: hidden;
+    width: 100%;
+    height: 5px;
+    background-color: rgba(94, 106, 113, 0.25);
+    border-radius: 3px;
+    overflow: hidden;
 }
 
 .profile-banner .xp-bar-fill {
-  height: 100%;
-  background-color: #248232;
-  border-radius: 3px;
+    height: 100%;
+    background-color: #248232;
+    border-radius: 3px;
 }
 
 hr {
-  border: 0.1px solid var(--hr);
-  margin-block: 10px;
+    border: 0.1px solid var(--hr);
+    margin-block: 10px;
 }
 
-/* Achievements & Saved Recipes */
-
+/* Achievements and saved recipes */
 .achievements h2,
 .saved-recipes h2 {
-  font-size: 0.8rem;
+    font-size: 0.8rem;
 }
 
 .achievements h2 {
-  margin-top: 50px;
+    margin-top: 50px;
 }
 
 .saved-recipes h2 {
-  margin-top: 25px;
+    margin-top: 25px;
 }
 
 .achievement-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
 }
 
 .saved-recipes-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 16px;
 }
 
 .achievement-item {
-  display: grid;
-  justify-items: center;
-  gap: 8px;
-  text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    text-align: center;
 }
 
 .achievement-item img {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
 }
 
 .achievement-item p,
 .empty-achievements,
 .saved-recipe-item p,
 .empty-saved-recipes {
-  font-size: 0.65rem;
-  font-family: 'Inter-regular';
+    font-size: 0.65rem;
+    font-family: 'Inter-regular';
 }
 
 .empty-achievements,
 .empty-saved-recipes {
-  margin-top: 16px;
+    margin-top: 16px;
 }
 
-
-/* Spotify */
+/* Spotify connection */
 .spotify {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: rgb(217 217 217 / 30%);
-  border-radius: var(--main-border-radius);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(217 217 217 / 30%);
+    border-radius: var(--main-border-radius);
 }
 
 .spotify p {
-  font-size: 0.65rem;
-  margin-bottom: 1rem;
-  font-family: 'Inter-regular';
-  color: var(--primary-dark);
+    font-size: 0.65rem;
+    margin-bottom: 1rem;
+    font-family: 'Inter-regular';
+    color: var(--primary-dark);
 }
 
 .spotify img {
-  width: 9rem;
-  height: 4rem;
-  object-fit: contain;
+    width: 9rem;
+    height: 4rem;
+    object-fit: contain;
 }
 
 .spotify a {
-  font-size: 1rem;
-  font-weight: bold;
-  text-decoration: none;
-  background-color: var(--success);
-  padding: 0.5rem;
-  color: var(--background);
-  border-radius: var(--main-border-radius);
-  margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    background-color: var(--success);
+    padding: 0.5rem;
+    color: var(--background);
+    border-radius: var(--main-border-radius);
+    margin-bottom: 1rem;
 }
 
 /* Logout */
 .logout {
-  display: flex;
-  justify-content: center;
-  margin-block: 1.5rem 3rem;
+    display: flex;
+    justify-content: center;
+    margin-block: 1.5rem 3rem;
 }
 
 .logout form {
-  width: 100%;
+    width: 100%;
 }
 
 .logout button {
-  width: 100%;
-  font-family: 'Inter-700-weight', var(--font);
-  font-size: 0.5rem;
-  cursor: pointer;
-  background-color: rgba(231, 77, 60, 0.75);
-  padding: 10px 10px;
-  color: var(--background);
-  border-radius: var(--main-border-radius);
+    width: 100%;
+    font-family: 'Inter-700-weight', var(--font);
+    font-size: 0.5rem;
+    cursor: pointer;
+    background-color: rgba(231, 77, 60, 0.75);
+    padding: 10px 10px;
+    color: var(--background);
+    border-radius: var(--main-border-radius);
 }
 
 .logout button:hover {
-  background-color: rgba(231, 77, 60, 1);;
+    background-color: rgba(231, 77, 60, 1);
 }
