@@ -1,9 +1,14 @@
 <?php
 
+// DO NOT ADD THE SPOTIFY CREDENTIALS TO THIS FILE, THIS IS JUST AN EXAMPLE
+
+require_once __DIR__ . '/include-url-config.php';
+
 return [
-    'SPOTIFY_CLIENT_ID' => 'e80027eca4c74c98aa0707e8a143ba9c',
-    'SPOTIFY_CLIENT_SECRET' => 'e50886904b9e41179f742f942aced6ea',
-    'SPOTIFY_REDIRECT_URI' => 'http://127.0.0.1:3000/Spotify_connection/callback.php'
+    'SPOTIFY_CLIENT_ID' => 'EXAMPLE_ID',
+    'SPOTIFY_CLIENT_SECRET' => 'EXAMPLE_SECRET',
+    'SPOTIFY_REDIRECT_URI' => $baseUrl . '/php/callback.php'
 ];
 
 ?>
+
