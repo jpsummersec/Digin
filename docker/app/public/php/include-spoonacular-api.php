@@ -4,12 +4,12 @@ require_once __DIR__ . '/include-url-config.php';
 
 $apiKeys = [];
 
-// Load every configured API key so requests can continue when one key reaches
-// its quota or temporarily fails.
+// Get all API keys from database into apiKeys array
 try
 {
     $statement = $dbHandler->prepare('SELECT `api_key_value` FROM `spoonacular_api_key`');
     $statement->execute();
+
     $apiKeys = $statement->fetchAll(PDO::FETCH_COLUMN);
     $statement->closeCursor();
 }
@@ -18,7 +18,7 @@ catch (PDOException $exception)
     $apiKeys = [];
 }
 
-// Extract the HTTP status code from the first response header.
+// Get the HTTP status code from the first response header with regex.
 function spoonacularParseStatusCode(array $headers): int
 {
     if (!isset($headers[0]))
@@ -47,6 +47,7 @@ function spoonacularShouldTryNextKey(int $statusCode, bool $networkFailure): boo
         return true;
     }
 
+    // Spoonacular-side issues.
     return $statusCode >= 500;
 }
 
@@ -60,6 +61,7 @@ function spoonacularRequestWithKeyRotation(string $baseUrl, array $parameters): 
         $requestParameters = $parameters;
         $requestParameters['apiKey'] = $apiKey;
 
+        // Build the full Spoonacular request URL.
         $url = $baseUrl . '?' . http_build_query($requestParameters);
 
         $httpOptions = [];
@@ -71,6 +73,7 @@ function spoonacularRequestWithKeyRotation(string $baseUrl, array $parameters): 
 
         $context = stream_context_create($contextOptions);
 
+        // Suppress PHP warnings here because failures are handled below
         $response = @file_get_contents($url, false, $context);
         $lastResponseHeaders = http_get_last_response_headers();
         if (is_array($lastResponseHeaders))
@@ -85,6 +88,7 @@ function spoonacularRequestWithKeyRotation(string $baseUrl, array $parameters): 
         $statusCode = spoonacularParseStatusCode($responseHeaders);
         $networkFailure = $response === false;
 
+        // A 2xx response means the request worked. Return the raw response body
         if (!$networkFailure && $statusCode >= 200 && $statusCode < 300)
         {
             $successResult = [];
@@ -95,8 +99,10 @@ function spoonacularRequestWithKeyRotation(string $baseUrl, array $parameters): 
             return $successResult;
         }
 
+        // Stop immediately for errors that are not likely to be fixed by using another API key
         if (!spoonacularShouldTryNextKey($statusCode, $networkFailure))
         {
+            // If no HTTP status was captured, use 502 to indicate an issue.
             if ($statusCode > 0)
             {
                 $failedStatusCode = $statusCode;
@@ -106,6 +112,8 @@ function spoonacularRequestWithKeyRotation(string $baseUrl, array $parameters): 
                 $failedStatusCode = 502;
             }
 
+            // Preserve Spoonacular's error body when it was returned. Otherwise
+            // create a small JSON error response.
             if ($response !== false)
             {
                 $failedBody = $response;
@@ -126,6 +134,7 @@ function spoonacularRequestWithKeyRotation(string $baseUrl, array $parameters): 
         }
     }
 
+    // If every key failed with a retryable error, return one generic failure response after the loop.
     $errorBody = [];
     $errorBody['error'] = 'Failed to fetch from Spoonacular';
 
