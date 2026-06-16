@@ -95,11 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Log the new user in immediately after creating the account
             $_SESSION['user_id'] = $dbHandler->lastInsertId();
-            $_SESSION['first_name'] = $firstName;
-            $_SESSION['last_name'] = $lastName;
-            $_SESSION['email'] = $email;
-            $_SESSION['level'] = 1;
-            $_SESSION['xp'] = 0;
 
             $showRedirect = true;
         }

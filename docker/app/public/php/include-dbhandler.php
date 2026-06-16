@@ -2,10 +2,22 @@
 
 require_once __DIR__ . '/include-url-config.php';
 
-$host = 'mysql';
-$username = 'root';
-$password = 'qwerty';
-$database = 'digin';
+function getRequiredEnvironmentVariable($name)
+{
+    $value = getenv($name);
+
+    if ($value === false || $value === '')
+    {
+        die('Configuration Error: Missing required environment variable ' . $name);
+    }
+
+    return $value;
+}
+
+$host = getRequiredEnvironmentVariable('DB_SERVER');
+$username = getRequiredEnvironmentVariable('DB_USER');
+$password = getRequiredEnvironmentVariable('DB_PASSWORD');
+$database = getRequiredEnvironmentVariable('DB_DATABASE');
 
 try
 {

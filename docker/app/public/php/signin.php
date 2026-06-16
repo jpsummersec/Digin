@@ -53,11 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($password, $user['password_hash'])) {
             $_SESSION['user_id'] = $user['user_id'];
-            $_SESSION['first_name'] = $user['first_name'];
-            $_SESSION['last_name'] = $user['last_name'];
-            $_SESSION['email'] = $user['email_address'];
-            $_SESSION['level'] = $user['level'];
-            $_SESSION['xp'] = $user['xp'];
 
             $showRedirect = true;
         } else {

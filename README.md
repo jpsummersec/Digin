@@ -1,8 +1,8 @@
 # DigIn
 
-DigIn is a hilarious mobile-first cooking web application. It uses Spoonacular for recipe data and Spotify for optional music playback during cooking.
+DigIn is a hilarious mobile-first cooking web application. It uses Spoonacular for recipe data and Spotify for optional music playback while cooking.
 
-## Team Members
+## Team Members (IT1D)
 
 - Lorenzo
 - JP
@@ -15,18 +15,22 @@ DigIn is a hilarious mobile-first cooking web application. It uses Spoonacular f
 
 - Docker Engine
 - Docker Compose v2
-- Spotify application credentials (+ request access from JP)
+- Spotify application credentials
+- Spotify account added to Spotify Developer Dashboard (request from JP)
 - At least one Spoonacular API key
 
 ## Setup
 
-1. Confirm that the existing `docker/.env` file contains the required database values:
+1. Confirm that `docker/.env` exists and contains the required database values:
 
 ```env
-DB_ROOT_PASSWORD=PASSWORD_HERE
-DB_ROOT_USER=root
 DB_SERVER=mysql
+DB_ROOT_USER=root
+DB_ROOT_PASSWORD=YOUR_PASSWORD_HERE
+DB_DATABASE=digin
 ```
+
+The PHP database handler requires these values through Docker Compose. If one is missing or empty, the page stops with a configuration error.
 
 2. Copy `docker/app/public/php/config-example.php` to `docker/app/public/php/config.php`.
 
@@ -57,24 +61,33 @@ docker compose up -d --build
 docker compose ps --all
 ```
 
-6. Add at least one Spoonacular API key to the `spoonacular_api_key` table through phpMyAdmin or SQL:
+6. Add at least one Spoonacular API key to the `spoonacular_api_key` table through phpMyAdmin or SQL.
+
+phpMyAdmin is available at [http://localhost:8080](http://localhost:8080). Use these login details from `docker/.env`:
+
+```text
+Server: mysql
+Username: root
+Password: YOUR_SET_PASSWORD
+Database: digin
+```
+
+Then run:
 
 ```sql
 INSERT INTO spoonacular_api_key (api_key_value)
 VALUES ('YOUR_SPOONACULAR_API_KEY');
 ```
 
-7. Open the application and database tools:
+7. Open the application:
 
 - Application: [http://127.0.0.1:3000](http://127.0.0.1:3000)
-- Nginx endpoint: [http://localhost](http://localhost)
-- phpMyAdmin: [http://localhost:8080](http://localhost:8080)
 
 ## Project Configuration
 
 The local application URL is configured in [`docker/app/public/php/include-url-config.php`](docker/app/public/php/include-url-config.php). The default URL is `http://127.0.0.1:3000`.
 
-The Spotify application's registered redirect URI must match:
+The Spotify application's registered redirect URL must match:
 
 ```text
 http://127.0.0.1:3000/php/callback.php
@@ -83,10 +96,12 @@ http://127.0.0.1:3000/php/callback.php
 The main Docker configuration files are:
 
 - [`docker/docker-compose.yaml`](docker/docker-compose.yaml)
+- [`docker/.env`](docker/.env)
 - [`docker/database/init.sql`](docker/database/init.sql)
 - [`docker/nginx.conf`](docker/nginx.conf)
 - [`docker/PHP.dockerfile`](docker/PHP.dockerfile)
 - [`docker/nginx.dockerfile`](docker/nginx.dockerfile)
+- [`docker/Caddyfile`](docker/Caddyfile)
 
 ## Database Startup Import
 
@@ -132,6 +147,15 @@ docker compose up -d php
 
 ## Common Issues
 
+### Missing Database Environment Variable
+
+If the page stops with `Configuration Error: Missing required environment variable ...`, check that `docker/.env` exists and includes `DB_SERVER`, `DB_ROOT_USER`, `DB_ROOT_PASSWORD`, and `DB_DATABASE`. Restart the containers after changing `.env`:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
 ### Nginx Cannot Find PHP
 
 If Nginx fails with `host not found in upstream "php"`, rebuild the environment and inspect the PHP logs:
@@ -160,6 +184,9 @@ Use `docker compose ps --all` to inspect bound ports, then free conflicting port
 
 ## Known Errors and Limitations
 
-- Recipe search and recipe pages depend on Spoonacular. They fail when no API key is stored, the daily quota is exhausted, or the service is unavailable.
-- Spotify playback requires valid Spotify application credentials and manual authentication from JP.
-- ADD MORE HERE
+- Recipe search, recipe pages, and cooking steps depend on Spoonacular. They return an error when no API key is stored, all stored keys have reached their quota, or Spoonacular is unavailable.
+- Spotify authentication and playback require valid Spotify application credentials in `docker/app/public/php/config.php`.
+- Spotify development-mode apps only work for users added in the Spotify developer dashboard.
+- Spotify playback can fail when no active Spotify device is available. Open Spotify on a phone, desktop app, or web player before starting playback.
+- The application is configured for `http://127.0.0.1:3000` by default. Requests to another host are redirected to that URL unless `docker/app/public/php/include-url-config.php` is changed.
+- Recreating the volume deletes the previous database.
