@@ -78,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 
                 if ($currentLevel == 5 || $currentLevel == 10 || $currentLevel == 15 || $currentLevel == 20)
                 {
+                    // ID of achievements is level needed for achievement / 5 in the database (Bronze - 1, Silver - 2, etc.)
                     $achievementId = (int) ($currentLevel / 5);
 
                     $statement = $dbHandler->prepare('
@@ -90,7 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                     $statement->closeCursor();
                 }
 
-                $xpToNextLevel = 100 * $currentLevel * 2;
+                // Next level takes 1.5x as much XP to achieve as the previous one 
+                $xpToNextLevel = 100 * $currentLevel * 1.5;
             }
 
             $statement = $dbHandler->prepare('
