@@ -6,7 +6,7 @@ let isRecipeCompleted = false;
 
 const gordonAudio = document.getElementById('gordon-audio');
 
-// Audio played at random intervals while the user is cooking.
+// Audio played at random times while the user is cooking
 const randomPressureAudios = [
   '../audio/waitingfortalent.mp3',
   '../audio/whatisthatshit.mp3',
@@ -35,7 +35,7 @@ const randomPressureAudios = [
   '../audio/yourunashithole.mp3',
 ];
 
-// Audio played when the user advances to the next cooking step.
+// Audio played when the user moves to another step
 const nextStepAudios = [
   '../audio/getinthere.mp3',
   '../audio/lookatthemess.mp3',
@@ -51,7 +51,7 @@ const nextStepAudios = [
   '../audio/stubbornfcker.mp3',
 ];
 
-// Audio played after the completed recipe is recorded successfully.
+// Audio played after the user completed recipe
 const completeRecipeAudios = [
   '../audio/thatsit.mp3',
   '../audio/icookedthatshit.mp3',
@@ -112,7 +112,7 @@ function startRandomPressureTimer() {
 function playRandomPressureAudio() {
   const selectedAudio = getNextFromBag(pressureBag, randomPressureAudios);
 
-  // Lower Spotify before playing the local audio clip.
+  // Lower Spotify before playing the Gordon Ramsay audio
   setSpotifyVolume(30);
 
   gordonAudio.pause();

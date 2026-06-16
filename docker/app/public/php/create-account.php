@@ -4,9 +4,9 @@ require_once __DIR__ . '/include-cannot-access-when-loggedin.php';
 require_once __DIR__ . '/include-dbhandler.php';
 
 $errors = [];
-// These values control the success overlay and the asynchronous form response.
+// These values are used to handle successful signups and AJAX requests
 $showRedirect = false;
-$isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']);
+$isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']); // This checks whether the form was submitted by JavaScript
 
 $firstName = '';
 $lastName = '';
@@ -14,101 +14,70 @@ $email = '';
 $password = '';
 $confirmPassword = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
-{
-    if (isset($_POST['first_name']))
-    {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['first_name'])) {
         $firstName = trim($_POST['first_name']);
-    }
-    else
-    {
+    } else {
         $firstName = '';
     }
 
-    if (isset($_POST['last_name']))
-    {
+    if (isset($_POST['last_name'])) {
         $lastName = trim($_POST['last_name']);
-    }
-    else
-    {
+    } else {
         $lastName = '';
     }
 
-    if (isset($_POST['email']))
-    {
+    if (isset($_POST['email'])) {
         $email = trim($_POST['email']);
-    }
-    else
-    {
+    } else {
         $email = '';
     }
 
-    if (isset($_POST['password']))
-    {
+    if (isset($_POST['password'])) {
         $password = $_POST['password'];
-    }
-    else
-    {
+    } else {
         $password = '';
     }
 
-    if (isset($_POST['confirm_password']))
-    {
+    if (isset($_POST['confirm_password'])) {
         $confirmPassword = $_POST['confirm_password'];
-    }
-    else
-    {
+    } else {
         $confirmPassword = '';
     }
 
-    if ($firstName === '')
-    {
+    if ($firstName === '') {
         $errors[] = 'First name is required.';
     }
 
-    if ($lastName === '')
-    {
+    if ($lastName === '') {
         $errors[] = 'Last name is required.';
     }
 
-    if ($email === '')
-    {
+    if ($email === '') {
         $errors[] = 'Email is required.';
-    }
-    elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false)
-    {
+    } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
         $errors[] = 'Invalid email address.';
     }
 
-    if ($password === '')
-    {
+    if ($password === '') {
         $errors[] = 'Password is required.';
-    }
-    elseif (strlen($password) < 8)
-    {
+    } elseif (strlen($password) < 8) {
         $errors[] = 'Password must be at least 8 characters.';
     }
 
-    if ($confirmPassword === '')
-    {
+    if ($confirmPassword === '') {
         $errors[] = 'Confirm password is required.';
-    }
-    elseif ($password !== $confirmPassword)
-    {
+    } elseif ($password !== $confirmPassword) {
         $errors[] = 'Passwords do not match.';
     }
 
-    if (empty($errors))
-    {
+    if (empty($errors)) {
         $checkEmail = $dbHandler->prepare("SELECT user_id FROM user WHERE email_address = ?");
         $checkEmail->execute([$email]);
 
-        if ($checkEmail->fetch())
-        {
+        if ($checkEmail->fetch()) {
             $errors[] = 'Email address already exists.';
-        }
-        else
-        {
+        } else {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
             $statement = $dbHandler->prepare("
@@ -124,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
                 $hashedPassword
             ]);
 
-            // Log the new user in immediately after creating the account.
+            // Log the new user in immediately after creating the account
             $_SESSION['user_id'] = $dbHandler->lastInsertId();
             $_SESSION['first_name'] = $firstName;
             $_SESSION['last_name'] = $lastName;
@@ -137,9 +106,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     }
 }
 
-if ($isAjax)
-{
-    // Return validation results to the shared JavaScript form handler.
+if ($isAjax) {
+    // Send the login result back to JavaScript
     header('Content-Type: application/json');
     $response = new stdClass();
     $response->success = $showRedirect;
@@ -148,9 +116,8 @@ if ($isAjax)
     exit;
 }
 
-if ($showRedirect)
-{
-    // Support successful form submissions when JavaScript is unavailable.
+if ($showRedirect) {
+    // Send the user to the next page after a successful login
     header('Location: search-page.php');
     exit;
 }
@@ -179,7 +146,9 @@ if ($showRedirect)
             Create an account and join us today
         </p>
 
-        <div class="error-message" id="auth-errors" <?php if (empty($errors)) { echo 'hidden'; } ?>>
+        <div class="error-message" id="auth-errors" <?php if (empty($errors)) {
+                                                        echo 'hidden';
+                                                    } ?>>
             <?php echo htmlspecialchars(implode("\n", $errors)); ?>
         </div>
 
@@ -220,18 +189,14 @@ if ($showRedirect)
     </form>
 
     <script>
-        function togglePassword(inputId, button)
-        {
+        function togglePassword(inputId, button) {
             const input = document.getElementById(inputId);
             const icon = button.querySelector('img');
 
-            if (input.type === 'password')
-            {
+            if (input.type === 'password') {
                 input.type = 'text';
                 icon.src = '../images/eyeopen.svg';
-            }
-            else
-            {
+            } else {
                 input.type = 'password';
                 icon.src = '../images/eyeclosed.svg';
             }
@@ -239,7 +204,7 @@ if ($showRedirect)
     </script>
 
     <?php
-    // Add the shared success overlay and asynchronous form handler.
+    // Add the JavaScript that submits the form without reloading the page
     include __DIR__ . '/include-redirect.php';
     ?>
 </body>

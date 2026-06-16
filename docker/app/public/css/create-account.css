@@ -54,6 +54,7 @@
     display: flex;
     gap: 8px;
     justify-content: center;
+    flex-direction: column;
 }
 
 .input-box input {

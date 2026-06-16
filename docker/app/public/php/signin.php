@@ -4,45 +4,35 @@ require_once __DIR__ . '/include-cannot-access-when-loggedin.php';
 require_once __DIR__ . '/include-dbhandler.php';
 
 $errors = [];
-// These values control the success overlay and the asynchronous form response.
+
 $showRedirect = false;
 $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']);
 
 $email = '';
 $password = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST')
-{
-    if (isset($_POST['email']))
-    {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['email'])) {
         $email = trim($_POST['email']);
-    }
-    else
-    {
+    } else {
         $email = '';
     }
 
-    if (isset($_POST['password']))
-    {
+    if (isset($_POST['password'])) {
         $password = $_POST['password'];
-    }
-    else
-    {
+    } else {
         $password = '';
     }
 
-    if ($email === '')
-    {
+    if ($email === '') {
         $errors[] = 'Email is required.';
     }
 
-    if ($password === '')
-    {
+    if ($password === '') {
         $errors[] = 'Password is required.';
     }
 
-    if (empty($errors))
-    {
+    if (empty($errors)) {
 
         $statement = $dbHandler->prepare("
             SELECT user_id,
@@ -61,8 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
 
         $user = $statement->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password_hash']))
-        {
+        if ($user && password_verify($password, $user['password_hash'])) {
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['first_name'] = $user['first_name'];
             $_SESSION['last_name'] = $user['last_name'];
@@ -71,17 +60,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
             $_SESSION['xp'] = $user['xp'];
 
             $showRedirect = true;
-        }
-        else
-        {
+        } else {
             $errors[] = 'Invalid email or password.';
         }
     }
 }
 
-if ($isAjax)
-{
-    // Return validation results to the shared JavaScript form handler.
+if ($isAjax) {
+    // Send the login result back to JavaScript
     header('Content-Type: application/json');
     $response = new stdClass();
     $response->success = $showRedirect;
@@ -90,9 +76,7 @@ if ($isAjax)
     exit;
 }
 
-if ($showRedirect)
-{
-    // Support successful form submissions when JavaScript is unavailable.
+if ($showRedirect) {
     header('Location: search-page.php');
     exit;
 }
@@ -118,7 +102,9 @@ if ($showRedirect)
         <img src="../images/burger.svg" alt="burger-icon" class="burger-icon">
         <h1>Sign in to continue to your account</h1>
 
-        <div class="error-message" id="auth-errors" <?php if (empty($errors)) { echo 'hidden'; } ?>>
+        <div class="error-message" id="auth-errors" <?php if (empty($errors)) {
+                                                        echo 'hidden';
+                                                    } ?>>
             <?php echo htmlspecialchars(implode("\n", $errors)); ?>
         </div>
 
@@ -142,18 +128,14 @@ if ($showRedirect)
     </form>
 
     <script>
-        function togglePassword(inputId, button)
-        {
+        function togglePassword(inputId, button) {
             const input = document.getElementById(inputId);
             const icon = button.querySelector('img');
 
-            if (input.type === 'password')
-            {
+            if (input.type === 'password') {
                 input.type = 'text';
                 icon.src = '../images/eyeopen.svg';
-            }
-            else
-            {
+            } else {
                 input.type = 'password';
                 icon.src = '../images/eyeclosed.svg';
             }
@@ -161,7 +143,7 @@ if ($showRedirect)
     </script>
 
     <?php
-    // Add the shared success overlay and asynchronous form handler.
+    //Add the JavaScript that submits the form without reloading the page
     include __DIR__ . '/include-redirect.php';
     ?>
 </body>
