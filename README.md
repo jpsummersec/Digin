@@ -2,7 +2,7 @@
 
 DigIn is a hilarious mobile-first cooking web application. It uses Spoonacular for recipe data and Spotify for optional music playback during cooking.
 
-## Team Members
+## Team Members (IT1D)
 
 - Lorenzo
 - JP
@@ -23,7 +23,7 @@ DigIn is a hilarious mobile-first cooking web application. It uses Spoonacular f
 1. Confirm that the existing `docker/.env` file contains the required database values:
 
 ```env
-DB_ROOT_PASSWORD=PASSWORD_HERE
+DB_ROOT_PASSWORD=YOUR_PASSWORD_HERE
 DB_ROOT_USER=root
 DB_SERVER=mysql
 ```
@@ -67,14 +67,13 @@ VALUES ('YOUR_SPOONACULAR_API_KEY');
 7. Open the application and database tools:
 
 - Application: [http://127.0.0.1:3000](http://127.0.0.1:3000)
-- Nginx endpoint: [http://localhost](http://localhost)
 - phpMyAdmin: [http://localhost:8080](http://localhost:8080)
 
 ## Project Configuration
 
 The local application URL is configured in [`docker/app/public/php/include-url-config.php`](docker/app/public/php/include-url-config.php). The default URL is `http://127.0.0.1:3000`.
 
-The Spotify application's registered redirect URI must match:
+The Spotify application's registered redirect URL must match:
 
 ```text
 http://127.0.0.1:3000/php/callback.php
@@ -161,5 +160,5 @@ Use `docker compose ps --all` to inspect bound ports, then free conflicting port
 ## Known Errors and Limitations
 
 - Recipe search and recipe pages depend on Spoonacular. They fail when no API key is stored, the daily quota is exhausted, or the service is unavailable.
-- Spotify playback requires valid Spotify application credentials and manual authentication from JP.
+- Spotify playback requires valid Spotify application credentials and manual authentication from JP since we have not been approved to use the API freely, so users must be added to the development dashboard to use the feature.
 - ADD MORE HERE
