@@ -160,14 +160,14 @@ function renderRecipe(recipe)
     let favoriteAction = 'Add';
     let favoriteDirection = 'to';
     let favoritePressed = 'false';
-    let heartImage = 'heart-empty.svg';
+    let heartImage = 'heart-empty.png';
 
     if (savedRecipeIds.includes(recipeId))
     {
         favoriteAction = 'Remove';
         favoriteDirection = 'from';
         favoritePressed = 'true';
-        heartImage = 'heart-full.svg';
+        heartImage = 'heart-full.png';
     }
 
     const recipeElement = document.createElement('article');
@@ -511,12 +511,12 @@ document.addEventListener('click', event =>
                 if (newFavoriteState)
                 {
                     button.setAttribute('aria-label', `Remove ${recipeTitle} from favorites`);
-                    favoriteImage.src = '../images/search-page/heart-full.svg';
+                    favoriteImage.src = '../images/search-page/heart-full.png';
                 }
                 else
                 {
                     button.setAttribute('aria-label', `Add ${recipeTitle} to favorites`);
-                    favoriteImage.src = '../images/search-page/heart-empty.svg';
+                    favoriteImage.src = '../images/search-page/heart-empty.png';
                 }
             });
         });
