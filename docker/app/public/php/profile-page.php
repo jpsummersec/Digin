@@ -5,11 +5,19 @@ require_once __DIR__ . '/include-dbhandler.php';
 
 $userId = (int) $_SESSION['user_id'];
 $uploadError = '';
+$uploadDirectory = __DIR__ . '/../database/profile-pictures/';
+$defaultProfilePicture = '../database/profile-pictures/default.png';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture']))
 {
     $profilePicture = $_FILES['profile_picture'];
     $maximumFileSize = 10 * 1024 * 1024;
+    $allowedImageTypes = [
+        IMAGETYPE_JPEG => 'jpg',
+        IMAGETYPE_PNG => 'png',
+        IMAGETYPE_WEBP => 'webp',
+        IMAGETYPE_GIF => 'gif'
+    ];
 
     if ($profilePicture['error'] !== UPLOAD_ERR_OK)
     {
@@ -21,13 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture']))
     }
     else
     {
+        // Check if image is really valid, not just a renamed file
         $imageInfo = getimagesize($profilePicture['tmp_name']);
-        $allowedImageTypes = [
-            IMAGETYPE_JPEG => 'jpg',
-            IMAGETYPE_PNG => 'png',
-            IMAGETYPE_WEBP => 'webp',
-            IMAGETYPE_GIF => 'gif'
-        ];
 
         if ($imageInfo === false || !isset($allowedImageTypes[$imageInfo[2]]))
         {
@@ -36,27 +39,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture']))
         else
         {
             $fileName = 'user-' . $userId . '-' . uniqid() . '.' . $allowedImageTypes[$imageInfo[2]];
-            $uploadDirectory = __DIR__ . '/../database/profile-pictures/';
             $newFileLocation = $uploadDirectory . $fileName;
             $newDatabasePath = '../database/profile-pictures/' . $fileName;
 
-            try
+            if (!move_uploaded_file($profilePicture['tmp_name'], $newFileLocation))
             {
-                $statement = $dbHandler->prepare('SELECT `path_to_icon` FROM `user` WHERE `user_id` = :userId');
-                $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
-                $statement->execute();
-                $oldDatabasePath = $statement->fetchColumn();
-                $statement->closeCursor();
-
-                if (move_uploaded_file($profilePicture['tmp_name'], $newFileLocation))
+                $uploadError = 'The image could not be saved.';
+            }
+            else
+            {
+                try
                 {
+                    $statement = $dbHandler->prepare('SELECT `path_to_icon` FROM `user` WHERE `user_id` = :userId');
+                    $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+                    $statement->execute();
+                    $oldDatabasePath = $statement->fetchColumn();
+
                     $statement = $dbHandler->prepare('UPDATE `user` SET `path_to_icon` = :pathToIcon WHERE `user_id` = :userId');
                     $statement->bindValue(':pathToIcon', $newDatabasePath);
                     $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
                     $statement->execute();
-                    $statement->closeCursor();
 
-                    if ($oldDatabasePath !== '../database/profile-pictures/default.png')
+                    // Destroy old profile picture file if it's not the default one.
+                    if ($oldDatabasePath !== $defaultProfilePicture)
                     {
                         $oldFileLocation = $uploadDirectory . basename($oldDatabasePath);
 
@@ -69,19 +74,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_picture']))
                     header('Location: profile-page.php');
                     exit;
                 }
-                else
+                catch (PDOException $exception)
                 {
-                    $uploadError = 'The image could not be saved.';
-                }
-            }
-            catch (PDOException $exception)
-            {
-                if (is_file($newFileLocation))
-                {
-                    unlink($newFileLocation);
-                }
+                    if (is_file($newFileLocation))
+                    {
+                        unlink($newFileLocation);
+                    }
 
-                $uploadError = 'The profile picture could not be updated.';
+                    $uploadError = 'The profile picture could not be updated.';
+                }
             }
         }
     }
@@ -131,69 +132,44 @@ if (isset($_GET['action']) && $_GET['action'] === 'login')
     exit;
 }
 
-$user = null;
+// Load user achievements and saved recipes.
 $achievements = [];
 $savedRecipes = [];
 
-if (isset($dbHandler))
+try
 {
-    // Load the profile information displayed in the banner.
-    try
-    {
-        $statement = $dbHandler->prepare('SELECT * FROM `user` WHERE `user_id` = :userId');
-        $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
-        $statement->execute();
-        $user = $statement->fetch(PDO::FETCH_ASSOC);
-        $statement->closeCursor();
-    }
-    catch (PDOException $exception)
-    {
-        die('Select error: ' . $exception->getMessage());
-    }
+    $statement = $dbHandler->prepare('SELECT * FROM `user` WHERE `user_id` = :userId');
+    $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $statement->execute();
+    $user = $statement->fetch(PDO::FETCH_ASSOC);
 
-    // Load achievements earned by this user.
-    try
-    {
-        $statement = $dbHandler->prepare('
-            SELECT a.`achievement_id`, a.`achievement_name`, a.`path_to_icon`
-            FROM `user_achievement` ua
-            INNER JOIN `achievement` a
-                ON a.`achievement_id` = ua.`achievement_id`
-            WHERE ua.`user_id` = :userId
-            ORDER BY a.`achievement_id`
-        ');
-        $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
-        $statement->execute();
-        $achievements = $statement->fetchAll(PDO::FETCH_ASSOC);
-        $statement->closeCursor();
-    }
-    catch (PDOException $exception)
-    {
-        die('Select error: ' . $exception->getMessage());
-    }
+    $statement = $dbHandler->prepare('
+        SELECT a.`achievement_id`, a.`achievement_name`, a.`path_to_icon`
+        FROM `user_achievement` ua
+        INNER JOIN `achievement` a
+            ON a.`achievement_id` = ua.`achievement_id`
+        WHERE ua.`user_id` = :userId
+        ORDER BY a.`achievement_id`
+    ');
+    $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $statement->execute();
+    $achievements = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-    // Load recipes saved by this user.
-    try
-    {
-        $statement = $dbHandler->prepare('
-            SELECT r.`recipe_id`, r.`recipe_json`
-            FROM `user_saved_recipe` ur
-            INNER JOIN `recipe` r
-                ON r.`recipe_id` = ur.`recipe_id`
-            WHERE ur.`user_id` = :userId
-        ');
-        $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
-        $statement->execute();
-        $savedRecipes = $statement->fetchAll(PDO::FETCH_ASSOC);
-        $statement->closeCursor();
-    }
-    catch (PDOException $exception)
-    {
-        die('Select error: ' . $exception->getMessage());
-    }
+    $statement = $dbHandler->prepare('
+        SELECT r.`recipe_id`, r.`recipe_json`
+        FROM `user_saved_recipe` ur
+        INNER JOIN `recipe` r
+            ON r.`recipe_id` = ur.`recipe_id`
+        WHERE ur.`user_id` = :userId
+    ');
+    $statement->bindValue(':userId', $userId, PDO::PARAM_INT);
+    $statement->execute();
+    $savedRecipes = $statement->fetchAll(PDO::FETCH_ASSOC);
 }
-
-$recipeDetailsUrl = '../php/recipe.php';
+catch (PDOException $exception)
+{
+    die('Select error: ' . $exception->getMessage());
+}
 
 ?>
 <!DOCTYPE html>
@@ -225,7 +201,7 @@ $recipeDetailsUrl = '../php/recipe.php';
             <?php
             $currentXp = $user['xp'];
             $currentLevel = $user['level'];
-            $xpToNextLevel = 100 * $currentLevel * 2;
+            $xpToNextLevel = 100 * $currentLevel * 1.5;
 
             $progressPercent = ($currentXp / $xpToNextLevel) * 100;
             $progressPercent = max(0, min(100, $progressPercent));
@@ -261,6 +237,7 @@ $recipeDetailsUrl = '../php/recipe.php';
                 <div class="saved-recipes-list">
                     <?php foreach ($savedRecipes as $savedRecipe) { ?>
                         <?php
+                        // Convert JSON to PHP associative array.
                         $recipe = json_decode($savedRecipe['recipe_json'], true);
 
                         if (!is_array($recipe))
@@ -272,24 +249,28 @@ $recipeDetailsUrl = '../php/recipe.php';
                         $title = $recipe['title'];
                         $image = $recipe['image'];
                         $time = $recipe['readyInMinutes'] . ' minutes';
+                        $calories = 'N/A';
 
                         $spoonacularScore = $recipe['spoonacularScore'];
                         $starScore = min(max((float) $spoonacularScore / 20, 0), 5);
                         $fullStars = round($starScore);
 
-                        foreach ($recipe['nutrition']['nutrients'] as $nutrient)
+                        if (isset($recipe['nutrition']['nutrients']))
                         {
-                            if (isset($nutrient['name']) && $nutrient['name'] === 'Calories')
+                            foreach ($recipe['nutrition']['nutrients'] as $nutrient)
                             {
-                                $calorieAmount = $nutrient['amount'];
-                                $calorieUnit = $nutrient['unit'];
-                                $calories = round($calorieAmount) . ' ' . $calorieUnit;
-                                break;
+                                if (isset($nutrient['name']) && $nutrient['name'] === 'Calories')
+                                {
+                                    $calorieAmount = $nutrient['amount'];
+                                    $calorieUnit = $nutrient['unit'];
+                                    $calories = round($calorieAmount) . ' ' . $calorieUnit;
+                                    break;
+                                }
                             }
                         }
                         ?>
                         <article class="recipe saved-recipe-item">
-                            <a class="recipe-link" href="<?php echo htmlspecialchars($recipeDetailsUrl . '?id=' . $recipeId); ?>">
+                            <a class="recipe-link" href="<?php echo htmlspecialchars('../php/recipe.php?id=' . $recipeId); ?>">
                                 <img class="recipe-image" src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($title); ?>" loading="lazy">
                                 <div class="recipe-content">
                                     <h2><?php echo htmlspecialchars($title); ?></h2>

@@ -1,16 +1,23 @@
-// Shared elements used by both authentication forms.
 const authForm = document.getElementById('auth-form');
 const authErrors = document.getElementById('auth-errors');
 const submitButton = authForm.querySelector('button[type="submit"]');
+const redirectOverlay = document.getElementById('redirect-overlay');
+const brand = document.getElementById('brand');
+const countdown = document.getElementById('countdown');
 const thankYouAudio = document.getElementById('thank-you-audio');
 const delayMs = 250;
 
-// Submit without leaving the page so the initial click can unlock audio.
+// When form is submitted, run this JS instead of letting the
+// browser submit the form normally.
+// Async function allows waiting for a PHP response without freezing the page
 authForm.addEventListener('submit', async function (event)
 {
+	// Stops browser default submission behaviour.
 	event.preventDefault();
 
+	// prevents double submissions while processing form
 	submitButton.disabled = true;
+	// hides previous form submission issues, if any
 	authErrors.hidden = true;
 
 	// Start muted audio during the user action while PHP validates the form.
@@ -25,6 +32,7 @@ authForm.addEventListener('submit', async function (event)
 		{
 			method: 'POST',
 			body: new FormData(authForm),
+			// lets signin.php and create-account.php know request was submitted by JavaScript
 			headers: { 'X-Requested-With': 'fetch' }
 		});
 		const result = await response.json();
@@ -34,7 +42,7 @@ authForm.addEventListener('submit', async function (event)
 			throw result.errors;
 		}
 
-		// Show the success overlay after valid authentication.
+		// Show the "thank you" elements after valid authentication.
 		document.getElementById('redirect-overlay').hidden = false;
 		document.getElementById('brand').classList.add('is-bouncing');
 
@@ -51,7 +59,7 @@ authForm.addEventListener('submit', async function (event)
 		const interval = setInterval(function ()
 		{
 			seconds--;
-			document.getElementById('countdown').textContent = seconds;
+			countdown.textContent = seconds;
 
 			if (seconds <= 0)
 			{

@@ -65,7 +65,7 @@
     margin-top: 8px;
 }
 
-/* Preserve line breaks between validation errors. */
+/* Keep line breaks between validation errors. */
 #auth-errors {
     white-space: pre-line;
 }

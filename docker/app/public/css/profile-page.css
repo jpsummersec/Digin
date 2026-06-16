@@ -64,7 +64,6 @@ body {
     object-fit: cover;
     object-position: center;
     display: block;
-    justify-self: start;
 }
 
 .profile-banner .profile-picture img:hover {
@@ -83,7 +82,6 @@ body {
 }
 
 .profile-banner .xp-bar,
-.profile-banner .xp-bar-fill,
 .profile-banner .xp-progress {
     grid-column: 2/3;
 }
@@ -143,8 +141,6 @@ hr {
 .achievement-item {
     display: grid;
     justify-items: center;
-    gap: 8px;
-    text-align: center;
 }
 
 .achievement-item img {
@@ -153,9 +149,7 @@ hr {
     object-fit: contain;
 }
 
-.achievement-item p,
 .empty-achievements,
-.saved-recipe-item p,
 .empty-saved-recipes {
     font-size: 0.65rem;
     font-family: 'Inter-regular';

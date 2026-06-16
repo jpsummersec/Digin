@@ -147,14 +147,14 @@ catch (PDOException $exception)
                         $favoriteAction = 'Add';
                         $favoriteDirection = 'to';
                         $favoritePressed = 'false';
-                        $heartImage = 'heart-empty.svg';
+                        $heartImage = 'heart-empty.png';
 
                         if ($isFavorite)
                         {
                             $favoriteAction = 'Remove';
                             $favoriteDirection = 'from';
                             $favoritePressed = 'true';
-                            $heartImage = 'heart-full.svg';
+                            $heartImage = 'heart-full.png';
                         }
                         ?>
                         <article class="recipe">
