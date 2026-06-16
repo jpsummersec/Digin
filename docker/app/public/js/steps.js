@@ -64,7 +64,7 @@ const completeRecipeAudios = [
   '../audio/yousurpriseme.mp3',
 ];
 
-// Shuffled bags prevent the same clips from repeating until each list is used.
+// Stores audio clips in a random order and only repeats after all clips have been played
 let pressureBag = [];
 let nextStepBag = [];
 let completeBag = [];
@@ -80,6 +80,8 @@ function refillBag(source) {
   return bag;
 }
 
+// Takes a random audio from the bag
+// If the bag is empty, a new shuffled bag is created
 function getNextFromBag(bag, source) {
   if (bag.length === 0) {
     bag.push(...refillBag(source));
@@ -145,7 +147,7 @@ function playNextStepAudio() {
   };
 }
 
-// Show the active step and update the navigation controls.
+// Updates the current step, button text and timer.
 function updateStepDisplay(playAudio = true) {
   steps.forEach((step) => {
     step.classList.remove('active');
@@ -171,7 +173,7 @@ function updateStepDisplay(playAudio = true) {
   }
 }
 
-// Record completion before playing the final audio and leaving cooking mode.
+// Marks the recipe as completed and plays a finishing audio
 function completeRecipe() {
   if (isRecipeCompleted) {
     return;
@@ -216,7 +218,7 @@ function completeRecipe() {
     });
 }
 
-// Right arrow or Space advances; left arrow returns to the previous step.
+// Allows users to move between the steps by using keyboard
 document.addEventListener('keydown', (event) => {
   if (event.key === 'ArrowRight' || event.code === 'Space') {
     event.preventDefault();
@@ -235,7 +237,7 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-// Bind the visible step navigation buttons.
+// Handle the Next and Previous step buttons
 const previousButton = document.getElementById('prev-step-btn');
 if (previousButton) {
   previousButton.addEventListener('click', () => {
@@ -259,7 +261,7 @@ if (nextButton) {
   });
 }
 
-// Initialize the first step without starting a new pressure timer.
+// Start on the first step without playing a Gordon quote yet
 updateStepDisplay(false);
 
 setSpotifyVolume(80);
