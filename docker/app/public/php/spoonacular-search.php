@@ -82,11 +82,6 @@ function sortRecipes(array $results, string $sort, string $direction = 'asc'): a
                 $secondValue = $secondRecipe['likes'] ?? 0;
                 break;
 
-            case 'price':
-                $firstValue = $firstRecipe['pricePerServing'] ?? PHP_INT_MAX;
-                $secondValue = $secondRecipe['pricePerServing'] ?? PHP_INT_MAX;
-                break;
-
             case 'calories':
                 $firstValue = $firstRecipe['nutrition']['nutrients'][0]['amount'] ?? PHP_INT_MAX;
                 $secondValue = $secondRecipe['nutrition']['nutrients'][0]['amount'] ?? PHP_INT_MAX;

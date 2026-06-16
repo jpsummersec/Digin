@@ -378,7 +378,6 @@ catch (PDOException $exception)
                         <button type="button" data-value="spoonacularScore">Score</button>
                         <button type="button" data-value="readyInMinutes">Time</button>
                         <button type="button" data-value="healthScore">Healthiness</button>
-                        <button type="button" data-value="price">Price</button>
                         <button type="button" data-value="calories">Calories</button>
                         <button type="button" data-value="likes">Likes</button>
                     </div>
