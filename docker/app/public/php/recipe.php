@@ -147,14 +147,14 @@ catch (PDOException $exception)
 $favoriteAction = 'Add';
 $favoriteDirection = 'to';
 $favoritePressed = 'false';
-$heartImage = 'heart-empty.svg';
+$heartImage = 'heart-empty.png';
 
 if ($isFavorite)
 {
     $favoriteAction = 'Remove';
     $favoriteDirection = 'from';
     $favoritePressed = 'true';
-    $heartImage = 'heart-full.svg';
+    $heartImage = 'heart-full.png';
 }
 ?>
 
@@ -211,7 +211,7 @@ if ($isFavorite)
                 <span id="desc-short">
                     <?php
                     echo htmlspecialchars($shortDescription);
-                    echo $descriptionTruncated ? '...' : '';
+                    echo $descriptionTruncated ? '...' : ''; // If description has been truncated, echo "...", otherwise echo "".
                     ?>
                 </span>
                 <?php if ($descriptionTruncated): ?>
@@ -310,8 +310,8 @@ if ($isFavorite)
     </div>
 
     <?php include __DIR__ . '/footer.php'; ?>
-
-    <script>
+</body>
+<script>
         function toggleDesc()
         {
             const short = document.getElementById('desc-short');
@@ -391,16 +391,14 @@ if ($isFavorite)
                     if (newFavoriteState)
                     {
                         favoriteButton.setAttribute('aria-label', `Remove ${recipeTitle} from favorites`);
-                        favoriteImage.src = '../images/search-page/heart-full.svg';
+                        favoriteImage.src = '../images/search-page/heart-full.png';
                     }
                     else
                     {
                         favoriteButton.setAttribute('aria-label', `Add ${recipeTitle} to favorites`);
-                        favoriteImage.src = '../images/search-page/heart-empty.svg';
+                        favoriteImage.src = '../images/search-page/heart-empty.png';
                     }
                 });
         });
     </script>
-</body>
-
 </html>
