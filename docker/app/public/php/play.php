@@ -7,7 +7,7 @@ $config = require __DIR__ . '/config.php';
 $clientId = $config['SPOTIFY_CLIENT_ID'] ?? null;
 $clientSecret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
 
-// Spotify tokens are stored only in the current PHP session.
+// Get the Spotify tokens saved during login from the current session.
 $accessToken = $_SESSION['access_token'] ?? null;
 $refreshToken = $_SESSION['refresh_token'] ?? null;
 $expiresAt = $_SESSION['spotify_token_expires'] ?? 0;
@@ -17,7 +17,10 @@ if (!$accessToken)
     die('Connect Spotify from your profile before starting a recipe.');
 }
 
-// Refresh the access token before making playback requests when it has expired.
+// Refresh the access token before making playback requests when it has expired,
+// Spotify's access tokens last usually 1 hour and must be refreshed using the refresh token obtained during authorization,
+// if the refresh token is missing or invalid, the user must reconnect Spotify to obtain new tokens.
+
 if ($expiresAt <= time())
 {
     if (!$refreshToken || !$clientId || !$clientSecret)
@@ -52,7 +55,8 @@ if ($expiresAt <= time())
     $_SESSION['spotify_token_expires'] = time() + ($refreshResult['expires_in'] ?? 3600);
 }
 
-// Build a playlist search based on the recipe cuisine.
+// Search for a playlist based on the recipe cuisine type. Always top hits for know musics,
+// if for some reason no cuisine is specified in the database, a general "cooking" playlist is selected.
 $cuisine = trim($_GET['cuisine'] ?? 'cooking');
 $searchQuery = ($cuisine ?: 'cooking') . ' top hits';
 
@@ -61,7 +65,10 @@ $headers = [
     "Content-Type: application/json"
 ];
 
-// Search several results so an actual top-hits playlist can be selected.
+// Search several results so an actual top-hits playlist can be selected,
+// for example, searching for "italian" may return a playlist named "Italian cooking recipes",
+// the search results are filtered to find a playlist whose name contains "top" or "hits", which is more likely to be a popular music playlist,
+// related to the cuisine. If no such playlist is found, an error message is shown to the user.
 $searchUrl = 'https://api.spotify.com/v1/search?' . http_build_query([
     'q' => $searchQuery,
     'type' => 'playlist',
@@ -139,7 +146,9 @@ if (empty($devices))
     die('No Spotify devices found. Open Spotify on your phone or laptop and try again.');
 }
 
-// Prefer the active device and otherwise use the first available device.
+// Uses the active device and otherwise use the first available device, for example,
+// if laptop is not avaiable but a phone is it will play music on the phone,
+// this also avoids Spotify erros by trying to select a device by themself.
 $deviceId = null;
 foreach ($devices as $device)
 {
