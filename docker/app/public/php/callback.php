@@ -1,11 +1,10 @@
 <?php
 
-// Keep OAuth on the configured application URL and use the session that stores
-// the user's temporary Spotify connection.
+// Keep OAuth on the configured application URL and use the session that stores the user's temporary Spotify connection.
 require_once __DIR__ . '/include-url-config.php';
 session_start();
 
-// Load the Spotify application credentials and registered callback URL.
+// Load the Spotify application credentials and the registered callback URL.
 $config = require __DIR__ . '/config.php';
 $clientId = $config['SPOTIFY_CLIENT_ID'] ?? null;
 $clientSecret = $config['SPOTIFY_CLIENT_SECRET'] ?? null;
@@ -17,8 +16,7 @@ if (!$clientId || !$clientSecret)
 
 $redirectUri = $config['SPOTIFY_REDIRECT_URI'];
 
-// Reject callbacks whose state value does not match the one created on the
-// profile page.
+// Reject callbacks when the state value does not match the one created on the profile page.
 if (!isset($_GET['state'], $_SESSION['spotify_state']) || $_GET['state'] !== $_SESSION['spotify_state'])
 {
     die('State mismatch. Please restart the Spotify login process.');
@@ -30,7 +28,7 @@ if (!$code)
     die('Error: Authorization code not found in callback.');
 }
 
-// Exchange Spotify's short-lived authorization code for session tokens.
+// Exchange Spotify's authorization code for session tokens.
 $curlHandle = curl_init('https://accounts.spotify.com/api/token');
 
 $requestData = [
@@ -44,8 +42,7 @@ $headers = [
     'Content-Type: application/x-www-form-urlencoded'
 ];
 
-// Spotify requires HTTP Basic authentication and the same redirect URI used
-// during authorization.
+// Spotify requires HTTP Basic authentication and the same redirect URI used during authorization.
 curl_setopt($curlHandle, CURLOPT_POST, true);
 curl_setopt($curlHandle, CURLOPT_POSTFIELDS, http_build_query($requestData));
 curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $headers);
