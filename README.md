@@ -16,7 +16,7 @@ DigIn is a hilarious mobile-first cooking web application. It uses Spoonacular f
 - Docker Engine
 - Docker Compose v2
 - Spotify application credentials
-- Account added to Spotify Developer Dashboard (request from JP)
+- Spotify account added to Spotify Developer Dashboard (request from JP)
 - At least one Spoonacular API key
 
 ## Setup
