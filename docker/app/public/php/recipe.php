@@ -193,7 +193,7 @@ if ($isFavorite)
                 <span class="title"><?php echo htmlspecialchars($recipe['title']); ?></span>
             </div>
             <div id="favorite-button-div">
-                <button type="button" class="favorite-btn" aria-label="<?php echo $favoriteAction . ' ' . htmlspecialchars($recipe['title']) . ' ' . $favoriteDirection; ?> favorites" aria-pressed="<?php echo $favoritePressed; ?>">
+                <button type="button" class="favorite-btn" data-recipe-id="<?php echo $recipeId; ?>" aria-label="<?php echo $favoriteAction . ' ' . htmlspecialchars($recipe['title']) . ' ' . $favoriteDirection; ?> favorites" aria-pressed="<?php echo $favoritePressed; ?>">
                     <img src="../images/search-page/<?php echo $heartImage; ?>" alt="" aria-hidden="true">
                 </button>
             </div>
@@ -310,95 +310,7 @@ if ($isFavorite)
     </div>
 
     <?php include __DIR__ . '/footer.php'; ?>
+
+    <script src="../js/recipe.js"></script>
 </body>
-<script>
-        function toggleDesc()
-        {
-            const short = document.getElementById('desc-short');
-            const full = document.getElementById('desc-full');
-            const btn = event.target;
-
-            if (full.style.display === 'none')
-            {
-                short.style.display = 'none';
-                full.style.display = 'inline';
-                btn.textContent = 'View less';
-            }
-            else
-            {
-                short.style.display = 'inline';
-                full.style.display = 'none';
-                btn.textContent = 'View all';
-            }
-        }
-
-        function toggleIngredients()
-        {
-            const namesExtra = document.getElementById('ingredient-names-extra');
-            const amountsExtra = document.getElementById('ingredient-amounts-extra');
-            const btn = event.target;
-
-            const isHidden = namesExtra.style.display === 'none';
-            namesExtra.style.display = isHidden ? 'contents' : 'none';
-            amountsExtra.style.display = isHidden ? 'contents' : 'none';
-            btn.textContent = isHidden ? 'View less' : 'View all';
-        }
-
-        function toggleSteps()
-        {
-            const extra = document.getElementById('steps-extra');
-            const btn = document.getElementById('steps-btn');
-
-            if (extra.style.display === 'none')
-            {
-                extra.style.display = 'block';
-                btn.textContent = 'View less';
-            }
-            else
-            {
-                extra.style.display = 'none';
-                btn.textContent = 'View all';
-            }
-        }
-
-        const favoriteButton = document.querySelector('.favorite-btn');
-
-        favoriteButton.addEventListener('click', () =>
-        {
-            const isFavorite = favoriteButton.getAttribute('aria-pressed') === 'true';
-            const recipeTitle = <?php echo json_encode($recipe['title']); ?>;
-            const newFavoriteState = !isFavorite;
-            const formData = new FormData();
-            formData.append('recipe_id', <?php echo $recipeId; ?>);
-            formData.append('isFavorite', String(newFavoriteState));
-
-            fetch('favorite-recipe.php',
-            {
-                method: 'POST',
-                body: formData,
-            })
-                .then(response => response.json())
-                .then(result =>
-                {
-                    if (!result.success)
-                    {
-                        return;
-                    }
-
-                    const favoriteImage = favoriteButton.querySelector('img');
-                    favoriteButton.setAttribute('aria-pressed', String(newFavoriteState));
-
-                    if (newFavoriteState)
-                    {
-                        favoriteButton.setAttribute('aria-label', `Remove ${recipeTitle} from favorites`);
-                        favoriteImage.src = '../images/search-page/heart-full.png';
-                    }
-                    else
-                    {
-                        favoriteButton.setAttribute('aria-label', `Add ${recipeTitle} to favorites`);
-                        favoriteImage.src = '../images/search-page/heart-empty.png';
-                    }
-                });
-        });
-    </script>
 </html>
